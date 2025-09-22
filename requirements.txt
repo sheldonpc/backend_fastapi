@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+tortoise-orm
+aiomysql
+passlib[bcrypt]
+python-jose[cryptography]
+pydantic[email]
+python-dotenv

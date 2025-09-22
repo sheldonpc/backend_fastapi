@@ -1,0 +1,17 @@
+.env
+test_main.http
+.vscode/
+.idea/
+.gitignore
+.git/
+.env.example
+.env.testing
+.env.local
+.env.local.example
+.env.local.testing
+.env.local.testing.example
+.env.local.testing.local
+.env.local.testing.local.example
+.env.local.testing.local.testing
+.env.local.testing.local.testing.example
+.env.local.testing.local.testing.local

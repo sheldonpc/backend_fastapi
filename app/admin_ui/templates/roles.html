@@ -1,0 +1,393 @@
+<!-- roles.html -->
+<div class="container-fluid">
+    <h2 class="mb-4">🛡️ 角色管理</h2>
+
+    <!-- 操作区 -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button class="btn btn-success" onclick="openCreateRoleModal()">
+                ➕ 新增角色
+            </button>
+        </div>
+        <div class="col-md-6 text-end">
+            <small class="text-muted">💡 管理员角色不可删除</small>
+        </div>
+    </div>
+
+    <!-- 角色表格 -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>角色名称</th>
+                            <th>描述</th>
+                            <th>权限数量</th>
+                            <th>使用用户数</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rolesTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center py-4">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑角色模态框 -->
+<div class="modal fade" id="roleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="roleModalLabel">新增角色</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="roleId" />
+                <div class="mb-3">
+                    <label class="form-label">角色名称 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="roleName" placeholder="如：内容编辑" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">角色描述</label>
+                    <textarea class="form-control" id="roleDescription" rows="2" placeholder="描述此角色的用途"></textarea>
+                </div>
+
+                <hr />
+                <h6>分配权限</h6>
+                <small class="text-muted">勾选该角色拥有的权限</small>
+
+                <!-- 权限分组 -->
+                <div class="accordion" id="permissionsAccordion">
+                    <!-- 用户管理 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUser">
+                                👥 用户管理
+                            </button>
+                        </h2>
+                        <div id="collapseUser" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="user_view" id="perm_user_view" />
+                                    <label class="form-check-label" for="perm_user_view">查看用户</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="user_edit" id="perm_user_edit" />
+                                    <label class="form-check-label" for="perm_user_edit">编辑用户</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="user_delete" id="perm_user_delete" />
+                                    <label class="form-check-label" for="perm_user_delete">删除用户</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="user_create" id="perm_user_create" />
+                                    <label class="form-check-label" for="perm_user_create">创建用户</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 文章管理 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArticle">
+                                📄 文章管理
+                            </button>
+                        </h2>
+                        <div id="collapseArticle" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="article_view" id="perm_article_view" />
+                                    <label class="form-check-label" for="perm_article_view">查看文章</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="article_edit" id="perm_article_edit" />
+                                    <label class="form-check-label" for="perm_article_edit">编辑文章</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="article_delete" id="perm_article_delete" />
+                                    <label class="form-check-label" for="perm_article_delete">删除文章</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="article_create" id="perm_article_create" />
+                                    <label class="form-check-label" for="perm_article_create">创建文章</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="article_publish" id="perm_article_publish" />
+                                    <label class="form-check-label" for="perm_article_publish">发布文章</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 系统设置 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSystem">
+                                ⚙️ 系统设置
+                            </button>
+                        </h2>
+                        <div id="collapseSystem" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="system_config" id="perm_system_config" />
+                                    <label class="form-check-label" for="perm_system_config">系统配置</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="role_manage" id="perm_role_manage" />
+                                    <label class="form-check-label" for="perm_role_manage">角色管理</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input permission-checkbox" type="checkbox" value="log_view" id="perm_log_view" />
+                                    <label class="form-check-label" for="perm_log_view">查看日志</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 全选/反选 -->
+                <div class="mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary me-2" onclick="selectAllPermissions(true)">
+                        全选
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAllPermissions(false)">
+                        反选
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveRole()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 全局变量
+let roles = [];
+
+// 页面激活时加载数据
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('roles').classList.contains('d-none') === false) {
+        loadRoles();
+    }
+});
+
+// 监听导航切换
+const rolesObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const rolesDiv = document.getElementById('roles');
+            if (rolesDiv && !rolesDiv.classList.contains('d-none')) {
+                loadRoles();
+            }
+        }
+    });
+});
+rolesObserver.observe(document.getElementById('roles'), { attributes: true });
+
+// 加载角色列表
+async function loadRoles() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alert("登录已过期，请重新登录");
+        window.location.href = "/login?next=/admin/";
+        return;
+    }
+
+    try {
+        const res = await fetch("/admin/api/roles", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        roles = data.items || [];
+
+        renderRolesTable();
+
+    } catch (err) {
+        console.error("加载角色失败:", err);
+        document.getElementById("rolesTableBody").innerHTML = `
+            <tr><td colspan="6" class="text-center text-danger">加载失败，请重试</td></tr>
+        `;
+    }
+}
+
+// 渲染角色表格
+function renderRolesTable() {
+    const tbody = document.getElementById("rolesTableBody");
+    if (roles.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center">暂无角色数据</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = roles.map(role => `
+        <tr>
+            <td><strong>${escapeHtml(role.name)}</strong></td>
+            <td>${escapeHtml(role.description || '-')}</td>
+            <td><span class="badge bg-primary">${role.permissions.length} 项</span></td>
+            <td><span class="badge bg-info">${role.user_count} 人</span></td>
+            <td>${formatDate(role.created_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary me-1"
+                        onclick="editRole(${role.id})">编辑</button>
+                <button class="btn btn-sm btn-outline-danger ${role.name === '管理员' ? 'disabled' : ''}"
+                        onclick="${role.name === '管理员' ? '' : `deleteRole(${role.id}, '${escapeHtml(role.name)}')`}"
+                        ${role.name === '管理员' ? 'disabled title="管理员角色不可删除"' : ''}>
+                    删除
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// 打开新增角色模态框
+function openCreateRoleModal() {
+    document.getElementById("roleId").value = "";
+    document.getElementById("roleName").value = "";
+    document.getElementById("roleDescription").value = "";
+
+    // 清空所有权限选择
+    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = false);
+
+    document.getElementById("roleModalLabel").textContent = "新增角色";
+    new bootstrap.Modal(document.getElementById("roleModal")).show();
+}
+
+// 编辑角色
+function editRole(roleId) {
+    const role = roles.find(r => r.id === roleId);
+    if (!role) return;
+
+    document.getElementById("roleId").value = role.id;
+    document.getElementById("roleName").value = role.name;
+    document.getElementById("roleDescription").value = role.description || "";
+
+    // 设置权限
+    const permissionSet = new Set(role.permissions);
+    document.querySelectorAll('.permission-checkbox').forEach(cb => {
+        cb.checked = permissionSet.has(cb.value);
+    });
+
+    document.getElementById("roleModalLabel").textContent = "编辑角色";
+    new bootstrap.Modal(document.getElementById("roleModal")).show();
+}
+
+// 保存角色（新增或编辑）
+async function saveRole() {
+    const token = localStorage.getItem("access_token");
+    const roleId = document.getElementById("roleId").value;
+    const name = document.getElementById("roleName").value.trim();
+    const description = document.getElementById("roleDescription").value.trim();
+
+    if (!name) {
+        alert("角色名称不能为空");
+        return;
+    }
+
+    // 获取选中的权限
+    const permissions = Array.from(document.querySelectorAll('.permission-checkbox:checked'))
+        .map(cb => cb.value);
+
+    try {
+        let url = "/admin/api/roles";
+        let method = "POST";
+        let body = { name, description, permissions };
+
+        if (roleId) {
+            url += `/${roleId}`;
+            method = "PUT";
+        }
+
+        const res = await fetch(url, {
+            method,
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.detail || `HTTP ${res.status}`);
+        }
+
+        alert(roleId ? "角色更新成功" : "角色创建成功");
+        bootstrap.Modal.getInstance(document.getElementById("roleModal")).hide();
+        loadRoles(); // 刷新列表
+    } catch (err) {
+        console.error("保存角色失败:", err);
+        alert("操作失败：" + err.message);
+    }
+}
+
+// 删除角色
+async function deleteRole(roleId, roleName) {
+    if (roleName === "管理员") {
+        alert("管理员角色不可删除");
+        return;
+    }
+
+    if (!confirm(`确定要删除角色「${roleName}」吗？\n此操作不可恢复，且会影响 ${roles.find(r => r.id === roleId)?.user_count || 0} 名用户！`)) {
+        return;
+    }
+
+    const token = localStorage.getItem("access_token");
+
+    try {
+        const res = await fetch(`/admin/api/roles/${roleId}`, {
+            method: 'DELETE',
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.detail || `HTTP ${res.status}`);
+        }
+
+        alert("角色删除成功");
+        loadRoles();
+    } catch (err) {
+        console.error(err);
+        alert("删除失败：" + err.message);
+    }
+}
+
+// 全选/反选权限
+function selectAllPermissions(selectAll) {
+    document.querySelectorAll('.permission-checkbox').forEach(cb => {
+        cb.checked = selectAll;
+    });
+}
+
+// 工具函数
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return isNaN(date) ? '' : date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).replace(/\//g, '-');
+}
+</script>

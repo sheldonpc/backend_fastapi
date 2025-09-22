@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        #main {
+            display: flex;
+            flex: 1;
+        }
+
+        #sidebar {
+            width: 220px;
+            background: #2c3e50;
+            color: white;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        #sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            border-radius: 4px;
+            margin: 4px 0;
+            padding: 10px 15px;
+            transition: all 0.2s;
+        }
+
+        #sidebar .nav-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+
+        #sidebar .nav-link.active {
+            background: #3498db;
+            color: white;
+        }
+
+        #sidebar h4 {
+            padding: 20px 0;
+            margin: 0;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f5f7fa;
+        }
+
+        #content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .content-page {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+
+            #sidebar h4, #sidebar .nav-link span {
+                display: none;
+            }
+
+            #sidebar .nav-link {
+                text-align: center;
+                padding: 15px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 权限校验中 -->
+    <div id="loading">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <p>正在验证权限，请稍候...</p>
+        </div>
+    </div>
+
+    <!-- 主界面（默认隐藏，校验通过后显示） -->
+    <div id="main" style="display:none;">
+        <!-- 左侧导航栏 -->
+        <div id="sidebar" class="d-flex flex-column p-3">
+            <h4 class="text-center">管理后台</h4>
+            <ul class="nav nav-pills flex-column mt-3" id="menu">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-target="overview">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        <span>概览</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="users">
+                        <i class="bi bi-people me-2"></i>
+                        <span>用户</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="roles">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        <span>角色</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="articles">
+                        <i class="bi bi-file-text me-2"></i>
+                        <span>文章</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-target="config">
+                        <i class="bi bi-gear me-2"></i>
+                        <span>设置</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="mt-auto">
+                <button class="btn logout-btn w-100 py-2" onclick="logout()">
+                    <i class="bi bi-box-arrow-left me-2"></i>
+                    <span>退出登录</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div id="main-content">
+            <div id="content">
+                <div id="overview" class="content-page">
+                    <div class="content-card">
+                        <h4 class="mb-4">系统概览</h4>
+                        {% include "overview.html" %}
+                    </div>
+                </div>
+                <div id="users" class="content-page d-none">
+                    <div class="content-card">
+                        <h4 class="mb-4">用户管理</h4>
+                        {% include "users.html" %}
+                    </div>
+                </div>
+                <div id="roles" class="content-page d-none">
+                    <div class="content-card">
+                        <h4 class="mb-4">角色管理</h4>
+                        {% include "roles.html" %}
+                    </div>
+                </div>
+                <div id="articles" class="content-page d-none">
+                    <div class="content-card">
+                        <h4 class="mb-4">文章管理</h4>
+                        {% include "articles.html" %}
+                    </div>
+                </div>
+                <div id="config" class="content-page d-none">
+                    <div class="content-card">
+                        <h4 class="mb-4">系统设置</h4>
+                        {% include "config.html" %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 获取 Token
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            redirectToLogin();
+        }
+
+        // 校验权限
+        verifyPermission();
+
+        async function verifyPermission() {
+            try {
+                const res = await fetch("/admin/verify", {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+
+                if (res.ok) {
+                    // 校验通过，显示主界面
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("main").style.display = "flex";
+                } else if (res.status === 401 || res.status === 403) {
+                    // 权限不足或 Token 无效
+                    alert("权限不足或登录已过期，请重新登录");
+                    redirectToLogin();
+                } else {
+                    alert("校验失败，请重试");
+                    redirectToLogin();
+                }
+            } catch (err) {
+                console.error("权限校验失败:", err);
+                alert("请登录后，再访问后台管理页面！");
+                redirectToLogin();
+            }
+        }
+
+        function redirectToLogin() {
+            const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
+            window.location.href = "/login?next=" + currentPath;
+        }
+
+        function logout() {
+            localStorage.removeItem("access_token");
+            window.location.href = "/login";
+        }
+
+        // 导航切换逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuLinks = document.querySelectorAll('#menu .nav-link');
+            const pages = document.querySelectorAll('.content-page');
+
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    menuLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    const target = this.getAttribute('data-target');
+                    pages.forEach(page =>
+                        page.id === target
+                            ? page.classList.remove('d-none')
+                            : page.classList.add('d-none')
+                    );
+
+                    // 更新页面标题
+                    document.querySelector('.content-card h4').textContent =
+                        this.querySelector('span').textContent + '管理';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

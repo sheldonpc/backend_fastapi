@@ -1,0 +1,305 @@
+<div class="container-fluid">
+    <h2 class="mb-4">📄 文章管理</h2>
+
+    <!-- 操作区 -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button class="btn btn-success" onclick="openCreateArticleModal()">
+                ➕ 新增文章
+            </button>
+        </div>
+        <div class="col-md-6 text-end">
+            <small class="text-muted">💡 发布中的文章不可删除</small>
+        </div>
+    </div>
+
+    <!-- 文章表格 -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>文章标题</th>
+                        <th>作者</th>
+                        <th>状态</th>
+                        <th>分类</th>
+                        <th>创建时间</th>
+                        <th>浏览量</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="articlesTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4">加载中...</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑文章模态框 -->
+<div class="modal fade" id="articleModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="articleModalLabel">新增文章</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="articleId"/>
+                <div class="mb-3">
+                    <label class="form-label">文章标题 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="articleTitle" placeholder="请输入文章标题" required/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">作者 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="articleAuthor" placeholder="请输入作者姓名" required/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">分类 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="articleCategory" placeholder="如：技术分享" required/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">状态 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="articleStatus" required>
+                        <option value="draft">草稿</option>
+                        <option value="published">已发布</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">标签（可选，用逗号分隔）</label>
+                    <input type="text" class="form-control" id="articleTags" placeholder="如：前端,JavaScript"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">文章内容 <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="articleContent" rows="10"
+                              placeholder="请输入文章正文，支持Markdown" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveArticle()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 全局变量
+    let articles = [];
+
+    // 页面激活时加载数据
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('articles').classList.contains('d-none') === false) {
+            loadArticles();
+        }
+    });
+
+    // 监听导航切换
+    const articlesObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const articlesDiv = document.getElementById('articles');
+                if (articlesDiv && !articlesDiv.classList.contains('d-none')) {
+                    loadArticles();
+                }
+            }
+        });
+    });
+    articlesObserver.observe(document.getElementById('articles'), {attributes: true});
+
+    // 加载文章列表
+    async function loadArticles() {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            alert("登录已过期，请重新登录");
+            window.location.href = "/login?next=/admin/";
+            return;
+        }
+
+        try {
+            const res = await fetch("/admin/api/articles", {
+                headers: {"Authorization": "Bearer " + token}
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            articles = data.items || [];
+
+            renderArticlesTable();
+
+        } catch (err) {
+            console.error("加载文章失败:", err);
+            document.getElementById("articlesTableBody").innerHTML = `
+            <tr><td colspan="7" class="text-center text-danger">加载失败，请重试</td></tr>
+        `;
+        }
+    }
+
+    // 渲染文章表格
+    function renderArticlesTable() {
+        const tbody = document.getElementById("articlesTableBody");
+        if (articles.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center">暂无文章数据</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = articles.map(article => {
+            const statusBadge = article.status === 'published'
+                ? '<span class="badge bg-success">已发布</span>'
+                : '<span class="badge bg-secondary">草稿</span>';
+            const deleteOnclick = article.status === 'published' ? '' : `deleteArticle('${article.id}', '${escapeHtml(article.title)}')`;
+            const deleteAttrs = article.status === 'published' ? 'disabled title="发布中的文章不可删除"' : '';
+            return `
+        <tr>
+            <td><strong>${escapeHtml(article.title)}</strong></td>
+            <td>${escapeHtml(article.author || '-')}</td>
+            <td>${statusBadge}</td>
+            <td><span class="badge bg-info">${escapeHtml(article.category || '-')}</span></td>
+            <td>${formatDate(article.created_at)}</td>
+            <td><span class="badge bg-primary">${article.views || 0} 次</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary me-1"
+                        onclick="editArticle('${article.id}')">编辑</button>
+                <button class="btn btn-sm btn-outline-danger ${article.status === 'published' ? 'disabled' : ''}"
+                        onclick="${deleteOnclick}"
+                        ${deleteAttrs}>
+                    删除
+                </button>
+            </td>
+        </tr>
+    `;
+        }).join('');
+    }
+
+    // 打开新增文章模态框
+    function openCreateArticleModal() {
+        document.getElementById("articleId").value = "";
+        document.getElementById("articleTitle").value = "";
+        document.getElementById("articleAuthor").value = "";
+        document.getElementById("articleCategory").value = "";
+        document.getElementById("articleStatus").value = "draft";
+        document.getElementById("articleTags").value = "";
+        document.getElementById("articleContent").value = "";
+
+        document.getElementById("articleModalLabel").textContent = "新增文章";
+        new bootstrap.Modal(document.getElementById("articleModal")).show();
+    }
+
+    // 编辑文章
+    function editArticle(articleId) {
+        const article = articles.find(a => a.id === articleId);
+        if (!article) return;
+
+        document.getElementById("articleId").value = article.id;
+        document.getElementById("articleTitle").value = article.title;
+        document.getElementById("articleAuthor").value = article.author || "";
+        document.getElementById("articleCategory").value = article.category || "";
+        document.getElementById("articleStatus").value = article.status || "draft";
+        document.getElementById("articleTags").value = article.tags ? article.tags.join(', ') : "";
+        document.getElementById("articleContent").value = article.content || "";
+
+        document.getElementById("articleModalLabel").textContent = "编辑文章";
+        new bootstrap.Modal(document.getElementById("articleModal")).show();
+    }
+
+    // 保存文章（新增或编辑）
+    async function saveArticle() {
+        const token = localStorage.getItem("access_token");
+        const articleId = document.getElementById("articleId").value;
+        const title = document.getElementById("articleTitle").value.trim();
+        const author = document.getElementById("articleAuthor").value.trim();
+        const category = document.getElementById("articleCategory").value.trim();
+        const status = document.getElementById("articleStatus").value;
+        const tagsInput = document.getElementById("articleTags").value.trim();
+        const content = document.getElementById("articleContent").value.trim();
+        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
+        if (!title || !author || !category || !content) {
+            alert("标题、作者、分类和内容不能为空");
+            return;
+        }
+
+        try {
+            let url = "/admin/api/articles";
+            let method = "POST";
+            let body = {title, author, category, status, tags, content};
+
+            if (articleId) {
+                url += `/${articleId}`;
+                method = "PUT";
+            }
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || `HTTP ${res.status}`);
+            }
+
+            alert(articleId ? "文章更新成功" : "文章创建成功");
+            bootstrap.Modal.getInstance(document.getElementById("articleModal")).hide();
+            loadArticles(); // 刷新列表
+        } catch (err) {
+            console.error("保存文章失败:", err);
+            alert("操作失败：" + err.message);
+        }
+    }
+
+    // 删除文章
+    async function deleteArticle(articleId, articleTitle) {
+        if (!confirm(`确定要删除文章「${articleTitle}」吗？\n此操作不可恢复！`)) {
+            return;
+        }
+
+        const token = localStorage.getItem("access_token");
+
+        try {
+            const res = await fetch(`/admin/api/articles/${articleId}`, {
+                method: 'DELETE',
+                headers: {"Authorization": "Bearer " + token}
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || `HTTP ${res.status}`);
+            }
+
+            alert("文章删除成功");
+            loadArticles();
+        } catch (err) {
+            console.error(err);
+            alert("删除失败：" + err.message);
+        }
+    }
+
+    // 工具函数
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return isNaN(date) ? '' : date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(/\//g, '-');
+    }
+</script>

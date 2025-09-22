@@ -1,0 +1,322 @@
+<!-- config.html -->
+<div class="container-fluid">
+    <h2 class="mb-4">⚙️ 系统配置</h2>
+
+    <!-- 操作区 -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button class="btn btn-success" onclick="openEditConfigModal()">
+                ✏️ 编辑配置
+            </button>
+        </div>
+        <div class="col-md-6 text-end">
+            <small class="text-muted">💡 配置变更后需重启应用生效</small>
+        </div>
+    </div>
+
+    <!-- 配置表格 -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>配置键</th>
+                            <th>当前值</th>
+                            <th>描述</th>
+                            <th>分组</th>
+                            <th>最后更新</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="configTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center py-4">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑配置模态框 -->
+<div class="modal fade" id="configModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="configModalLabel">编辑系统配置</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="configKey" />
+                <div class="mb-3">
+                    <label class="form-label">配置键 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="configKeyInput" placeholder="如：site_title" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">配置值 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="configValue" placeholder="请输入配置值" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">描述</label>
+                    <textarea class="form-control" id="configDescription" rows="2" placeholder="配置用途描述"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">分组</label>
+                    <select class="form-select" id="configGroup">
+                        <option value="site">网站信息</option>
+                        <option value="seo">SEO设置</option>
+                        <option value="email">邮件配置</option>
+                        <option value="cache">缓存设置</option>
+                    </select>
+                </div>
+
+                <hr />
+                <h6>配置分组详情</h6>
+                <small class="text-muted">根据分组选择适用配置</small>
+
+                <!-- 分组详情 -->
+                <div class="accordion" id="configAccordion">
+                    <!-- 网站信息 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSite">
+                                🌐 网站信息
+                            </button>
+                        </h2>
+                        <div id="collapseSite" class="accordion-collapse collapse show">
+                            <div class="accordion-body">
+                                <p>site_title: 站点标题</p>
+                                <p>site_description: 站点描述</p>
+                                <p>site_logo: Logo URL</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SEO设置 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeo">
+                                🔍 SEO设置
+                            </button>
+                        </h2>
+                        <div id="collapseSeo" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <p>seo_keywords: 关键词（逗号分隔）</p>
+                                <p>seo_meta: Meta描述</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 邮件配置 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEmail">
+                                📧 邮件配置
+                            </button>
+                        </h2>
+                        <div id="collapseEmail" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <p>email_smtp_host: SMTP主机</p>
+                                <p>email_smtp_port: SMTP端口</p>
+                                <p>email_username: 用户名</p>
+                                <p>email_password: 密码（加密存储）</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 缓存设置 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCache">
+                                🗄️ 缓存设置
+                            </button>
+                        </h2>
+                        <div id="collapseCache" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <p>cache_enabled: 启用缓存 (true/false)</p>
+                                <p>cache_redis_host: Redis主机</p>
+                                <p>cache_ttl: 缓存TTL（秒）</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveConfig()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 全局变量
+let configs = [];
+
+// 页面激活时加载数据
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('config').classList.contains('d-none') === false) {
+        loadConfigs();
+    }
+});
+
+// 监听导航切换
+const configObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const configDiv = document.getElementById('config');
+            if (configDiv && !configDiv.classList.contains('d-none')) {
+                loadConfigs();
+            }
+        }
+    });
+});
+configObserver.observe(document.getElementById('config'), { attributes: true });
+
+// 加载配置列表
+async function loadConfigs() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alert("登录已过期，请重新登录");
+        window.location.href = "/login?next=/admin/";
+        return;
+    }
+
+    try {
+        const res = await fetch("/admin/api/config", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        configs = data.items || [];
+
+        renderConfigsTable();
+
+    } catch (err) {
+        console.error("加载配置失败:", err);
+        document.getElementById("configTableBody").innerHTML = `
+            <tr><td colspan="6" class="text-center text-danger">加载失败，请重试</td></tr>
+        `;
+    }
+}
+
+// 渲染配置表格
+function renderConfigsTable() {
+    const tbody = document.getElementById("configTableBody");
+    if (configs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center">暂无配置数据</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = configs.map(config => `
+        <tr>
+            <td><strong>${escapeHtml(config.key)}</strong></td>
+            <td>${escapeHtml(config.value || '-')}</td>
+            <td>${escapeHtml(config.description || '-')}</td>
+            <td><span class="badge bg-info">${escapeHtml(config.group || '-')}</span></td>
+            <td>${formatDate(config.updated_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary"
+                        onclick="editConfig('${config.id}')">编辑</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// 打开编辑配置模态框
+function openEditConfigModal() {
+    // 默认新增模式，清空表单
+    document.getElementById("configKey").value = "";
+    document.getElementById("configKeyInput").value = "";
+    document.getElementById("configValue").value = "";
+    document.getElementById("configDescription").value = "";
+    document.getElementById("configGroup").value = "site";
+    document.getElementById("configModalLabel").textContent = "新增配置";
+    new bootstrap.Modal(document.getElementById("configModal")).show();
+}
+
+// 编辑配置
+function editConfig(configId) {
+    const config = configs.find(c => c.id === configId);
+    if (!config) return;
+
+    document.getElementById("configKey").value = config.id;
+    document.getElementById("configKeyInput").value = config.key;
+    document.getElementById("configValue").value = config.value || "";
+    document.getElementById("configDescription").value = config.description || "";
+    document.getElementById("configGroup").value = config.group || "site";
+    document.getElementById("configModalLabel").textContent = "编辑配置";
+    new bootstrap.Modal(document.getElementById("configModal")).show();
+}
+
+// 保存配置（新增或编辑）
+async function saveConfig() {
+    const token = localStorage.getItem("access_token");
+    const configId = document.getElementById("configKey").value;
+    const key = document.getElementById("configKeyInput").value.trim();
+    const value = document.getElementById("configValue").value.trim();
+    const description = document.getElementById("configDescription").value.trim();
+    const group = document.getElementById("configGroup").value;
+
+    if (!key || !value) {
+        alert("配置键和值不能为空");
+        return;
+    }
+
+    try {
+        let url = "/admin/api/config";
+        let method = "POST";
+        let body = { key, value, description, group };
+
+        if (configId) {
+            url += `/${configId}`;
+            method = "PUT";
+            body = { ...body, key }; // PUT时key不可变，但包含以防
+        }
+
+        const res = await fetch(url, {
+            method,
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.detail || `HTTP ${res.status}`);
+        }
+
+        alert(configId ? "配置更新成功" : "配置创建成功");
+        bootstrap.Modal.getInstance(document.getElementById("configModal")).hide();
+        loadConfigs(); // 刷新列表
+    } catch (err) {
+        console.error("保存配置失败:", err);
+        alert("操作失败：" + err.message);
+    }
+}
+
+// 工具函数
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return isNaN(date) ? '' : date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).replace(/\//g, '-');
+}
+</script>

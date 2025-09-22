@@ -1,0 +1,221 @@
+<!-- overview.html -->
+<div class="container-fluid">
+    <!-- 标题 -->
+    <h2 class="mb-4">📊 系统概览</h2>
+
+    <!-- 第一部分：数据统计卡片（4列） -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">👥 总用户数</h5>
+                    <h2 class="card-text" id="total_users">--</h2>
+                    <p class="card-text"><small>较昨日 +5%</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">📝 文章总数</h5>
+                    <h2 class="card-text" id="total_articles">--</h2>
+                    <p class="card-text"><small>今日新增 3 篇</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">🛡️ 活跃管理员</h5>
+                    <h2 class="card-text" id="active_admins">--</h2>
+                    <p class="card-text"><small>在线 2 人</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">⚠️ 待审核文章</h5>
+                    <h2 class="card-text" id="pending_articles">--</h2>
+                    <p class="card-text"><small>需尽快处理</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第二部分：图表区域（2列） -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📈 最近7日用户增长</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="userGrowthChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📅 最近活动日志</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group" id="recentLogs">
+                        <div class="list-group-item">加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第三部分：快捷操作 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚡ 快捷操作</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#" class="btn btn-outline-primary" onclick="navigateTo('users')">👥 管理用户</a>
+                        <a href="#" class="btn btn-outline-success" onclick="navigateTo('articles')">📝 发布文章</a>
+                        <a href="#" class="btn btn-outline-warning" onclick="navigateTo('roles')">🔐 管理角色</a>
+                        <a href="#" class="btn btn-outline-info" onclick="navigateTo('articles')">📋 审核文章</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 Chart.js（轻量级图表库） -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// 页面激活时加载数据
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('overview').classList.contains('d-none') === false) {
+        loadOverviewData();
+    }
+});
+
+// 监听导航切换，如果是切换到 overview，则加载数据
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            const overviewDiv = document.getElementById('overview');
+            if (overviewDiv && !overviewDiv.classList.contains('d-none')) {
+                loadOverviewData();
+            }
+        }
+    });
+});
+
+observer.observe(document.getElementById('overview'), { attributes: true });
+
+async function loadOverviewData() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alert("未登录或会话过期");
+        window.location.href = "/login?next=/admin/";
+        return;
+    }
+
+    try {
+        // 1. 加载统计数据
+        const statsRes = await fetch("/admin/api/stats", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        if (!statsRes.ok) throw new Error("加载统计数据失败");
+        const stats = await statsRes.json();
+
+        document.getElementById("total_users").textContent = stats.total_users || 0;
+        document.getElementById("total_articles").textContent = stats.total_articles || 0;
+        document.getElementById("active_admins").textContent = stats.active_admins || 0;
+        document.getElementById("pending_articles").textContent = stats.pending_articles || 0;
+
+        // 2. 加载最近日志
+        const logsRes = await fetch("/admin/api/recent-logs", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        if (!logsRes.ok) throw new Error("加载日志失败");
+        const logs = await logsRes.json();
+
+        const logList = document.getElementById("recentLogs");
+        logList.innerHTML = "";
+        logs.slice(0, 5).forEach(log => {
+            const item = document.createElement("div");
+            item.className = "list-group-item d-flex justify-content-between align-items-center";
+            item.innerHTML = `
+                <span>${log.action} - ${log.user}</span>
+                <small class="text-muted">${new Date(log.timestamp).toLocaleString()}</small>
+            `;
+            logList.appendChild(item);
+        });
+
+        // 3. 初始化图表
+        // initUserGrowthChart(stats.user_growth_last_7_days || []);
+
+    } catch (err) {
+        console.error("加载概览数据失败:", err);
+        alert("加载数据失败，请刷新页面或重新登录");
+    }
+}
+
+function initUserGrowthChart(data) {
+    const canvas = document.getElementById('userGrowthChart');
+    if (!canvas) {
+        console.warn("图表容器未找到，跳过初始化");
+        return; // 安全退出
+    }
+
+    const ctx = canvas.getContext('2d');
+
+    // 如果已有图表，先销毁
+    if (window.userGrowthChart) {
+        window.userGrowthChart.destroy();
+    }
+
+    window.userGrowthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.date),
+            datasets: [{
+                label: '新增用户数',
+                data: data.map(d => d.count),
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+}
+
+function navigateTo(target) {
+    const menuLinks = document.querySelectorAll('#menu .nav-link');
+    menuLinks.forEach(link => {
+        if (link.getAttribute('data-target') === target) {
+            link.click();
+        }
+    });
+}
+</script>
