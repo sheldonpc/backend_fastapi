@@ -45,7 +45,7 @@ def rate_limiter(key_prefix: str, limit: int = 5, ttl: int = 60):
             count = await redis_client.get(key)
             if count is None:
                 await redis_client.set(key, 1, ex=ttl)
-            elif int(count) < limit:
+            elif int(count) <= limit:
                 await redis_client.incr(key)
             else:
                 raise HTTPException(

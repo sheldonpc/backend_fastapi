@@ -103,3 +103,44 @@ class ArticleFavorite(models.Model):
 
     class Meta:
         unique_together = ("user", "article")
+
+# 金融资讯模型
+class FinancialNews(models.Model):
+    """金融信息"""
+    id = fields.IntField(pk=True)
+    title = fields.CharField(max_length=255)
+    content = fields.TextField()
+    author = fields.ForeignKeyField("models.User", related_name="financial_news")
+    is_published = fields.BooleanField(default=False)
+    # 无需在代码中处理时间戳，ORM 会自动维护
+    created_at = fields.DatetimeField(auto_now_add=True)
+    updated_at = fields.DatetimeField(auto_now=True)
+
+    news_type = fields.CharField(max_length=50, default="general")
+    symbol = fields.CharField(max_length=50, null=True)
+    sentiment_score = fields.FloatField(null=True)
+    source_url = fields.CharField(max_length=500, null=True)
+
+# 市场数据模型
+class MarketData(models.Model):
+    """市场数据"""
+    id = fields.IntField(pk=True)
+    symbol = fields.CharField(max_length=50)
+    name = fields.CharField(max_length=255)
+    current_price = fields.DecimalField(max_digits=15, decimal_places=4)
+    change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
+    volume = fields.BigIntField()
+    market_type = fields.CharField(max_length=50)
+    updated_at = fields.DatetimeField(auto_now=True)
+
+# AI分析结果模型
+class SentimentAnalysis(models.Model):
+    """市场情绪分析结果"""
+    id = fields.IntField(pk=True)
+    symbol = fields.CharField(max_length=20)
+    analysis_date = fields.DatetimeField(auto_now_add=True)
+    sentiment_score = fields.FloatField()  # -1 (极度悲观) 到 1 (极度乐观)
+    confidence = fields.FloatField()  # 0-1, 分析置信度
+    summary = fields.TextField()  # AI生成的情绪分析摘要
+    news_count = fields.IntField(default=0)  # 分析的新闻数量
+
