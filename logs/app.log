@@ -948,3 +948,77 @@
 2025-09-22 15:50:12,472 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/recent-logs completed in 0.002s
 2025-09-22 15:50:14,943 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/users?page=1&page_size=10 completed in 0.001s
 2025-09-22 15:50:14,956 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/users/?page=1&page_size=10 completed in 0.003s
+2025-09-25 16:54:55,799 - app.utils.logger - INFO - Logger initialized
+2025-09-25 16:54:55,836 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 16:55:04,926 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-25 16:55:05,095 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-25 16:55:05,095 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.001s
+2025-09-25 16:55:11,176 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-25 16:55:36,390 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-25 16:55:37,913 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.036s
+2025-09-25 16:56:23,638 - app.utils.logger - WARNING - HTTPException: Not authenticated at POST-http://127.0.0.1:8000/financial/market/crawl
+2025-09-25 16:56:23,639 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl completed in 0.001s
+2025-09-25 16:56:34,892 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.4633s
+2025-09-25 16:56:40,703 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl completed in 0.003s
+2025-09-25 17:00:46,795 - app.utils.logger - WARNING - HTTPException: 获取爬虫状态失败: can't subtract offset-naive and offset-aware datetimes at GET-http://127.0.0.1:8000/financial/market/status
+2025-09-25 17:00:46,795 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.02s
+2025-09-25 17:00:58,550 - app.utils.logger - WARNING - HTTPException: 获取爬虫状态失败: can't subtract offset-naive and offset-aware datetimes at GET-http://127.0.0.1:8000/financial/market/status
+2025-09-25 17:00:58,551 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.003s
+2025-09-25 17:02:05,641 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 17:03:36,340 - app.utils.logger - INFO - Logger initialized
+2025-09-25 17:03:36,376 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 17:03:40,924 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.001s
+2025-09-25 17:03:41,101 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0334s
+2025-09-25 17:03:47,318 - app.utils.logger - WARNING - HTTPException: Not authenticated at POST-http://127.0.0.1:8000/financial/market/crawl-now
+2025-09-25 17:03:47,318 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl-now completed in 0.0011s
+2025-09-25 17:03:57,775 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.3671s
+2025-09-25 17:05:28,763 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl-now completed in 82.8437s
+2025-09-25 17:08:16,263 - app.utils.logger - WARNING - HTTPException: 获取爬虫状态失败: can't subtract offset-naive and offset-aware datetimes at GET-http://127.0.0.1:8000/financial/market/status
+2025-09-25 17:08:16,263 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.004s
+2025-09-25 17:10:42,793 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 17:10:44,463 - app.utils.logger - INFO - Logger initialized
+2025-09-25 17:10:44,497 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 17:10:46,013 - app.utils.logger - INFO - Logger initialized
+2025-09-25 17:10:46,053 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 17:27:12,226 - app.utils.logger - INFO - Logger initialized
+2025-09-25 17:27:12,260 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 17:28:38,165 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl-now completed in 69.4071s
+2025-09-25 17:30:08,540 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 17:31:33,762 - app.utils.logger - INFO - Logger initialized
+2025-09-25 17:31:33,800 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 17:33:06,969 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.001s
+2025-09-25 17:33:07,145 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0342s
+2025-09-25 17:33:14,361 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/overview completed in 0.0165s
+2025-09-25 17:33:35,476 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/latest completed in 0.002s
+2025-09-25 17:34:44,253 - app.utils.logger - WARNING - HTTPException: 获取爬虫状态失败: can't subtract offset-naive and offset-aware datetimes at GET-http://127.0.0.1:8000/financial/market/status
+2025-09-25 17:34:44,254 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.002s
+2025-09-25 17:35:11,758 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 18:09:34,496 - app.utils.logger - INFO - Logger initialized
+2025-09-25 18:09:34,535 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 18:09:39,135 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.012s
+2025-09-25 18:16:47,859 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 18:17:39,472 - app.utils.logger - INFO - Logger initialized
+2025-09-25 18:17:39,510 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 18:17:58,047 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.001s
+2025-09-25 18:17:58,275 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.1022s
+2025-09-25 18:18:04,459 - app.utils.logger - WARNING - HTTPException: Not authenticated at POST-http://127.0.0.1:8000/financial/market/crawl
+2025-09-25 18:18:04,459 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl completed in 0.0s
+2025-09-25 18:18:14,739 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.2281s
+2025-09-25 18:18:21,954 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl completed in 0.002s
+2025-09-25 18:21:29,835 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 18:21:34,679 - app.utils.logger - INFO - Logger initialized
+2025-09-25 18:21:34,715 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 18:21:49,618 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.0148s
+2025-09-25 18:26:32,995 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 18:29:29,567 - app.utils.logger - INFO - Logger initialized
+2025-09-25 18:29:29,602 - app.utils.logger - ERROR - 启动市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 18:29:34,452 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.0107s
+2025-09-25 18:30:18,842 - app.utils.logger - ERROR - 停止市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 18:30:21,053 - app.utils.logger - INFO - Logger initialized
+2025-09-25 18:30:21,086 - app.utils.logger - ERROR - 启动市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 18:30:25,068 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.0388s
+2025-09-25 18:30:45,138 - app.utils.logger - ERROR - 停止市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 18:31:12,411 - app.utils.logger - INFO - Logger initialized
+2025-09-25 18:31:12,445 - app.utils.logger - ERROR - 启动市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 18:31:16,664 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.012s
+2025-09-25 18:31:35,285 - app.utils.logger - ERROR - 停止市场数据调度器出错: name 'timezone' is not defined

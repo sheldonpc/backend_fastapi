@@ -22,6 +22,11 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_DB = int(os.getenv("REDIS_DB", 0))
 VERIFICATION_CODE_TTL = int(os.getenv("VERIFICATION_CODE_TTL", 60*5))
 
+# 爬虫配置
+CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", "chromedriver.exe")
+CRAWLER_HEADLESS = os.getenv("CRAWLER_HEADLESS", "true").lower() == "true"
+CRAWLER_INTERVAL_SECONDS = int(os.getenv("CRAWLER_INTERVAL_SECONDS", 300))
+
 TORTOISE_ORM = {
     "connections" : {"default": DB_URL},
     "apps" : {
@@ -31,3 +36,40 @@ TORTOISE_ORM = {
         }
     }
 }
+
+def _load_financial_targets():
+    targets = []
+    symbols = [
+        "SHANGHAI", "SHENZHEN", "CHINEXT", "BEIJING", "HUSHEN300",
+        "DOWJONES", "NASDAQ", "SP500", "GOLD_NY", "SILVER_NY"
+    ]
+
+    for symbol in symbols:
+        url = os.getenv(f"{symbol}_URL")
+        if url:
+            name = symbol.replace("_", "")
+            if symbol == "HUSHEN300":
+                name = "HuShen300"
+            elif symbol == "CHINEXT":
+                name = "ChiNext"
+            elif symbol == "SP500":
+                name = "S&P500"
+            elif symbol == "GOLD_NY":
+                name = "Gold_NY"
+            elif symbol == "SILVER_NY":
+                name = "Silver_NY"
+            else:
+                name = symbol.capitalize()
+
+            target = {
+                "name": name,
+                "url": url,
+                "type": os.getenv(f"{symbol}_TYPE", "unknown"),
+                "display_name": os.getenv(f"{symbol}_NAME", name),
+                "data_type": os.getenv(f"{symbol}_DATA_TYPE", "index"),
+                "market_region": os.getenv(f"{symbol}_REGION", "Unknown")
+            }
+            targets.append(target)
+    return targets
+
+FINANCIAL_TARGETS = _load_financial_targets()

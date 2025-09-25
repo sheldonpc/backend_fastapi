@@ -3,7 +3,7 @@ from typing import Optional, Annotated
 from pydantic import BaseModel, EmailStr, constr, Field
 from tortoise.contrib.pydantic import pydantic_model_creator
 
-from app.models import Comment, ArticleLike, CommentLike, ArticleFavorite, FinancialNews, MarketData
+from app.models import Comment, ArticleLike, CommentLike, ArticleFavorite, FinancialNews, SentimentAnalysis, IndexData
 
 
 class UserCreate(BaseModel):
@@ -84,5 +84,5 @@ CommentLike_Pydantic = pydantic_model_creator(CommentLike, name="CommentLike")
 ArticleFavorite_Pydantic = pydantic_model_creator(ArticleFavorite, name="ArticleFavorite")
 
 FinancialNews_Pydantic = pydantic_model_creator(FinancialNews, name="FinancialNews")
-MarketData_Pydantic = pydantic_model_creator(MarketData, name="MarketData")
-SentimentAnalysis_Pydantic = pydantic_model_creator(MarketData, name="SentimentAnalysis")
+MarketData_Pydantic = pydantic_model_creator(IndexData, name="MarketData")
+SentimentAnalysis_Pydantic = pydantic_model_creator(SentimentAnalysis, name="SentimentAnalysis")

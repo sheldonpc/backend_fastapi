@@ -104,7 +104,7 @@ class ArticleFavorite(models.Model):
     class Meta:
         unique_together = ("user", "article")
 
-# 金融资讯模型
+# 金融资讯
 class FinancialNews(models.Model):
     """金融信息"""
     id = fields.IntField(pk=True)
@@ -121,17 +121,6 @@ class FinancialNews(models.Model):
     sentiment_score = fields.FloatField(null=True)
     source_url = fields.CharField(max_length=500, null=True)
 
-# 市场数据模型
-class MarketData(models.Model):
-    """市场数据"""
-    id = fields.IntField(pk=True)
-    symbol = fields.CharField(max_length=50)
-    name = fields.CharField(max_length=255)
-    current_price = fields.DecimalField(max_digits=15, decimal_places=4)
-    change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
-    volume = fields.BigIntField()
-    market_type = fields.CharField(max_length=50)
-    updated_at = fields.DatetimeField(auto_now=True)
 
 # AI分析结果模型
 class SentimentAnalysis(models.Model):
@@ -144,3 +133,38 @@ class SentimentAnalysis(models.Model):
     summary = fields.TextField()  # AI生成的情绪分析摘要
     news_count = fields.IntField(default=0)  # 分析的新闻数量
 
+
+
+# 新增：股指和贵金属实时数据模型
+class IndexData(models.Model):
+    """股指和贵金属实时数据"""
+    id = fields.IntField(pk=True)
+    symbol = fields.CharField(max_length=50, unique=True)  # Shanghai, Shenzhen, ChiNext等
+    name = fields.CharField(max_length=100)  # 中文名称
+    timestamp = fields.DatetimeField()  # 数据时间戳
+    
+    # 价格相关字段
+    price = fields.DecimalField(max_digits=15, decimal_places=4)  # 当前价格
+    change = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 涨跌额
+    change_percent = fields.CharField(max_length=20, null=True)  # 涨跌幅百分比
+    
+    # 详细交易数据（可能为空）
+    open_today = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 今开
+    close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 昨收
+    highest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 最高
+    lowest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 最低
+    volume = fields.CharField(max_length=50, null=True)  # 成交量（字符串格式，如"5.57亿手"）
+    amount = fields.CharField(max_length=50, null=True)  # 成交额（字符串格式，如"9497.23亿元"）
+    
+    # 数据类型分类
+    data_type = fields.CharField(max_length=30)  # index(指数), precious_metal(贵金属), us_stock(美股)
+    market_region = fields.CharField(max_length=30)  # CN(中国), US(美国), Global(全球)
+    
+    # 更新时间
+    updated_at = fields.DatetimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.name}({self.symbol}): {self.price}"
+    
+    class Meta:
+        table = "index_data"

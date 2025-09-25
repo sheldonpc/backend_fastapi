@@ -10,14 +10,31 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.utils.logger import init_logger, logger
 from app.database import init_db, close_db
-from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config
+from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
+    financial
 from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_logger()
     await init_db()
+
+    try:
+        from app.services.scheduler import market_scheduler
+        await market_scheduler.start_scheduler()
+        logger.info("启动市场数据调度器")
+    except Exception as e:
+        logger.error(f"启动市场数据调度器出错: {e}")
+
     yield
+
+    try:
+        from app.services.scheduler import market_scheduler
+        await market_scheduler.stop_scheduler()
+        logger.info("停止市场数据调度器")
+    except Exception as e:
+        logger.error(f"停止市场数据调度器出错: {e}")
+
     await close_db()
 app = FastAPI(
     lifespan=lifespan,
@@ -69,6 +86,7 @@ app.include_router(admin.router)
 app.include_router(api_users.router)
 app.include_router(roles.router)
 app.include_router(api_articles.router)
+app.include_router(financial.router)
 
 app.include_router(api_config.router)
 # deprecated

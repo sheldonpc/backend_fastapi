@@ -15,3 +15,4 @@ test_main.http
 .env.local.testing.local.testing
 .env.local.testing.local.testing.example
 .env.local.testing.local.testing.local
+chromedriver.exe
