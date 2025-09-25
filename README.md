@@ -1,4 +1,4 @@
-# 金融投资数据平台 / Financial Investment Data Platform
+# 金融数据平台 / Financial Data Platform
 
 [中文](#中文文档) | [English](#english-documentation)
 
@@ -8,7 +8,7 @@
 
 ### 项目简介
 
-基于FastAPI构建的现代化金融投资数据平台，集成AI市场分析和实时数据爬取功能。项目采用RESTful API设计风格，提供完整的金融数据服务。
+基于FastAPI构建的现代化金融数据平台，集成AI市场分析和实时数据爬取功能。项目采用RESTful API设计风格，提供完整的金融数据服务。
 
 ### 技术栈
 
@@ -22,7 +22,7 @@
 
 ### 核心功能
 
-- ✅ 实时金融数据爬取（A股指数、美股指数、贵金属）
+- ✅ 金融数据爬取（A股指数、美股指数、贵金属）
 - ✅ 智能定时调度器（交易时间自动执行）
 - ✅ RESTful API设计
 - ✅ JWT用户认证和权限管理
@@ -224,7 +224,7 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker
 
 ### Project Overview
 
-A modern financial investment data platform built with FastAPI, integrating AI market analysis and real-time data crawling capabilities. The project follows RESTful API design principles to provide comprehensive financial data services.
+A modern financial data platform built with FastAPI, integrating AI market analysis and real-time data crawling capabilities. The project follows RESTful API design principles to provide comprehensive financial data services.
 
 ### Tech Stack
 
@@ -238,7 +238,7 @@ A modern financial investment data platform built with FastAPI, integrating AI m
 
 ### Core Features
 
-- ✅ Real-time financial data crawling (A-shares, US stocks, precious metals)
+- ✅ Financial data crawling (A-shares, US stocks, precious metals)
 - ✅ Intelligent scheduled tasks (auto-execution during trading hours)
 - ✅ RESTful API design
 - ✅ JWT user authentication and authorization
