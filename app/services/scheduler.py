@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timezone, timedelta
 from typing import Optional
 from app.services.market_service import MarketDataService
 

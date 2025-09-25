@@ -1022,3 +1022,36 @@
 2025-09-25 18:31:12,445 - app.utils.logger - ERROR - 启动市场数据调度器出错: name 'timezone' is not defined
 2025-09-25 18:31:16,664 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.012s
 2025-09-25 18:31:35,285 - app.utils.logger - ERROR - 停止市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 18:44:22,522 - app.utils.logger - INFO - Logger initialized
+2025-09-25 18:44:22,574 - app.utils.logger - ERROR - 启动市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 18:44:45,162 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-25 18:44:45,164 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-25 18:44:45,334 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-25 18:44:45,334 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.0s
+2025-09-25 18:44:47,561 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-25 18:44:47,743 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0337s
+2025-09-25 18:44:56,471 - app.utils.logger - WARNING - HTTPException: Not authenticated at POST-http://127.0.0.1:8000/financial/market/crawl
+2025-09-25 18:44:56,471 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl completed in 0.0s
+2025-09-25 18:45:05,136 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.2286s
+2025-09-25 18:45:09,480 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl completed in 0.001s
+2025-09-25 18:47:02,130 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/latest completed in 0.005s
+2025-09-25 18:48:12,761 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.003s
+2025-09-25 18:48:21,946 - app.utils.logger - ERROR - 停止市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 19:01:31,448 - app.utils.logger - INFO - Logger initialized
+2025-09-25 19:01:31,485 - app.utils.logger - ERROR - 启动市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 19:01:56,614 - app.utils.logger - WARNING - HTTPException: 获取爬虫状态失败: connect() got an unexpected keyword argument 'timezone' at GET-http://127.0.0.1:8000/financial/market/status
+2025-09-25 19:01:56,615 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.004s
+2025-09-25 19:02:10,700 - app.utils.logger - WARNING - Unhandled exception at POST-http://127.0.0.1:8000/financial/market/crawl
+2025-09-25 19:02:22,327 - app.utils.logger - ERROR - 停止市场数据调度器出错: name 'timezone' is not defined
+2025-09-25 19:04:08,031 - app.utils.logger - INFO - Logger initialized
+2025-09-25 19:04:08,068 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 19:04:14,753 - app.utils.logger - WARNING - HTTPException: 获取爬虫状态失败: connect() got an unexpected keyword argument 'timezone' at GET-http://127.0.0.1:8000/financial/market/status
+2025-09-25 19:04:14,754 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.003s
+2025-09-25 19:04:21,562 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 19:05:26,284 - app.utils.logger - INFO - Logger initialized
+2025-09-25 19:05:26,318 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-25 19:05:29,480 - app.utils.logger - INFO - GET http://127.0.0.1:8000/financial/market/status completed in 0.0492s
+2025-09-25 19:05:52,067 - app.utils.logger - INFO - POST http://127.0.0.1:8000/financial/market/crawl completed in 0.012s
+2025-09-25 19:10:40,107 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-25 19:10:41,877 - app.utils.logger - INFO - Logger initialized
+2025-09-25 19:10:41,912 - app.utils.logger - INFO - 启动市场数据调度器

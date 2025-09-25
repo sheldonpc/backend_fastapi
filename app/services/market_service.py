@@ -462,12 +462,13 @@ class FinancialDataCrawler:
                 #     "data_type": data.get("data_type", "unknown"),
                 #     "market_region": data.get("market_region", "Unknown")
                 # }
+                beijing_now = datetime.now(BEIJING_TZ)
 
                 # 解析数据
                 parsed_data = {
                     "name": data.get("display_name", symbol),
                     # "timestamp": datetime.strptime(data["timestamp"], "%Y-%m-%d %H:%M:%S"),
-                    "timestamp": datetime.strptime(data["timestamp"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=BEIJING_TZ),
+                    "timestamp": beijing_now,  # 直接使用带时区的北京时间
                     "price": self._parse_decimal(data.get("price")),
                     "change": self._parse_decimal(data.get("change")),
                     "change_percent": data.get("change_percent"),
@@ -478,7 +479,9 @@ class FinancialDataCrawler:
                     "volume": data.get("volume") if data.get("volume") != "N/A" else None,
                     "amount": data.get("amount") if data.get("amount") != "N/A" else None,
                     "data_type": data.get("data_type", "unknown"),
-                    "market_region": data.get("market_region", "Unknown")
+                    "market_region": data.get("market_region", "Unknown"),
+                    "updated_at": beijing_now  # 手动设置updated_at为北京时间
+
                 }
 
                 # 确保price不为None
@@ -499,8 +502,15 @@ class FinancialDataCrawler:
 
     def save_to_file(self, results: Dict[str, Dict]) -> str:
         """保存结果到JSON文件"""
+        import os
+
+        # 确保crawlData目录存在
+        crawl_dir = "crawlData"
+        if not os.path.exists(crawl_dir):
+            os.makedirs(crawl_dir)
+
         timestamp_str = datetime.now(BEIJING_TZ).strftime("%Y%m%d_%H%M%S")
-        filename = f"market_data_{timestamp_str}.json"
+        filename = os.path.join(crawl_dir, f"market_data_{timestamp_str}.json")
 
         try:
             with open(filename, "w", encoding="utf-8") as f:

@@ -27,14 +27,39 @@ CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", "chromedriver.exe")
 CRAWLER_HEADLESS = os.getenv("CRAWLER_HEADLESS", "true").lower() == "true"
 CRAWLER_INTERVAL_SECONDS = int(os.getenv("CRAWLER_INTERVAL_SECONDS", 300))
 
+# TORTOISE_ORM = {
+#     "connections" : {"default": DB_URL},
+#     "apps" : {
+#         "models" : {
+#             "models" : ["app.models", "aerich.models"],
+#             "default_connection" : "default"
+#         }
+#     }
+# }
+
 TORTOISE_ORM = {
-    "connections" : {"default": DB_URL},
+    "connections" : {
+        "default": {
+            "engine": "tortoise.backends.mysql",
+            "credentials": {
+                "host": os.getenv("DB_HOST", "localhost"),
+                "port": int(os.getenv("DB_PORT", 3306)),
+                "user": os.getenv("DB_USER", "root"),
+                "password": os.getenv("DB_PASSWORD", "root"),
+                "database": os.getenv("DB_NAME", "mydb"),
+                "charset": "utf8mb4"
+                # 移除不支持的timezone参数
+            }
+        }
+    },
     "apps" : {
         "models" : {
             "models" : ["app.models", "aerich.models"],
             "default_connection" : "default"
         }
-    }
+    },
+    "use_tz": True,  # 启用时区支持
+    "timezone": "Asia/Shanghai"  # 设置默认时区为北京时间
 }
 
 def _load_financial_targets():
