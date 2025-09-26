@@ -13,27 +13,28 @@ from app.database import init_db, close_db
 from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
     financial
 from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler
+from app.core.templates import templates
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_logger()
     await init_db()
 
-    try:
-        from app.services.scheduler import market_scheduler
-        await market_scheduler.start_scheduler()
-        logger.info("启动市场数据调度器")
-    except Exception as e:
-        logger.error(f"启动市场数据调度器出错: {e}")
+    # try:
+    #     from app.services.scheduler import market_scheduler
+    #     await market_scheduler.start_scheduler()
+    #     logger.info("启动市场数据调度器")
+    # except Exception as e:
+    #     logger.error(f"启动市场数据调度器出错: {e}")
 
     yield
 
-    try:
-        from app.services.scheduler import market_scheduler
-        await market_scheduler.stop_scheduler()
-        logger.info("停止市场数据调度器")
-    except Exception as e:
-        logger.error(f"停止市场数据调度器出错: {e}")
+    # try:
+    #     from app.services.scheduler import market_scheduler
+    #     await market_scheduler.stop_scheduler()
+    #     logger.info("停止市场数据调度器")
+    # except Exception as e:
+    #     logger.error(f"停止市场数据调度器出错: {e}")
 
     await close_db()
 app = FastAPI(
@@ -74,9 +75,6 @@ app.add_exception_handler(Exception, all_exception_handler)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-app.mount("/static", StaticFiles(directory="app/admin_ui/templates"), name="static")
-
-
 app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(articles.router)
@@ -94,14 +92,16 @@ app.include_router(api_config.router)
 # async def startup():
 #     await init_db()
 
-templates = Jinja2Templates(directory="app/admin_ui/templates")
+# templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 @app.get("/")
 async def root():
     return {"msg": "Hello FastAPI + Tortoise + MySQL"}
 
 @app.get("/login")
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("admin/login.html", {"request": request})
 
 @app.get("/hello/{name}")
 async def say_hello(name: str):

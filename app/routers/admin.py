@@ -13,6 +13,7 @@ from app.models import User, Article, Category, Tag, Article_Pydantic, Category_
     Comment_Pydantic, User_Pydantic
 from app.schemas import UserOut
 from tortoise.expressions import Q
+from app.core.templates import templates
 
 router = APIRouter(
     prefix="/admin",
@@ -20,8 +21,8 @@ router = APIRouter(
     # dependencies=[Depends(get_current_admin)]  # 所有路由自动受管理员限制
 )
 
-templates = Jinja2Templates(directory="app/admin_ui/templates")
-
+# templates = Jinja2Templates(directory="app/admin_ui/templates")
+#
 
 # 在你的 admin 路由中添加：
 @router.get("/verify")
@@ -43,7 +44,7 @@ async def verify_admin(current_admin = Depends(get_current_admin)):
 async def admin_page(request: Request):
     # ✅ 不再校验权限，直接返回 HTML 页面
     # 前端 JS 会在加载后自动校验 /admin/verify
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return templates.TemplateResponse("admin/admin.html", {"request": request})
 
 # ———————————————— 模拟统计数据接口 ————————————————
 @router.get("/api/stats")

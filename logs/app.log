@@ -1055,3 +1055,74 @@
 2025-09-25 19:10:40,107 - app.utils.logger - INFO - 停止市场数据调度器
 2025-09-25 19:10:41,877 - app.utils.logger - INFO - Logger initialized
 2025-09-25 19:10:41,912 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-26 17:06:24,204 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:06:24,270 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-26 17:06:26,234 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 17:06:26,240 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-26 17:06:26,434 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-26 17:06:26,435 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.001s
+2025-09-26 17:06:30,233 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login/ completed in 0.0s
+2025-09-26 17:06:30,239 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login completed in 0.003s
+2025-09-26 17:07:15,503 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login completed in 0.001s
+2025-09-26 17:07:26,214 - app.utils.logger - WARNING - Unhandled exception at POST-http://127.0.0.1:8000/auth/login
+2025-09-26 17:07:37,431 - app.utils.logger - WARNING - Unhandled exception at POST-http://127.0.0.1:8000/auth/login
+2025-09-26 17:07:53,866 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.304s
+2025-09-26 17:07:53,888 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/ completed in 0.011s
+2025-09-26 17:07:54,582 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/verify completed in 0.004s
+2025-09-26 17:07:54,585 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/stats completed in 0.001s
+2025-09-26 17:07:54,645 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/recent-logs completed in 0.002s
+2025-09-26 17:07:57,026 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/users?page=1&page_size=10 completed in 0.001s
+2025-09-26 17:07:57,045 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/users/?page=1&page_size=10 completed in 0.003s
+2025-09-26 17:07:59,242 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/roles completed in 0.001s
+2025-09-26 17:07:59,254 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/roles/ completed in 0.001s
+2025-09-26 17:08:00,410 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/articles completed in 0.0s
+2025-09-26 17:08:00,418 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/articles/ completed in 0.001s
+2025-09-26 17:08:01,691 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/config completed in 0.001s
+2025-09-26 17:08:01,699 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/config/ completed in 0.001s
+2025-09-26 17:08:02,846 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/stats completed in 0.002s
+2025-09-26 17:08:02,853 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/recent-logs completed in 0.001s
+2025-09-26 17:08:37,316 - app.utils.logger - INFO - 停止市场数据调度器
+2025-09-26 17:09:06,871 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:13:47,050 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:17:57,152 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:17:58,979 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 17:18:03,358 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login/ completed in 0.0s
+2025-09-26 17:18:03,361 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/login
+2025-09-26 17:18:43,428 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:18:45,562 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/login
+2025-09-26 17:18:47,643 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/login
+2025-09-26 17:19:01,174 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:19:03,707 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login completed in 0.002s
+2025-09-26 17:19:10,404 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.6341s
+2025-09-26 17:19:10,418 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/admin/
+2025-09-26 17:19:30,360 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:19:32,444 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/admin/
+2025-09-26 17:19:34,649 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/admin/
+2025-09-26 17:19:38,750 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login completed in 0.004s
+2025-09-26 17:19:44,342 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.5122s
+2025-09-26 17:19:44,354 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/admin/
+2025-09-26 17:20:15,612 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:22:44,758 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:22:48,481 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.2537s
+2025-09-26 17:22:48,496 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/admin/
+2025-09-26 17:23:10,507 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:23:13,651 - app.utils.logger - INFO - POST http://127.0.0.1:8000/auth/login completed in 0.2526s
+2025-09-26 17:23:13,667 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/admin/
+2025-09-26 17:29:03,628 - app.utils.logger - INFO - Logger initialized
+2025-09-26 17:29:05,889 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/ completed in 0.0105s
+2025-09-26 17:29:06,030 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/verify completed in 0.0402s
+2025-09-26 17:29:06,031 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/stats completed in 0.0382s
+2025-09-26 17:29:06,095 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/recent-logs completed in 0.002s
+2025-09-26 17:29:07,663 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/users?page=1&page_size=10 completed in 0.0s
+2025-09-26 17:29:07,680 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/users/?page=1&page_size=10 completed in 0.0024s
+2025-09-26 17:29:08,064 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/roles completed in 0.001s
+2025-09-26 17:29:08,070 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/roles/ completed in 0.002s
+2025-09-26 17:29:08,279 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/articles completed in 0.0015s
+2025-09-26 17:29:08,291 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/articles/ completed in 0.001s
+2025-09-26 17:29:08,600 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/config completed in 0.0s
+2025-09-26 17:29:08,609 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/api/config/ completed in 0.0021s
+2025-09-26 17:29:09,328 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login completed in 0.0006s
+2025-09-26 17:29:12,399 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/ completed in 0.001s
+2025-09-26 17:29:12,444 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login?next=%2Fadmin%2F completed in 0.001s
+2025-09-26 17:29:12,450 - app.utils.logger - WARNING - HTTPException: Invalid token at GET-http://127.0.0.1:8000/admin/verify
+2025-09-26 17:29:12,450 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/verify completed in 0.001s
