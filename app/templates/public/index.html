@@ -1,0 +1,257 @@
+{% extends "public/base.html" %}
+
+{% block title %}首页 - 一市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .market-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+    }
+    .market-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    }
+    .index-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .ai-insight {
+        background-color: #f8f9fa;
+        border-left: 4px solid #0d6efd;
+        padding: 1rem;
+        border-radius: 0.375rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            欢迎访问一市信息平台！以下为今日市场概览。
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+</div>
+
+<!-- 市场指数与商品卡片 -->
+<!--添加一个更新时间：-->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0 fw-bold">市场行情</h5>
+    <small class="text-muted">
+        <i class="bi bi-clock me-1"></i>更新时间：2025-09-27 16:45
+    </small>
+</div>
+<div class="row g-3 mb-5">
+    <!-- 上证指数 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">上证指数</div>
+                <div class="index-value text-dark">3,045.82</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+0.78%</span>
+                    <small class="text-muted ms-1">+23.56</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 深证成指 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">深证成指</div>
+                <div class="index-value text-dark">9,876.34</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+1.12%</span>
+                    <small class="text-muted ms-1">+109.21</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创业板指 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">创业板指</div>
+                <div class="index-value text-dark">1,987.45</div>
+                <div class="mt-1">
+                    <span class="badge bg-danger">-0.34%</span>
+                    <small class="text-muted ms-1">-6.78</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 恒生指数 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">恒生指数</div>
+                <div class="index-value text-dark">17,562.10</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+0.92%</span>
+                    <small class="text-muted ms-1">+160.33</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 道琼斯 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">道琼斯</div>
+                <div class="index-value text-dark">39,250.60</div>
+                <div class="mt-1">
+                    <span class="badge bg-danger">-0.21%</span>
+                    <small class="text-muted ms-1">-82.45</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标普500 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">标普500</div>
+                <div class="index-value text-dark">5,342.18</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+0.15%</span>
+                    <small class="text-muted ms-1">+8.02</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 纳斯达克 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">纳斯达克</div>
+                <div class="index-value text-dark">16,890.33</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+0.45%</span>
+                    <small class="text-muted ms-1">+75.21</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 美元/人民币 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">USD/CNY</div>
+                <div class="index-value text-dark">7.2150</div>
+                <div class="mt-1">
+                    <span class="badge bg-secondary">中间价 7.2100</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 黄金 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">黄金 (XAU)</div>
+                <div class="index-value text-dark">$2,345.60</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+0.80%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 白银 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">白银 (XAG)</div>
+                <div class="index-value text-dark">$28.75</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+1.20%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 原油 (WTI) -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">WTI 原油</div>
+                <div class="index-value text-dark">$78.40</div>
+                <div class="mt-1">
+                    <span class="badge bg-danger">-0.60%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 热门股票：贵州茅台 -->
+    <div class="col-6 col-md-4 col-lg-3">
+        <div class="card market-card shadow-sm">
+            <div class="card-body p-3">
+                <div class="small text-muted">贵州茅台</div>
+                <div class="index-value text-dark">¥1,720.00</div>
+                <div class="mt-1">
+                    <span class="badge bg-success">+2.10%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新闻 + AI 研判 双栏 -->
+<div class="row g-4">
+    <!-- 最新财经新闻 -->
+    <div class="col-lg-7">
+        <h5 class="mb-3 fw-bold border-bottom pb-2">最新财经新闻</h5>
+        <div class="list-group list-group-flush">
+            <a href="/news/1" class="list-group-item list-group-item-action py-2">
+                <div class="d-flex justify-content-between">
+                    <strong class="me-2">央行今日开展1000亿元逆回购操作</strong>
+                    <small class="text-muted">10:30</small>
+                </div>
+                <small class="text-muted">维护银行体系流动性合理充裕，利率持平于1.80%。</small>
+            </a>
+            <a href="/news/2" class="list-group-item list-group-item-action py-2">
+                <div class="d-flex justify-content-between">
+                    <strong class="me-2">美联储主席暗示年内或降息</strong>
+                    <small class="text-muted">09:15</small>
+                </div>
+                <small class="text-muted">称通胀压力缓解，市场预期9月或启动降息周期。</small>
+            </a>
+            <a href="/news/3" class="list-group-item list-group-item-action py-2">
+                <div class="d-flex justify-content-between">
+                    <strong class="me-2">A股半导体板块集体大涨</strong>
+                    <small class="text-muted">08:45</small>
+                </div>
+                <small class="text-muted">受国产替代政策利好刺激，多只个股涨停。</small>
+            </a>
+        </div>
+    </div>
+
+    <!-- AI 市场研判 -->
+    <div class="col-lg-5">
+        <h5 class="mb-3 fw-bold border-bottom pb-2">AI 市场研判 <small class="text-muted">(DeepSeek)</small></h5>
+        <div class="ai-insight">
+            <p class="mb-0 small">
+                当前全球市场呈现分化走势：美股在科技股带动下企稳反弹，A股受政策预期提振温和放量。
+                人民币汇率保持稳定，黄金因地缘风险溢价维持高位。建议关注高股息蓝筹与AI产业链。
+                短期波动或加剧，宜控制仓位，避免追高。
+            </p>
+        </div>
+        <div class="mt-3 text-end">
+            <small class="text-muted">更新于：2025-09-27 16:30</small>
+        </div>
+    </div>
+</div>
+{% endblock %}

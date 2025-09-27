@@ -1,0 +1,95 @@
+<!-- app/templates/base.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}一市信息平台{% endblock %}</title>
+    <!-- Bootstrap 5 CSS (使用 CDN，无需本地文件) -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css">
+    <!-- 自定义 CSS（可选） -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Header / Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-graph-up"></i> 一市信息平台
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.url.path == '/' %}active{% endif %}" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'market' in request.url.path %}active{% endif %}" href="/market">市场行情</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'news' in request.url.path %}active{% endif %}" href="/news">财经新闻</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'analysis' in request.url.path %}active{% endif %}" href="/analysis">数据分析</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'report' in request.url.path %}active{% endif %}" href="/report">研究报告</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/profile"><i class="bi bi-person"></i> 个人中心</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> 退出登录</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right"></i> 登录</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container py-4 flex-grow-1">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light border-top mt-auto py-3">
+        <div class="container text-center text-muted">
+            <p class="mb-0">
+                &copy; 2025 金融信息平台 |
+                <a href="/privacy" class="text-decoration-none">隐私政策</a> |
+                <a href="/contact" class="text-decoration-none">联系我们</a>
+            </p>
+            <p class="mb-0 small">数据仅供参考，不构成投资建议。</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 全局 JS（如登出逻辑） -->
+    <script>
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                // 你可以在这里调用 /api/logout 或直接跳转
+                window.location.href = '/logout';
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
