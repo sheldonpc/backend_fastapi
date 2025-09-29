@@ -1,0 +1,398 @@
+import asyncio
+import logging
+from datetime import datetime, time, timezone, timedelta
+from typing import Optional
+from zoneinfo import ZoneInfo
+
+import requests
+
+from app.services.market_data_service import fetch_realtime_market_data, fetch_realtime_usa_market_data, \
+    fetch_fx_market_data, fetch_stock_hot_follow_market_data, fetch_minute_cn_market_data, fetch_minute_usa_market_data, \
+    fetch_vix_index, fetch_rise_down_index, fetch_daily_market_data, \
+    fetch_cn_us_bond_market_data, fetch_hurun_rank_market_data, fetch_global_market_data, \
+    fetch_eastmoney_history_news_market_data, fetch_fx_market_history_data, fetch_oil_data, fetch_gold_data, \
+    fetch_silver_data, fetch_global_market_data2, fetch_global_market_data3, fetch_global_market_data4, \
+    fetch_minute_hk_market_data
+
+logger = logging.getLogger(__name__)
+
+class NewMarketScheduler:
+    """市场数据定时调度器"""
+    def __init__(self):
+        self.running = False
+        self.tasks: list[asyncio.Task] = []
+        self.force_run_once = False
+
+    def is_cn_trading_time(self):
+        cn_time = datetime.now(ZoneInfo("Asia/Shanghai"))
+        if cn_time.weekday() < 5 and time(9, 00) <= cn_time.time() <= time(16, 0):
+            return True
+        else:
+            return False
+
+    def is_usa_trading_time(self):
+        usa_time = datetime.now(ZoneInfo("America/New_York"))
+        if usa_time.weekday() < 5 and time(9, 00) <= usa_time.time() <= time(16, 0):
+            return True
+        else:
+            return False
+
+    def is_cn_trading_day(self) -> bool:
+        return datetime.now(ZoneInfo("Asia/Shanghai")).weekday() < 5
+
+    def is_usa_trading_day(self) -> bool:
+        return datetime.now(ZoneInfo("America/New_York")).weekday() < 5
+
+    async def run_update_cn_data(self):
+        logger.info("开始更新中国市场数据")
+        try:
+            data = await fetch_realtime_market_data()
+            logger.info("success: 中国市场指数数据更新成功")
+        except Exception as e:
+            logging.error(f"error: 中国市场指数数据更新失败: {e}")
+
+
+    async def run_update_usa_data(self):
+        logger.info("开始更新美国市场数据")
+        try:
+            data = await fetch_realtime_usa_market_data()
+            logger.info("success: 美国市场数据更新成功")
+        except Exception as e:
+            logging.error(f"error: 美国市场数据更新失败: {e}")
+
+    async def update_fx_market_data(self):
+        logger.info("开始更新外汇数据")
+        try:
+            data = await fetch_fx_market_data()
+            logger.info("success: 外汇数据更新成功")
+        except Exception as e:
+            logging.error(f"error: 外汇数据更新失败: {e}")
+
+    async def update_hot_stock(self):
+        logger.info("开始更新热门股票数据")
+        try:
+            data = await fetch_stock_hot_follow_market_data()
+            logger.info("success: 热门股票数据更新成功")
+        except Exception as e:
+            logging.error(f"error: 热门股票更新失败: {e}")
+
+    # 接口有问题
+    async def update_minute_level_cn_data(self):
+        logger.info("开始更新中国分时数据")
+        try:
+            data = await fetch_minute_cn_market_data()
+            logger.info("success: 中国分时数据更新成功")
+        except Exception as e:
+            logging.error(f"error: 中国分时数据更新失败: {e}")
+
+    async def update_minute_level_hk_data(self):
+        logger.info("开始更新香港分时数据")
+        try:
+            data = await fetch_minute_hk_market_data()
+            logger.info("success: 香港分时数据更新成功")
+        except Exception as e:
+            logging.error(f"error: 香港分时数据更新失败: {e}")
+
+    async def update_minute_level_usa_data(self):
+        logger.info("开始更新美国分时数据")
+        try:
+            data = await fetch_minute_usa_market_data()
+            logger.info("success: 美国分时数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 美国分时数据更新失败: {e}")
+
+    async def update_oil_data(self):
+        logger.info("开始更新石油数据")
+        try:
+            data = await fetch_oil_data()
+            logger.info("success: 石油数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 石油数据更新失败: {e}")
+
+    async def update_gold_data(self):
+        logger.info("开始更新黄金数据")
+        try:
+            data = await fetch_gold_data()
+            logger.info("success: 黄金数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 黄金数据更新失败: {e}")
+
+    async def update_silver_data(self):
+        logger.info("开始更新白银数据")
+        try:
+            data = await fetch_silver_data()
+            logger.info("success: 白银数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 白银数据更新失败: {e}")
+
+    async def update_vix_index(self):
+        logger.info("开始更新VIX指数数据")
+        try:
+            # fetch_vix_index
+            data = await fetch_vix_index()
+            logger.info("success: VIX指数数据更新成功")
+        except Exception as e:
+            logging.info(f"error: VIX指数数据更新失败: {e}")
+
+    async def update_rise_down_data(self):
+        logger.info("开始更新涨跌数据")
+        try:
+            data = await fetch_rise_down_index()
+            logger.info("success: 涨跌数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 涨跌数据更新失败: {e}")
+
+    # 获取历史数据 sz399001, sh000001, sz399006, hsi, SP500, NASDAQ, DJ, gold, silver, Pt
+    async def update_index_history_data(self):
+        logger.info("开始更新历史数据")
+        try:
+            data = await fetch_daily_market_data()
+            logger.info("success: 历史数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 历史数据更新失败: {e}")
+
+    async def update_fx_history_data(self):
+        logger.info("开始更新外汇历史数据")
+        try:
+            data = await fetch_fx_market_history_data()
+            logger.info("success:外汇历史数据更新成功")
+        except Exception as e:
+            logging.info(f"error:外汇历史数据更新失败: {e}")
+
+    async def update_bond_data(self):
+        logger.info("开始更新债券数据")
+        try:
+            data = await fetch_cn_us_bond_market_data()
+            logger.info("success: 债券数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 债券数据更新失败: {e}")
+
+    # async def update_global_news(self):
+    #     logger.info("开始更新全球新闻数据")
+    #     try:
+    #         data = await fetch_global_market_data()
+    #         logger.info("success: 全球新闻数据更新成功")
+    #     except Exception as e:
+    #         logging.info(f"error: 全球新闻数据更新失败: {e}")
+
+    async def update_eastmoney_news(self):
+        logger.info("开始更新东方财富新闻数据")
+        try:
+            data = await fetch_eastmoney_history_news_market_data()
+            logger.info("success: 东方财富新闻数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 东方财富新闻数据更新失败: {e}")
+
+    async def update_news_one(self):
+        logger.info("开始更新新闻1数据")
+        try:
+            data = await fetch_global_market_data()
+            logger.info("success: 新闻1数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 新闻1数据更新失败: {e}")
+
+    async def update_news_two(self):
+        logger.info("开始更新新闻2数据")
+        try:
+            data = await fetch_global_market_data2()
+            logger.info("success: 新闻2数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 新闻2数据更新失败: {e}")
+
+    async def update_news_three(self):
+        logger.info("开始更新新闻3数据")
+        try:
+            data = await fetch_global_market_data3()
+            logger.info("success: 新闻3数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 新闻3数据更新失败: {e}")
+
+    async def update_news_four(self):
+        logger.info("开始更新新闻2数据")
+        try:
+            data = await fetch_global_market_data4()
+            logger.info("success: 新闻4数据更新成功")
+        except Exception as e:
+            logging.info(f"error: 新闻4数据更新失败: {e}")
+
+    async def yearly_update_huren_rank(self):
+        logger.info("开始更新胡润排名数据")
+        try:
+            data = await fetch_hurun_rank_market_data()
+            logger.info("success:胡润排名数据更新成功")
+        except Exception as e:
+            logging.info(f"error:胡润排名数据更新失败: {e}")
+
+
+    async def run_cn_5min_tasks(self):
+        logger.info("开始执行中国5分钟级任务")
+        try:
+            await self.run_update_cn_data()
+            await self.update_fx_market_data()
+            await self.update_hot_stock()
+            await self.update_oil_data()
+            await self.update_gold_data()
+            await self.update_silver_data()
+            await self.update_vix_index()
+            await self.update_rise_down_data()
+        except Exception as e:
+            logging.info(e)
+
+    async def run_usa_5min_tasks(self):
+        logger.info("开始执行美国5分钟级任务")
+        try:
+            await self.run_update_usa_data()
+        except Exception as e:
+            logging.info(e)
+
+    async def run_cn_daily_tasks(self):
+        logger.info("开始执行中国日级任务")
+        try:
+            await self.update_index_history_data()
+            await self.update_fx_history_data()
+            await self.update_bond_data()
+            # await self.update_global_news()
+            await self.update_eastmoney_news()
+            await self.update_news_one()
+            await self.update_news_two()
+            await self.update_news_three()
+            await self.update_news_four()
+        except Exception as e:
+            logging.info(e)
+
+    async def run_hourly_tasks(self):
+        logger.info("开始执行小时任务")
+        try:
+            await self.update_minute_level_cn_data()
+            await self.update_minute_level_usa_data()
+            await self.update_minute_level_hk_data()
+        except Exception as e:
+            logging.error(e)
+
+
+    async def _scheduler_loop_5min_cn(self):
+        while self.running:
+            if self.is_cn_trading_time():
+                logger.info("CN交易中，执行5分钟任务")
+                await self.run_cn_5min_tasks()
+            else:
+                logger.debug("非CN交易时间，跳过5分钟任务")
+            await asyncio.sleep(300)
+
+    async def _scheduler_loop_daily_cn(self):
+        daily_times = [time(10, 0), time(18, 0)]
+        while self.running:
+            now = datetime.now(ZoneInfo("Asia/Shanghai"))
+            today = now.date()
+            next_run = None
+
+            for t in daily_times:
+                candidate = datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai"))
+                if candidate > now:
+                    if next_run is None or candidate < next_run:
+                        next_run = candidate
+
+            if next_run is None:
+                tomorrow = today + timedelta(days=1)
+                first_time = daily_times[0]
+                next_run = datetime.combine(tomorrow, first_time, tzinfo=ZoneInfo("Asia/Shanghai"))
+
+            sleep_time = (next_run - now).total_seconds()
+            logger.info(f"CN每日任务将在{sleep_time:.0f}秒后开始执行")
+            await asyncio.sleep(sleep_time)
+
+            if not self.running:
+                break
+            if self.is_cn_trading_time():
+                logger.info("CN交易中，执行每日任务")
+                await self.run_cn_daily_tasks()
+            else:
+                logger.error("今天非中国交易日，跳过每日任务")
+
+
+    async def _scheduler_loop_5min_usa(self):
+        while self.running:
+            if self.is_usa_trading_time():
+                logger.info("当前在US交易时间内，执行数据获取")
+                await self.run_usa_5min_tasks()
+            else:
+                logger.error("当前不在交易时间内，跳过执行")
+            await asyncio.sleep(300)
+
+    async def _scheduler_loop_hourly(self):
+        daily_times = [
+            time(10, 0),
+            time(11, 0),
+            time(12, 0),
+            time(13, 0),
+            time(14, 0),
+            time(15, 0),
+            time(16, 0),
+            time(17, 0),
+            time(18, 0)
+        ]
+        while self.running:
+            now = datetime.now(ZoneInfo("Asia/Shanghai"))
+            today = now.date()
+
+            # 找出今天尚未执行的最近时间点
+            next_run = None
+            for t in daily_times:
+                candidate = datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai"))
+                if candidate > now:
+                    if next_run is None or candidate < next_run:
+                        next_run = candidate
+
+            # 如果今天没有更多时间点，则安排到明天第一个时间点
+            if next_run is None:
+                tomorrow = today + timedelta(days=1)
+                first_time = daily_times[0]
+                next_run = datetime.combine(tomorrow, first_time, tzinfo=ZoneInfo("Asia/Shanghai"))
+
+            sleep_sec = (next_run - now).total_seconds()
+            logger.info(f"小时任务将在 {sleep_sec:.0f} 秒后执行（{next_run.strftime('%Y-%m-%d %H:%M')}）")
+            await asyncio.sleep(sleep_sec)
+
+            # 执行前再次检查是否仍在运行，且是交易日
+            if not self.running:
+                break
+            if self.is_cn_trading_day():
+                await self.run_hourly_tasks()
+            else:
+                logger.error("今天非CN交易日，跳过小时任务")
+
+    async def start_scheduler(self, force_run_once: bool = False):
+        """启动调度器"""
+        if self.running:
+            logger.warning("调度器已在运行中")
+            return
+
+        self.running = True
+        self.force_run_once = force_run_once
+        logger.info("市场数据调度器启动")
+
+        # 创建后台任务
+        self.tasks = [
+            asyncio.create_task(self._scheduler_loop_5min_cn()),
+            asyncio.create_task(self._scheduler_loop_daily_cn()),
+            asyncio.create_task(self._scheduler_loop_5min_usa()),
+            asyncio.create_task(self._scheduler_loop_hourly()),
+        ]
+
+    async def stop_scheduler(self):
+        """停止调度器"""
+        if not self.running:
+            logger.warning("调度器未运行")
+            return
+
+        self.running = False
+        for task in self.tasks:
+            task.cancel()
+        await asyncio.gather(*self.tasks, return_exceptions=True)
+        logger.info("✅ 调度器已停止")
+
+
+
+if __name__ == "__main__":
+    scheduler = NewMarketScheduler()
+    print(scheduler.is_cn_trading_time())

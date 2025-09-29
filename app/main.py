@@ -8,24 +8,27 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData
 from app.utils.logger import init_logger, logger
 from app.database import init_db, close_db
 from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
-    financial, market
+    financial, market, api_fetch_data, api_index, root
 from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler
 from app.core.templates import templates
 from app.services.scheduler import market_scheduler
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_logger()
     await init_db()
 
-    try:
-        await market_scheduler.start_scheduler()
-        logger.info("启动市场数据调度器")
-    except Exception as e:
-        logger.error(f"启动市场数据调度器出错: {e}")
+    # try:
+    #     await market_scheduler.start_scheduler()
+    #     logger.info("启动市场数据调度器")
+    # except Exception as e:
+    #     logger.error(f"启动市场数据调度器出错: {e}")
 
     yield
 
@@ -74,7 +77,9 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, all_exception_handler)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+app.include_router(root.router)
 app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(articles.router)
@@ -87,22 +92,12 @@ app.include_router(api_articles.router)
 # app.include_router(financial.router)
 app.include_router(market.router)
 app.include_router(api_config.router)
+app.include_router(api_fetch_data.router)
+app.include_router(api_index.router)
 # deprecated
 # @app.on_event("startup")
 # async def startup():
 #     await init_db()
 
 # templates = Jinja2Templates(directory="app/templates")
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-@app.get("/")
-async def index(request: Request):
-    return templates.TemplateResponse("public/index.html", {"request": request})
-
-@app.get("/login")
-async def login_page(request: Request):
-    return templates.TemplateResponse("admin/login.html", {"request": request})
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}

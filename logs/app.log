@@ -1126,3 +1126,431 @@
 2025-09-26 17:29:12,444 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login?next=%2Fadmin%2F completed in 0.001s
 2025-09-26 17:29:12,450 - app.utils.logger - WARNING - HTTPException: Invalid token at GET-http://127.0.0.1:8000/admin/verify
 2025-09-26 17:29:12,450 - app.utils.logger - INFO - GET http://127.0.0.1:8000/admin/verify completed in 0.001s
+2025-09-26 18:21:18,060 - app.utils.logger - INFO - Logger initialized
+2025-09-26 18:21:19,925 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0025s
+2025-09-26 18:21:19,928 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-26 18:21:20,148 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-26 18:21:20,148 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.001s
+2025-09-26 18:25:36,639 - app.utils.logger - INFO - Logger initialized
+2025-09-26 18:25:38,289 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/
+2025-09-26 18:26:05,821 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0056s
+2025-09-26 18:26:11,127 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/market
+2025-09-26 18:26:11,128 - app.utils.logger - INFO - GET http://127.0.0.1:8000/market completed in 0.0s
+2025-09-26 18:26:28,623 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 18:26:30,649 - app.utils.logger - INFO - GET http://127.0.0.1:8000/login completed in 0.003s
+2025-09-26 18:49:06,309 - app.utils.logger - INFO - Logger initialized
+2025-09-26 18:49:08,414 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0065s
+2025-09-26 18:49:08,416 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0012s
+2025-09-26 18:49:50,097 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0047s
+2025-09-26 18:49:55,321 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 18:50:53,219 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0045s
+2025-09-26 18:50:54,210 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-26 19:01:12,359 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0058s
+2025-09-26 19:01:13,838 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:01:16,690 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:01:17,254 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:01:54,080 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0031s
+2025-09-26 19:01:54,645 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0015s
+2025-09-26 19:01:54,826 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-26 19:01:55,029 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:02:11,307 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0055s
+2025-09-26 19:02:12,163 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-26 19:02:16,355 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-26 19:02:16,356 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-26 19:03:10,373 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/
+2025-09-26 19:03:10,386 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-26 19:03:10,386 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-26 19:03:22,041 - app.utils.logger - INFO - Logger initialized
+2025-09-26 19:03:23,240 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/
+2025-09-26 19:03:23,250 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/
+2025-09-26 19:03:31,462 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-26 19:04:04,299 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-26 19:04:45,505 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0036s
+2025-09-26 19:04:46,425 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:04:47,082 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:04:52,037 - app.utils.logger - INFO - Logger initialized
+2025-09-26 19:04:53,660 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0075s
+2025-09-26 19:04:55,049 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-26 19:04:57,309 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-26 19:04:57,309 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-26 19:05:10,637 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.002s
+2025-09-26 19:05:10,651 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-26 19:05:10,651 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-26 19:05:11,534 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:05:11,545 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-26 19:05:11,546 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-26 19:05:25,242 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-26 19:05:43,574 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-26 19:05:43,586 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-26 19:05:43,586 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-26 19:05:46,365 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-26 19:05:46,366 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.0025s
+2025-09-26 19:06:27,680 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.002s
+2025-09-26 19:07:10,336 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0045s
+2025-09-26 19:07:14,639 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-26 19:07:14,639 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-26 19:09:51,988 - app.utils.logger - INFO - Logger initialized
+2025-09-26 19:09:53,605 - app.utils.logger - INFO - Logger initialized
+2025-09-27 16:41:21,295 - app.utils.logger - INFO - Logger initialized
+2025-09-27 16:41:21,363 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-27 16:41:24,365 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0089s
+2025-09-27 16:41:25,368 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-27 16:41:25,368 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.0005s
+2025-09-27 16:48:44,512 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.002s
+2025-09-27 16:48:53,613 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/news/1
+2025-09-27 16:48:53,614 - app.utils.logger - INFO - GET http://127.0.0.1:8000/news/1 completed in 0.002s
+2025-09-27 16:53:22,958 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.007s
+2025-09-27 16:53:27,162 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.002s
+2025-09-27 16:53:27,694 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0006s
+2025-09-27 16:53:28,660 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.002s
+2025-09-27 16:54:02,839 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-27 16:56:58,645 - app.utils.logger - INFO - Logger initialized
+2025-09-27 16:56:58,681 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-27 16:57:00,182 - app.utils.logger - INFO - Logger initialized
+2025-09-27 16:57:00,216 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-28 23:26:18,158 - app.utils.logger - INFO - Logger initialized
+2025-09-28 23:26:18,202 - app.utils.logger - INFO - 启动市场数据调度器
+2025-09-28 23:26:19,988 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.008s
+2025-09-28 23:26:19,992 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-28 23:27:15,605 - app.utils.logger - INFO - Logger initialized
+2025-09-28 23:27:18,289 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.007s
+2025-09-28 23:27:18,290 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-28 23:27:22,339 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.001s
+2025-09-28 23:27:38,863 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-28 23:27:40,304 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0414s
+2025-09-28 23:28:03,984 - app.utils.logger - INFO - POST http://127.0.0.1:8000/fetch/market-data completed in 0.0s
+2025-09-28 23:29:28,315 - app.utils.logger - INFO - Logger initialized
+2025-09-28 23:29:37,174 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-28 23:29:37,360 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.034s
+2025-09-28 23:29:39,956 - app.utils.logger - INFO - POST http://127.0.0.1:8000/fetch/market-data completed in 0.0s
+2025-09-28 23:30:58,618 - app.utils.logger - INFO - POST http://127.0.0.1:8000/fetch/fx-data completed in 0.0s
+2025-09-29 09:26:59,636 - app.utils.logger - INFO - Logger initialized
+2025-09-29 09:27:11,650 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0181s
+2025-09-29 09:27:15,108 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0015s
+2025-09-29 09:27:15,276 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0881s
+2025-09-29 09:30:00,921 - app.utils.logger - INFO - Logger initialized
+2025-09-29 09:30:10,210 - app.utils.logger - INFO - POST http://127.0.0.1:8000/fetch/fx-data completed in 0.0s
+2025-09-29 09:30:15,301 - app.utils.logger - WARNING - Unhandled exception at POST-http://127.0.0.1:8000/fetch/fx-data
+2025-09-29 09:30:33,338 - app.utils.logger - INFO - POST http://127.0.0.1:8000/fetch/fx-data completed in 0.001s
+2025-09-29 09:40:08,471 - app.utils.logger - INFO - Logger initialized
+2025-09-29 09:40:13,334 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-29 09:40:13,507 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0345s
+2025-09-29 09:40:22,018 - app.utils.logger - INFO - POST http://127.0.0.1:8000/fetch/fx-data completed in 0.0014s
+2025-09-29 09:43:42,172 - app.utils.logger - INFO - Logger initialized
+2025-09-29 09:43:45,435 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.008s
+2025-09-29 09:43:45,646 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-29 09:43:45,646 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.001s
+2025-09-29 09:59:34,963 - app.utils.logger - INFO - Logger initialized
+2025-09-29 09:59:36,407 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.009s
+2025-09-29 09:59:39,566 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/market/monitor
+2025-09-29 09:59:39,566 - app.utils.logger - INFO - GET http://127.0.0.1:8000/market/monitor completed in 0.0s
+2025-09-29 09:59:42,724 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 09:59:44,117 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favorites
+2025-09-29 09:59:44,117 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favorites completed in 0.001s
+2025-09-29 09:59:47,646 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/alerts
+2025-09-29 09:59:47,646 - app.utils.logger - INFO - GET http://127.0.0.1:8000/alerts completed in 0.0s
+2025-09-29 09:59:49,822 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/calculator
+2025-09-29 09:59:49,822 - app.utils.logger - INFO - GET http://127.0.0.1:8000/calculator completed in 0.001s
+2025-09-29 09:59:52,945 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/market/index
+2025-09-29 09:59:52,946 - app.utils.logger - INFO - GET http://127.0.0.1:8000/market/index completed in 0.001s
+2025-09-29 10:00:32,790 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/news/1
+2025-09-29 10:00:32,790 - app.utils.logger - INFO - GET http://127.0.0.1:8000/news/1 completed in 0.0015s
+2025-09-29 10:01:20,654 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.006s
+2025-09-29 10:01:21,724 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:01:51,701 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.007s
+2025-09-29 10:02:03,072 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:02:03,073 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:02:34,626 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.005s
+2025-09-29 10:02:34,643 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:02:34,644 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:02:45,100 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.005s
+2025-09-29 10:02:45,116 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:02:45,116 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:03:40,182 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0168s
+2025-09-29 10:03:40,202 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:03:40,203 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.002s
+2025-09-29 10:03:48,269 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0024s
+2025-09-29 10:03:48,284 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:03:48,284 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0004s
+2025-09-29 10:03:49,702 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:03:49,720 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:03:49,720 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:08:25,928 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0049s
+2025-09-29 10:08:25,949 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:25,949 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:08:34,078 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/news
+2025-09-29 10:08:34,078 - app.utils.logger - INFO - GET http://127.0.0.1:8000/news completed in 0.0005s
+2025-09-29 10:08:34,119 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:34,120 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:08:35,042 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:35,042 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:08:35,060 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:35,061 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:08:50,030 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:08:50,042 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:50,042 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0003s
+2025-09-29 10:08:53,566 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:53,567 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:08:53,576 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:53,576 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:08:54,036 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:08:54,053 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:54,053 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:08:56,897 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:56,897 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:08:56,902 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:56,903 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:08:57,412 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:08:57,421 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:08:57,421 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:09:02,481 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:09:02,497 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:09:02,497 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:09:22,802 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:09:22,827 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:09:22,828 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:09:24,385 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:09:24,400 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:09:24,401 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0013s
+2025-09-29 10:10:37,259 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:10:37,274 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:37,274 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0003s
+2025-09-29 10:10:38,800 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0007s
+2025-09-29 10:10:38,812 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:38,812 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:10:39,839 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:10:39,850 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:39,850 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:10:40,902 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:10:40,915 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:40,915 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:10:41,925 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:10:42,007 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:42,008 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:10:42,918 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:10:42,930 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:42,931 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:10:43,753 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:10:43,765 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:43,766 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:10:44,757 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:10:44,766 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:44,766 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:10:45,704 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:10:45,714 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:45,715 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:10:47,699 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:10:47,710 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:47,710 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:10:48,504 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:10:48,516 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:10:48,516 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:11:15,628 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:11:15,648 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:15,648 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:11:19,789 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:11:19,804 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:19,804 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:11:20,696 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:11:20,762 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:20,762 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:11:31,597 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:11:31,617 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:31,617 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:11:32,614 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:11:32,626 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:32,626 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:11:33,539 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:11:33,552 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:33,553 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:11:47,009 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0037s
+2025-09-29 10:11:47,024 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:47,024 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0015s
+2025-09-29 10:11:47,760 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:11:47,774 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:11:47,774 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:11:50,427 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:12:14,666 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:12:59,136 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:13:05,027 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:13:39,328 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:14:04,083 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:14:10,260 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:14:37,974 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:14:55,867 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0035s
+2025-09-29 10:15:13,890 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0037s
+2025-09-29 10:15:16,204 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:15:51,483 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:16:01,257 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:16:01,257 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:16:18,151 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:16:18,164 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:16:18,164 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:16:21,927 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:16:21,955 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:16:21,956 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:16:27,921 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 10:16:27,938 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:16:27,939 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:16:56,197 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0037s
+2025-09-29 10:16:56,213 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:16:56,213 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:16:59,062 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 10:16:59,079 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:16:59,079 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:17:01,012 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0015s
+2025-09-29 10:17:01,024 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:17:01,024 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0005s
+2025-09-29 10:17:32,200 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0049s
+2025-09-29 10:17:32,221 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:17:32,222 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:18:37,264 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.003s
+2025-09-29 10:18:37,291 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:18:37,291 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 10:19:19,054 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.005s
+2025-09-29 10:19:19,076 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 10:19:19,076 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 10:20:24,155 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:20:33,377 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0037s
+2025-09-29 10:24:10,284 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:26:25,133 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0035s
+2025-09-29 10:27:25,272 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0097s
+2025-09-29 10:28:25,791 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0107s
+2025-09-29 10:28:48,934 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0117s
+2025-09-29 10:29:05,881 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0118s
+2025-09-29 10:29:40,193 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.003s
+2025-09-29 10:30:51,760 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:31:46,781 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.006s
+2025-09-29 10:32:08,101 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 10:58:12,855 - app.utils.logger - INFO - Logger initialized
+2025-09-29 10:58:39,508 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0095s
+2025-09-29 10:58:39,737 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-29 10:58:39,737 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.001s
+2025-09-29 10:59:24,780 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 11:01:41,358 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:01:47,057 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-29 11:01:47,299 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0943s
+2025-09-29 11:02:32,374 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:02:32,565 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-29 11:02:32,662 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.034s
+2025-09-29 11:02:44,190 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/index/main_market
+2025-09-29 11:03:09,328 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:03:11,009 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-29 11:03:11,118 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0375s
+2025-09-29 11:03:13,987 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.0361s
+2025-09-29 11:08:09,505 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:08:12,056 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:09:37,368 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:09:42,292 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/index/main_market
+2025-09-29 11:09:45,034 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:09:50,745 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:09:53,574 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.0453s
+2025-09-29 11:14:50,522 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:14:52,983 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:19:50,507 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:47:07,931 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.012s
+2025-09-29 11:47:07,946 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 11:47:08,195 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-29 11:47:08,196 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.001s
+2025-09-29 11:48:26,121 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:48:28,725 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:48:33,670 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:48:37,612 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.001s
+2025-09-29 11:48:37,724 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.034s
+2025-09-29 11:48:46,597 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/index/main_market
+2025-09-29 11:49:13,296 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:49:16,629 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.001s
+2025-09-29 11:49:16,733 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0351s
+2025-09-29 11:49:19,686 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.0494s
+2025-09-29 11:54:13,732 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:55:04,932 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:55:07,873 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-29 11:55:08,050 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0355s
+2025-09-29 11:55:10,374 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.0103s
+2025-09-29 11:55:13,255 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:55:20,257 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:55:24,341 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.0s
+2025-09-29 11:55:24,461 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0335s
+2025-09-29 11:55:27,290 - app.utils.logger - WARNING - Unhandled exception at GET-http://127.0.0.1:8000/index/main_market
+2025-09-29 11:56:18,508 - app.utils.logger - INFO - Logger initialized
+2025-09-29 11:56:20,383 - app.utils.logger - INFO - GET http://127.0.0.1:8000/docs completed in 0.001s
+2025-09-29 11:56:20,483 - app.utils.logger - INFO - GET http://127.0.0.1:8000/openapi.json completed in 0.0335s
+2025-09-29 11:56:23,200 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.009s
+2025-09-29 11:57:06,067 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:57:06,067 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0012s
+2025-09-29 11:58:14,435 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.01s
+2025-09-29 11:58:14,449 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:58:14,450 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 11:59:15,551 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 11:59:15,564 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:59:15,564 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 11:59:18,543 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/news/1
+2025-09-29 11:59:18,544 - app.utils.logger - INFO - GET http://127.0.0.1:8000/news/1 completed in 0.001s
+2025-09-29 11:59:18,568 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:59:18,569 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 11:59:19,961 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:59:19,962 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 11:59:20,000 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:59:20,002 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0295s
+2025-09-29 11:59:22,181 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/news/1
+2025-09-29 11:59:22,181 - app.utils.logger - INFO - GET http://127.0.0.1:8000/news/1 completed in 0.001s
+2025-09-29 11:59:22,205 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:59:22,205 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 11:59:23,229 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:59:23,229 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 11:59:23,246 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 11:59:23,246 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 12:00:33,446 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 12:00:33,460 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:00:33,460 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 12:00:58,003 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 12:00:58,017 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:00:58,017 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 12:01:08,736 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.004s
+2025-09-29 12:01:08,753 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:01:08,753 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 12:06:18,629 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:06:21,252 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:11:21,727 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:11:25,083 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:12:22,941 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:14:09,544 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:14:12,887 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.011s
+2025-09-29 12:14:12,889 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0s
+2025-09-29 12:14:14,633 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:14:14,633 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 12:16:37,514 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:16:39,514 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:16:39,514 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.0s
+2025-09-29 12:16:44,234 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.021s
+2025-09-29 12:16:44,250 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:16:44,250 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 12:16:46,046 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.1966s
+2025-09-29 12:16:49,390 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.002s
+2025-09-29 12:16:49,411 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:16:49,412 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 12:16:50,274 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.008s
+2025-09-29 12:17:34,318 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 12:17:35,259 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.004s
+2025-09-29 12:17:54,759 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:17:55,741 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.011s
+2025-09-29 12:17:55,744 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.001s
+2025-09-29 12:17:56,648 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.0534s
+2025-09-29 12:17:57,192 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.005s
+2025-09-29 12:20:07,783 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:20:18,447 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.01s
+2025-09-29 12:20:19,951 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.0412s
+2025-09-29 12:20:19,971 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/favicon.ico
+2025-09-29 12:20:19,971 - app.utils.logger - INFO - GET http://127.0.0.1:8000/favicon.ico completed in 0.0s
+2025-09-29 12:20:20,012 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:20:20,012 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 12:21:14,394 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0048s
+2025-09-29 12:21:14,411 - app.utils.logger - WARNING - HTTPException: Not Found at GET-http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json
+2025-09-29 12:21:14,411 - app.utils.logger - INFO - GET http://127.0.0.1:8000/.well-known/appspecific/com.chrome.devtools.json completed in 0.001s
+2025-09-29 12:21:15,220 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.004s
+2025-09-29 12:30:07,849 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:38:48,652 - app.utils.logger - INFO - Logger initialized
+2025-09-29 12:38:51,854 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.0661s
+2025-09-29 12:38:51,858 - app.utils.logger - INFO - GET http://127.0.0.1:8000/ completed in 0.003s
+2025-09-29 12:38:53,305 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.003s
+2025-09-29 12:38:53,765 - app.utils.logger - INFO - GET http://127.0.0.1:8000/index/main_market completed in 0.0034s

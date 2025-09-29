@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
@@ -171,7 +172,75 @@ class IndexData(models.Model):
     class Meta:
         table = "index_data"
 
+def shanghai_now():
+    return datetime.now(tz=ZoneInfo("Asia/Shanghai"))
+
+# class GlobalIndexRealtimeData(models.Model):
+#     """中国指数实时数据"""
+#     id = fields.IntField(pk=True)
+#     code = fields.CharField(max_length=20)
+#     name = fields.CharField(max_length=50)
+#     price = fields.DecimalField(max_digits=15, decimal_places=4)
+#     change = fields.DecimalField(max_digits=15, decimal_places=4)
+#     change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
+#     open_today = fields.DecimalField(max_digits=15, decimal_places=4)
+#     highest = fields.DecimalField(max_digits=15, decimal_places=4)
+#     lowest = fields.DecimalField(max_digits=15, decimal_places=4)
+#     close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4)
+#     amplitude = fields.DecimalField(max_digits=15, decimal_places=4)
+#     timestamp = fields.DatetimeField()
+#     updated_at = fields.DatetimeField()
+#
+#     def __str__(self):
+#         return f"{self.name}({self.code}): {self.price}"
+#
+#     class Meta:
+#         table = "global_index_data"
+#         unique_together = ("code", "timestamp")
+
+
+class GlobalIndexLatest(models.Model):
+    """全球指数最新数据（主表）"""
+    id = fields.IntField(pk=True)
+    code = fields.CharField(max_length=20, unique=True)  # 唯一约束
+    name = fields.CharField(max_length=50)
+    price = fields.DecimalField(max_digits=15, decimal_places=4)
+    change = fields.DecimalField(max_digits=15, decimal_places=4)
+    change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
+    open_today = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    highest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    lowest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    amplitude = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    timestamp = fields.DatetimeField()   # 行情时间
+    updated_at = fields.DatetimeField(auto_now=True)
+
+    class Meta:
+        table = "global_index_latest"
+        unique_together = ("code", "timestamp")
+
+class GlobalIndexHistory(models.Model):
+    """全球指数历史数据（历史表）"""
+    id = fields.IntField(pk=True)
+    code = fields.CharField(max_length=20)
+    name = fields.CharField(max_length=50)
+    price = fields.DecimalField(max_digits=15, decimal_places=4)
+    change = fields.DecimalField(max_digits=15, decimal_places=4)
+    change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
+    open_today = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    highest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    lowest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    amplitude = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    timestamp = fields.DatetimeField()   # 行情时间
+    updated_at = fields.DatetimeField(auto_now=True)
+
+    class Meta:
+        table = "global_index_history"
+        unique_together = ("code", "timestamp")  # 避免重复
+
 # "代码", "名称", "最新价", "涨跌额", "涨跌幅", "开盘价", "最高价", "最低价", "昨收价", "振幅", "最新行情时间"
+# 废弃
 class CNIndexRealtimeData(models.Model):
     """中国指数实时数据"""
     id = fields.IntField(pk=True)
@@ -192,7 +261,7 @@ class CNIndexRealtimeData(models.Model):
 
     class Meta:
         table = "cn_index_data"
-
+# 废弃
 class USAIndexRealtimeData(models.Model):
     """美国指数实时数据"""
     id = fields.IntField(pk=True)
@@ -218,15 +287,43 @@ class RealTimeForeignCurrencyData(models.Model):
     """外汇实时数据"""
     id = fields.IntField(pk=True)
     code = fields.CharField(max_length=20)
-    buying_price = fields.DecimalField(max_digits=15, decimal_places=4)
-    selling_price = fields.DecimalField(max_digits=15, decimal_places=4)
+    buying_price = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    selling_price = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
 
-class HistoryForeignCurrencyData(models.Model):
-    """外汇历史数据"""
-    id = fields.IntField(pk=True)
-    code = fields.CharField(max_length=20)
-    date = fields.DateField()
-    price = fields.DecimalField(max_digits=15, decimal_places=4)
+class DailyFxSnapshot(models.Model):
+    """每日外汇快照（宽表）"""
+    date = fields.DateField(unique=True)  # 主键或唯一索引
+
+    usd = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    eur = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    jpy = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    hkd = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    gbp = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    aud = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    nzd = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    sgd = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    chf = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    cad = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    myr = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    rub = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    zar = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    krw = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    aed = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    qar = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    huf = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    pln = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    dkk = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    sek = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    nok = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    try_ = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # try 是关键字
+    php = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    thb = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+    mop = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+
+    class Meta:
+        table = "daily_fx_snapshot"
+        unique_together = ("date",)
+
 
 class HotStock(models.Model):
     """热门股票"""
@@ -236,14 +333,55 @@ class HotStock(models.Model):
     followers = fields.IntField()
     price = fields.DecimalField(max_digits=15, decimal_places=4)
 
+# 今开     最高     最低        成交量        成交额    时间戳
+# 代码      名称   最新价  涨跌额   涨跌幅     买入     卖出     昨收  \
 class MinuteLevelCNStockData(models.Model):
     """中国股票分钟级数据"""
     id = fields.IntField(pk=True)
+
     code = fields.CharField(max_length=20)
     name = fields.CharField(max_length=50)
+    price = fields.DecimalField(max_digits=15, decimal_places=4)
+    change = fields.DecimalField(max_digits=15, decimal_places=4)
+    change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
+    buying_price = fields.DecimalField(max_digits=15, decimal_places=4)
+    selling_price = fields.DecimalField(max_digits=15, decimal_places=4)
+    close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4)
+    open_today = fields.DecimalField(max_digits=15, decimal_places=4)
+    high = fields.DecimalField(max_digits=15, decimal_places=4)
+    low = fields.DecimalField(max_digits=15, decimal_places=4)
+    volume = fields.IntField()
+    amount = fields.DecimalField(max_digits=15, decimal_places=4)
+    timestamp = fields.DatetimeField()
+
+    class Meta:
+        table = "minute_level_cn_stock_data"
+        unique_together = ("code", "name")
+
+# 港股分钟级数据
+    #  序号   代码                     名称    最新价  涨跌额  涨跌幅  \
+    # 今开      最高      最低      昨收        成交量        成交额
+class MinuteLevelHKStockData(models.Model):
+    id = fields.IntField(pk=True)
+    code = fields.CharField(max_length=20)
+    name = fields.CharField(max_length=50)
+    price = fields.DecimalField(max_digits=15, decimal_places=4)
+    change = fields.DecimalField(max_digits=15, decimal_places=4)
+    change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
+    close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4)
+    open_today = fields.DecimalField(max_digits=15, decimal_places=4)
+    high = fields.DecimalField(max_digits=15, decimal_places=4)
+    low = fields.DecimalField(max_digits=15, decimal_places=4)
+    volume = fields.IntField()
+    amount = fields.DecimalField(max_digits=15, decimal_places=4)
+    timestamp = fields.DatetimeField()
+
+    class Meta:
+        table = "minute_level_hk_stock_data"
+        unique_together = ("code", "name")
 
 class CNSpecificStockData(models.Model):
-    """中国股票数据模型 (精确匹配15个字段)"""
+    """特定数据模型 (精确匹配15个字段)"""
 
     id = fields.IntField(pk=True)
 
@@ -324,7 +462,7 @@ class SpecificStockHistory(models.Model):
     def __str__(self):
         return f"{self.code} {self.date}"
 
-
+# 弃用
 class OilRealTimeData(models.Model):
     """原油实时数据模型（根据网页显示格式）"""
 
@@ -347,14 +485,13 @@ class OilRealTimeData(models.Model):
     low_price = fields.DecimalField(max_digits=10, decimal_places=3, description="最低价")
 
     # 时间信息
-    update_time = fields.DatetimeField(description="更新时间", auto_now=True)
+    update_time = fields.DatetimeField(description="行情更新时间")  # 不自动更新
 
     # 系统字段
     created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
 
     class Meta:
         table = "oil_real_time_data"
-        unique_together = [("symbol", "update_time")]
         indexes = [("symbol",)]
 
     def __str__(self):
@@ -379,7 +516,7 @@ class OilRealTimeData(models.Model):
     def is_wti(self) -> bool:
         """是否为WTI原油"""
         return self.symbol == "wti"
-
+# 弃用
 class GoldRealTimeData(models.Model):
     """黄金实时数据模型"""
 
@@ -456,8 +593,7 @@ class GoldRealTimeData(models.Model):
             sign = "+" if float(self.change_amount) > 0 else ""
             return f"{sign}{self.change_amount} ({sign}{self.change_percent}%)"
         return "N/A"
-
-
+# 弃用
 class SilverRealTimeData(models.Model):
     """白银实时数据模型"""
 
@@ -541,13 +677,57 @@ class SilverRealTimeData(models.Model):
         return self.change_amount is not None and float(self.change_amount) > 0
 
 
+class ForeignCommodityRealTimeData2(models.Model):
+    symbol = fields.CharField(max_length=20, unique=True, description="品种代码，如 CL GC FEF")
+    name = fields.CharField(max_length=100, description="品种名称")
+
+    current_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    rmb_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    change_amount = fields.DecimalField(max_digits=12, decimal_places=4)
+    change_percent = fields.DecimalField(max_digits=8, decimal_places=3)
+    open_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    high_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    low_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    settlement_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    open_interest = fields.BigIntField(default=0)
+    bid_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    ask_price = fields.DecimalField(max_digits=12, decimal_places=4)
+
+    update_time = fields.DatetimeField(auto_now=True)
+
+    class Meta:
+        table = "foreign_commodity_realtime_data_fix"
+
+
+class ForeignCommodityHistory2(models.Model):
+    id = fields.BigIntField(pk=True)
+    symbol = fields.CharField(max_length=20, description="品种代码，如 CL GC FEF")
+    name = fields.CharField(max_length=100, description="品种名称")
+
+    current_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    rmb_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    change_amount = fields.DecimalField(max_digits=12, decimal_places=4)
+    change_percent = fields.DecimalField(max_digits=8, decimal_places=3)
+    open_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    high_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    low_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    settlement_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    open_interest = fields.BigIntField(default=0)
+    bid_price = fields.DecimalField(max_digits=12, decimal_places=4)
+    ask_price = fields.DecimalField(max_digits=12, decimal_places=4)
+
+    timestamp = fields.DatetimeField(default=datetime.utcnow)
+
+    class Meta:
+        table = "foreign_commodity_history_fix"
+        indexes = [
+            ("symbol", "timestamp"),
+        ]
+
 class VIXRealTimeData(models.Model):
     """VIX恐慌指数实时数据模型"""
 
     id = fields.IntField(pk=True)
-
-    # 基础信息
-    symbol = fields.CharField(max_length=20, default="znb_VIX", description="指数代码")
     name = fields.CharField(max_length=50, default="VIX恐慌指数", description="指数名称")
 
     # 主要价格数据
@@ -562,12 +742,8 @@ class VIXRealTimeData(models.Model):
     low_price = fields.DecimalField(max_digits=8, decimal_places=4, description="最低价")
 
     # 时间信息
-    update_time = fields.CharField(max_length=10, description="更新时间")  # 04:14:00
-    data_date = fields.CharField(max_length=10, description="数据日期")  # 09-27
-
-    # 系统字段
-    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
-    updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
+    update_time = fields.DatetimeField()  # 04:14:00
+    api_date = fields.DatetimeField()
 
     class Meta:
         table = "vix_real_time_data"
@@ -575,56 +751,6 @@ class VIXRealTimeData(models.Model):
 
     def __str__(self):
         return f"VIX指数 {self.current_price}"
-
-    @property
-    def price_display(self) -> str:
-        """格式化价格显示"""
-        return f"{self.current_price}"
-
-    @property
-    def change_display(self) -> str:
-        """格式化涨跌显示"""
-        if self.change_amount is not None and self.change_percent is not None:
-            sign = "+" if float(self.change_amount) > 0 else ""
-            return f"{sign}{self.change_amount} ({sign}{self.change_percent}%)"
-        return "N/A"
-
-    @property
-    def is_positive(self) -> bool:
-        """是否上涨"""
-        return self.change_amount is not None and float(self.change_amount) > 0
-
-    @property
-    def is_negative(self) -> bool:
-        """是否下跌"""
-        return self.change_amount is not None and float(self.change_amount) < 0
-
-    @property
-    def full_date(self) -> str:
-        """完整日期格式"""
-        current_year = datetime.now().year
-        return f"{current_year}-{self.data_date}"
-
-    @property
-    def datetime_display(self) -> str:
-        """完整日期时间显示"""
-        return f"{self.full_date} {self.update_time}"
-
-    @property
-    def volatility_level(self) -> str:
-        """波动率水平判断"""
-        if self.current_price is None:
-            return "未知"
-
-        price = float(self.current_price)
-        if price < 15:
-            return "低波动"
-        elif price < 25:
-            return "正常波动"
-        elif price < 35:
-            return "高波动"
-        else:
-            return "极高波动"
 
 class MarketIndexData(models.Model):
     """主要指数涨跌数据模型"""
@@ -731,34 +857,6 @@ class MarketUpDownStats(models.Model):
         return round(strong_down / total * 100, 2) if total > 0 else 0
 
 
-class NewStockListing(models.Model):
-    """新股上市数据"""
-
-    id = fields.IntField(pk=True)
-
-    # 基础信息
-    stock_code = fields.CharField(max_length=10, description="股票代码")
-    stock_name = fields.CharField(max_length=50, description="股票名称")
-
-    # 发行数据
-    ipo_price = fields.DecimalField(max_digits=10, decimal_places=2, description="发行价")
-    ipo_pe = fields.DecimalField(max_digits=10, decimal_places=2, description="发行市盈率")
-    allot_max = fields.IntField(description="申购上限(股)")
-    lot_rate = fields.DecimalField(max_digits=10, decimal_places=4, description="中签率")
-    issue_vol = fields.BigIntField(description="发行总量")
-
-    # 时间信息
-    listing_date = fields.DateField(description="上市日期")
-    update_time = fields.DatetimeField(auto_now=True, description="更新时间")
-
-    class Meta:
-        table = "new_stock_listing"
-        ordering = ["-listing_date"]
-
-    def __str__(self):
-        return f"{self.stock_name}({self.stock_code})"
-
-
 class SH000001History(models.Model):
     """上证指数历史数据模型"""
 
@@ -827,7 +925,7 @@ class HSIHistory(models.Model):
     volume = fields.BigIntField(description="成交量")
 
     class Meta:
-        table = "sz399006_history"
+        table = "hsi_history"
         ordering = ["-date"]
 
     def __str__(self):
@@ -852,92 +950,92 @@ class SP500History(models.Model):
     def __str__(self):
         return f"标普500 {self.date} {self.close}"
 
-    class NDXHistory(models.Model):
-        """纳斯达克指数历史数据模型"""
+class NDXHistory(models.Model):
+    """纳斯达克指数历史数据模型"""
 
-        id = fields.IntField(pk=True)
-        date = fields.DateField(description="交易日期", unique=True)
-        code = fields.CharField(max_length=10, description="指数代码", default="NDX")
-        name = fields.CharField(max_length=50, description="指数名称", default="纳斯达克")
-        open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
-        close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
-        high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
-        low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
-        amplitude = fields.DecimalField(max_digits=10, decimal_places=3, description="振幅")
+    id = fields.IntField(pk=True)
+    date = fields.DateField(description="交易日期", unique=True)
+    code = fields.CharField(max_length=10, description="指数代码", default="NDX")
+    name = fields.CharField(max_length=50, description="指数名称", default="纳斯达克")
+    open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
+    close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
+    high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
+    low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
+    amplitude = fields.DecimalField(max_digits=10, decimal_places=3, description="振幅")
 
-        class Meta:
-            table = "ndx_history"
-            ordering = ["-date"]
+    class Meta:
+        table = "ndx_history"
+        ordering = ["-date"]
 
-        def __str__(self):
-            return f"纳斯达克 {self.date} {self.close}"
+    def __str__(self):
+        return f"纳斯达克 {self.date} {self.close}"
 
-    class DJIAHistory(models.Model):
-        """道琼斯指数历史数据模型"""
+class DJIAHistory(models.Model):
+    """道琼斯指数历史数据模型"""
 
-        id = fields.IntField(pk=True)
-        date = fields.DateField(description="交易日期", unique=True)
-        code = fields.CharField(max_length=10, description="指数代码", default="DJIA")
-        name = fields.CharField(max_length=50, description="指数名称", default="道琼斯")
-        open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
-        close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
-        high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
-        low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
-        amplitude = fields.DecimalField(max_digits=10, decimal_places=3, description="振幅")
+    id = fields.IntField(pk=True)
+    date = fields.DateField(description="交易日期", unique=True)
+    code = fields.CharField(max_length=10, description="指数代码", default="DJIA")
+    name = fields.CharField(max_length=50, description="指数名称", default="道琼斯")
+    open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
+    close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
+    high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
+    low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
+    amplitude = fields.DecimalField(max_digits=10, decimal_places=3, description="振幅")
 
-        class Meta:
-            table = "djia_history"
-            ordering = ["-date"]
+    class Meta:
+        table = "djia_history"
+        ordering = ["-date"]
 
-        def __str__(self):
-            return f"道琼斯 {self.date} {self.close}"
+    def __str__(self):
+        return f"道琼斯 {self.date} {self.close}"
 
-    class GoldHistory(models.Model):
-        """黄金价格历史数据模型"""
-        id = fields.IntField(pk=True)
-        date = fields.DateField(description="交易日期", unique=True)
-        open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
-        close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
-        high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
-        low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
+class GoldHistory(models.Model):
+    """黄金价格历史数据模型"""
+    id = fields.IntField(pk=True)
+    date = fields.DateField(description="交易日期", unique=True)
+    open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
+    close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
+    high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
+    low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
 
-        class Meta:
-            table = "gold_history"
-            ordering = ["-date"]
+    class Meta:
+        table = "gold_history"
+        ordering = ["-date"]
 
-        def __str__(self):
-            return f"黄金 {self.date} {self.close}"
+    def __str__(self):
+        return f"黄金 {self.date} {self.close}"
 
-    class SilverHistory(models.Model):
-        """白银价格历史数据模型"""
-        id = fields.IntField(pk=True)
-        date = fields.DateField(description="交易日期", unique=True)
-        open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
-        close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
-        high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
-        low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
+class SilverHistory(models.Model):
+    """白银价格历史数据模型"""
+    id = fields.IntField(pk=True)
+    date = fields.DateField(description="交易日期", unique=True)
+    open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
+    close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
+    high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
+    low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
 
-        class Meta:
-            table = "silver_history"
-            ordering = ["-date"]
+    class Meta:
+        table = "silver_history"
+        ordering = ["-date"]
 
-        def __str__(self):
-            return f"白银 {self.date} {self.close}"
+    def __str__(self):
+        return f"白银 {self.date} {self.close}"
 
-    class PlatinumHistory(models.Model):
-        """铂金价格历史数据模型"""
-        id = fields.IntField(pk=True)
-        date = fields.DateField(description="交易日期", unique=True)
-        open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
-        close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
-        high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
-        low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
-        class Meta:
-            table = "platinum_history"
-            ordering = ["-date"]
+class PlatinumHistory(models.Model):
+    """铂金价格历史数据模型"""
+    id = fields.IntField(pk=True)
+    date = fields.DateField(description="交易日期", unique=True)
+    open = fields.DecimalField(max_digits=12, decimal_places=3, description="今开")
+    close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
+    high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
+    low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
+    class Meta:
+        table = "platinum_history"
+        ordering = ["-date"]
 
-        def __str__(self):
-            return f"铂金 {self.date} {self.close}"
+    def __str__(self):
+        return f"铂金 {self.date} {self.close}"
 
 
 class BondYieldHistory(models.Model):
@@ -947,19 +1045,19 @@ class BondYieldHistory(models.Model):
     date = fields.DateField(description="交易日期", unique=True)
 
     # 中国国债收益率
-    cn_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率2年")
-    cn_5y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率5年")
-    cn_10y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率10年")
-    cn_30y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率30年")
-    cn_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率10年-2年")
+    cn_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率2年", null=True)
+    cn_5y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率5年", null=True)
+    cn_10y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率10年", null=True)
+    cn_30y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率30年", null=True)
+    cn_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率10年-2年", null=True)
     cn_gdp_growth = fields.DecimalField(max_digits=8, decimal_places=4, description="中国GDP年增率", null=True)
 
     # 美国国债收益率
-    us_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率2年")
-    us_5y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率5年")
-    us_10y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率10年")
-    us_30y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率30年")
-    us_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率10年-2年")
+    us_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率2年", null=True)
+    us_5y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率5年", null=True)
+    us_10y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率10年", null=True)
+    us_30y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率30年", null=True)
+    us_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率10年-2年", null=True)
     us_gdp_growth = fields.DecimalField(max_digits=8, decimal_places=4, description="美国GDP年增率", null=True)
 
     class Meta:
@@ -1025,8 +1123,7 @@ class RichList(models.Model):
 
     class Meta:
         table = "rich_list"
-        unique_together = [("year", "rank")]
-        ordering = ["year", "rank"]
+        ordering = ["rank",]
 
     def __str__(self):
         return f"{self.year}年-第{self.rank}名: {self.name}"
@@ -1085,18 +1182,21 @@ class News1(models.Model):
         """格式化时间显示"""
         return self.publish_time.strftime("%Y-%m-%d %H:%M:%S")
 
-    # 标题 内容  时间 链接
-    class News2(models.Model):
-        """新闻数据模型"""
-        id = fields.IntField(pk=True)
-        title = fields.CharField(max_length=200, description="新闻标题")
-        content = fields.TextField(description="新闻内容")
-        publish_time = fields.DatetimeField(description="发布时间")
-        source = fields.CharField(max_length=500, description="新闻来源", null=True)
+# 标题 内容  时间 链接
+class News2(models.Model):
+    """新闻数据模型"""
+    id = fields.IntField(pk=True)
+    title = fields.CharField(max_length=200, description="新闻标题")
+    content = fields.TextField(description="新闻内容")
+    publish_time = fields.DatetimeField(description="发布时间")
+    source = fields.CharField(max_length=500, description="新闻来源", null=True)
 
-        class Meta:
-            table = "news2"
-            ordering = ["-publish_time"]
+    class Meta:
+        table = "news2"
+        unique_together = [
+            ("title", "publish_time"),  # 按标题和时间查询
+        ]
+        ordering = ["-publish_time"]
 
 # 标题 摘要  时间 链接
 class News3(models.Model):
@@ -1131,7 +1231,7 @@ class EastMoneyHistoryNews(models.Model):
     """东方财富历史新闻数据模型"""
     id = fields.IntField(pk=True)
     title = fields.CharField(max_length=200, description="新闻标题")
-    summary = fields.TextField(description="新闻摘要")
+    summary = fields.TextField(description="新闻摘要", null=True)
     publish_time = fields.DatetimeField(description="发布时间")
     source = fields.CharField(max_length=500, description="新闻来源", null=True)
     class Meta:
