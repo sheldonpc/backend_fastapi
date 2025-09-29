@@ -4,6 +4,7 @@ from datetime import datetime, time, timedelta
 from functools import wraps
 from zoneinfo import ZoneInfo
 
+from app.models import EastMoneyHistoryNews
 from app.services.market_data_service import (
     fetch_realtime_market_data,
     fetch_fx_market_data, fetch_stock_hot_follow_market_data,
@@ -12,9 +13,10 @@ from app.services.market_data_service import (
     fetch_cn_us_bond_market_data, fetch_hurun_rank_market_data,
     fetch_global_market_data, fetch_global_market_data2,
     fetch_global_market_data3, fetch_global_market_data4,
-    fetch_eastmoney_history_news_market_data, fetch_fx_market_history_data,
-    fetch_oil_data, fetch_gold_data, fetch_silver_data
+    fetch_fx_market_history_data,
+    fetch_oil_data, fetch_gold_data, fetch_silver_data, fetch_eastmoney_history_market_data
 )
+from app.utils.crawl_report import crawl_report_func
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +120,7 @@ class NewMarketScheduler:
 
     @log_task("东方财富新闻")
     async def update_eastmoney_news(self):
-        await fetch_eastmoney_history_news_market_data()
+        await fetch_eastmoney_history_market_data()
 
     @log_task("新闻1")
     async def update_news_one(self):
@@ -144,7 +146,6 @@ class NewMarketScheduler:
     async def run_cn_5min_tasks(self):
         await asyncio.gather(
             self.update_fx_market_data(),
-            self.update_hot_stock(),
             self.update_oil_data(),
             self.update_gold_data(),
             self.update_silver_data(),

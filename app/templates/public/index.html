@@ -121,7 +121,7 @@
 
     /* 新闻区域 */
     .news-section {
-        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        background: linear-gradient(135deg, #F8FAF8 0%, #ffffff 80%);
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -359,6 +359,154 @@
         transition: all 0.3s ease;
     }
 
+    /* 市场分析标签页样式 */
+    .market-analysis-tabs .nav-pills {
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 0.25rem;
+    }
+
+    .market-analysis-tabs .market-tab {
+        color: rgba(255,255,255,0.7);
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    .market-analysis-tabs .market-tab:hover {
+        color: white;
+        background: rgba(255,255,255,0.1);
+        transform: translateY(-1px);
+    }
+
+    .market-analysis-tabs .market-tab.active {
+        color: white;
+        background: var(--primary-color);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    /* 标签页内容动画 */
+    .tab-content .tab-pane {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+
+    .tab-content .tab-pane.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* 市场分析卡片 */
+    .market-analysis-tabs .ai-insight {
+        min-height: 140px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .market-analysis-tabs .ai-insight:hover {
+        background: rgba(255,255,255,0.12);
+        border-color: rgba(255,255,255,0.25);
+    }
+    /* AI 研判区域 */
+    .ai-insight-container {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ai-insight-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .ai-insight {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+
+    .ai-insight:hover {
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+
+    /* AI分析要点动画 */
+    .ai-insight p {
+        opacity: 0;
+        animation: fadeInLeft 0.6s ease forwards;
+    }
+
+    .ai-insight p:nth-child(3) { animation-delay: 0.1s; }
+    .ai-insight p:nth-child(4) { animation-delay: 0.2s; }
+
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* 情绪指标数值动画 */
+    .ai-insight .h6 {
+        font-weight: bold;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+    }
+
+    .ai-insight .h6:hover {
+        transform: scale(1.1);
+        filter: brightness(1.2);
+    }
+
+    /* 标签动画效果 */
+    .ai-insight .badge {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .ai-insight .badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* 刷新按钮动画 */
+    .btn-outline-light:hover {
+        background: rgba(255,255,255,0.2);
+        border-color: rgba(255,255,255,0.4);
+        transform: translateY(-1px);
+    }
+
+    .btn-outline-light:hover .bi-arrow-clockwise {
+        animation: rotate 0.5s ease-in-out;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
 </style>
 {% endblock %}
 
@@ -481,35 +629,19 @@
         <!-- 最新财经新闻 -->
         <div class="col-lg-7">
             <div class="news-section">
-                <h5 class="section-title mb-3">最新财经新闻</h5>
+                <h5 class="section-title mb-3">最新新闻</h5>
                 <div class="list-group list-group-flush">
+                    {% for news in data.news_data %}
                     <a href="/news/1" class="list-group-item list-group-item-action news-item border-0 py-3">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
-                                <h6 class="mb-1 fw-bold">央行今日开展1000亿元逆回购操作</h6>
-                                <p class="mb-1 small text-muted">维护银行体系流动性合理充裕，利率持平于1.80%。</p>
+                                <h6 class="mb-1 fw-bold">{{ news.title }}</h6>
+                                <p class="mb-1 small text-muted">{{ news.content | truncate(100)}}...</p>
                             </div>
-                            <small class="text-muted ms-3">10:30</small>
+                            <small class="text-muted ms-3">{{ news.publish_time }}</small>
                         </div>
                     </a>
-                    <a href="/news/2" class="list-group-item list-group-item-action news-item border-0 py-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1 fw-bold">美联储主席暗示年内或降息</h6>
-                                <p class="mb-1 small text-muted">称通胀压力缓解，市场预期9月或启动降息周期。</p>
-                            </div>
-                            <small class="text-muted ms-3">09:15</small>
-                        </div>
-                    </a>
-                    <a href="/news/3" class="list-group-item list-group-item-action news-item border-0 py-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1 fw-bold">A股半导体板块集体大涨</h6>
-                                <p class="mb-1 small text-muted">受国产替代政策利好刺激，多只个股涨停。</p>
-                            </div>
-                            <small class="text-muted ms-3">08:45</small>
-                        </div>
-                    </a>
+                    {% endfor %}
                 </div>
                 <div class="text-center mt-3">
                     <a href="/news" class="btn btn-outline-primary btn-sm">查看更多新闻</a>
@@ -523,32 +655,139 @@
                 <div class="d-flex align-items-center mb-3">
                     <i class="bi bi-robot me-2" style="font-size: 1.5rem;"></i>
                     <h5 class="mb-0">AI 市场研判</h5>
-                    <small class="ms-auto opacity-75">DeepSeek</small>
+                    <div class="ms-auto d-flex align-items-center">
+                        <span class="badge bg-success me-2">
+                            <i class="bi bi-lightning-fill me-1"></i>实时
+                        </span>
+                        <small class="opacity-75">DeepSeek</small>
+                    </div>
                 </div>
 
-                <div class="ai-insight">
-                    <p class="mb-3">
-                        当前全球市场呈现分化走势：美股在科技股带动下企稳反弹，A股受政策预期提振温和放量。
-                        人民币汇率保持稳定，黄金因地缘风险溢价维持高位。
-                    </p>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="badge bg-success me-2">看多</span>
-                            <small>高股息蓝筹 + AI产业链</small>
+                <!-- 综合市场情绪 -->
+                <div class="ai-insight mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-speedometer2 me-2"></i>综合情绪
+                        </h6>
+                        <span class="badge bg-warning">谨慎乐观</span>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="small opacity-75">VIX指数</div>
+                            <div class="h6 mb-0 text-warning">52</div>
                         </div>
-                        <div class="text-end">
-                            <div class="small opacity-75">风险等级</div>
-                            <div class="text-warning">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                            </div>
+                        <div class="col-4">
+                            <div class="small opacity-75">市场温度</div>
+                            <div class="h6 mb-0 text-success">65%</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small opacity-75">AI信心度</div>
+                            <div class="h6 mb-0 text-info">75%</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-3 text-end">
-                    <small class="opacity-75">更新于：2025-09-29 16:30</small>
+                <!-- A股市场分析 -->
+                <div class="ai-insight mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-flag me-2"></i>A股判断
+                        </h6>
+                        <span class="badge bg-success">看好</span>
+                    </div>
+                    <p class="small mb-2">
+                        <i class="bi bi-arrow-up-circle-fill text-success me-1"></i>
+                        政策底确认，消费复苏预期增强
+                    </p>
+                    <p class="small mb-2">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        外资流入放缓，关注北向资金动向
+                    </p>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="small opacity-75">重点关注</div>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <span class="badge bg-success bg-opacity-75">消费</span>
+                                <span class="badge bg-success bg-opacity-75">医药</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small opacity-75">支撑位</div>
+                            <div class="text-info fw-bold mt-1">3150点</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 美股市场分析 -->
+                <div class="ai-insight mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-star me-2"></i>美股判断
+                        </h6>
+                        <span class="badge bg-info">中性</span>
+                    </div>
+                    <p class="small mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        降息预期支撑，科技股企稳反弹
+                    </p>
+                    <p class="small mb-2">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        通胀数据仍需关注，波动性或加大
+                    </p>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="small opacity-75">重点关注</div>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <span class="badge bg-info bg-opacity-75">AI芯片</span>
+                                <span class="badge bg-info bg-opacity-75">云计算</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small opacity-75">支撑位</div>
+                            <div class="text-info fw-bold mt-1">4200点</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 贵金属市场分析 -->
+                <div class="ai-insight mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">
+                            <i class="bi bi-gem me-2"></i>贵金属判断
+                        </h6>
+                        <span class="badge bg-warning">震荡</span>
+                    </div>
+                    <p class="small mb-2">
+                        <i class="bi bi-arrow-up-circle-fill text-success me-1"></i>
+                        地缘风险溢价支撑黄金避险需求
+                    </p>
+                    <p class="small mb-2">
+                        <i class="bi bi-info-circle-fill text-info me-1"></i>
+                        铜价反映经济预期，关注需求复苏
+                    </p>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="small opacity-75">黄金</div>
+                            <div class="text-warning fw-bold">看涨</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small opacity-75">白银</div>
+                            <div class="text-info fw-bold">震荡</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small opacity-75">铜</div>
+                            <div class="text-success fw-bold">回暖</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex justify-content-between align-items-center">
+                    <small class="opacity-75">
+                        <i class="bi bi-clock me-1"></i>更新于：2025-09-29 16:30
+                    </small>
+                    <button class="btn btn-outline-light btn-sm" id="refreshAnalysis">
+                        <i class="bi bi-arrow-clockwise me-1"></i>刷新分析
+                    </button>
                 </div>
             </div>
         </div>
@@ -664,6 +903,76 @@ document.addEventListener('DOMContentLoaded', function() {
     // 观察所有卡片
     document.querySelectorAll('.card').forEach(card => {
         observer.observe(card);
+    });
+
+    // AI研判刷新功能
+    document.getElementById('refreshAnalysis')?.addEventListener('click', function() {
+        const button = this;
+        const insights = document.querySelectorAll('.ai-insight');
+
+        // 添加加载状态
+        button.disabled = true;
+        insights.forEach(insight => insight.classList.add('loading'));
+
+        // 模拟AI分析更新
+        setTimeout(() => {
+            // 移除加载状态
+            insights.forEach(insight => insight.classList.remove('loading'));
+            button.disabled = false;
+
+            // 添加数据更新视觉反馈
+            insights.forEach((insight, index) => {
+                setTimeout(() => {
+                    insight.classList.add('data-updated');
+                    setTimeout(() => {
+                        insight.classList.remove('data-updated');
+                    }, 600);
+                }, index * 150);
+            });
+
+            // 更新时间戳
+            const timeElement = document.querySelector('.ai-insight-container small');
+            if (timeElement) {
+                const now = new Date();
+                const timeString = now.toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                timeElement.innerHTML = `<i class="bi bi-clock me-1"></i>更新于：${timeString}`;
+            }
+
+            console.log('AI分析已刷新');
+        }, 2000);
+    });
+
+    // 情绪指标交互效果
+    const emotionIndicators = document.querySelectorAll('.ai-insight .h6');
+    emotionIndicators.forEach(indicator => {
+        indicator.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+            this.style.filter = 'brightness(1.1)';
+        });
+
+        indicator.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.filter = 'brightness(1)';
+        });
+    });
+
+    // 标签hover效果增强
+    const analysisbadges = document.querySelectorAll('.ai-insight .badge');
+    analysisbadges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+            this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+        });
+
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = 'none';
+        });
     });
 });
 </script>

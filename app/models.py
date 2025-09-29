@@ -1240,3 +1240,80 @@ class EastMoneyHistoryNews(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.publish_time})"
+
+
+class KeyPoint(models.Model):
+    """关键要点（Tortoise ORM 模型）"""
+    id = fields.IntField(pk=True)
+    type = fields.CharField(max_length=10, description="类型: positive/warning/negative")
+    text = fields.CharField(max_length=50, description="要点内容（不超过50字）")
+
+    # 关联到 CNMarket（多对一）
+    market = fields.ForeignKeyField(
+        "models.CNMarket",
+        related_name="key_points",
+        on_delete=fields.CASCADE
+    )
+
+    class Meta:
+        table = "market_key_points"  # 自定义表名
+
+
+class CNMarket(models.Model):
+    """市场研判结果（Tortoise ORM 模型）"""
+    id = fields.IntField(pk=True)
+    market_region = fields.CharField(max_length=2, default="CN", description="市场区域")
+    data_type = fields.CharField(max_length=10, default="index", description="数据类型")
+    confidence = fields.IntField(description="置信度 (0-100)")
+    sentiment = fields.CharField(max_length=10, description="情绪: 看好/中性/看空/乐观/悲观")
+    sentiment_level = fields.CharField(max_length=10, description="情绪级别: bullish/neutral/bearish")
+    focus_sectors = fields.JSONField(description="关注行业列表", default=list)
+    support_level = fields.FloatField(null=True, description="支撑位（可选）")
+    resistance_level = fields.FloatField(null=True, description="阻力位（可选）")
+    created_at = fields.DatetimeField(auto_now_add=True)
+
+    # 反向关系（通过 KeyPoint.market 关联）
+    key_points: fields.ReverseRelation[KeyPoint]
+
+    class Meta:
+        table = "cn_market_reports"  # 自定义表名
+
+    async def to_dict(self) -> dict:
+        """将 ORM 对象转为 JSON 兼容的字典（用于 API 返回）"""
+        return {
+            "market_region": self.market_region,
+            "data_type": self.data_type,
+            "confidence": self.confidence,
+            "sentiment": self.sentiment,
+            "sentiment_level": self.sentiment_level,
+            "key_points": [
+                {"type": kp.type, "text": kp.text}
+                for kp in await self.key_points.all()  # 注意：异步调用
+            ],
+            "focus_sectors": self.focus_sectors,
+            "support_level": self.support_level,
+            "resistance_level": self.resistance_level
+        }
+
+    @classmethod
+    async def from_dict(cls, data: dict) -> "CNMarket":
+        """从 JSON 数据创建并保存 CNMarket 对象（含关联 KeyPoint）"""
+        market = await cls.create(
+            market_region=data.get("market_region", "CN"),
+            data_type=data.get("data_type", "index"),
+            confidence=data["confidence"],
+            sentiment=data["sentiment"],
+            sentiment_level=data["sentiment_level"],
+            focus_sectors=data["focus_sectors"],
+            support_level=data.get("support_level"),
+            resistance_level=data.get("resistance_level")
+        )
+
+        # 批量创建关联的 KeyPoint
+        if "key_points" in data:
+            await KeyPoint.bulk_create([
+                KeyPoint(type=kp["type"], text=kp["text"], market=market)
+                for kp in data["key_points"]
+            ])
+
+        return market
