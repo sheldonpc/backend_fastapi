@@ -713,7 +713,11 @@
                     </div>
                     <div class="index-value text-dark">{{ item.price | round(2)}}</div>
                     <div class="change-indicator">
+                        {% if item.change <= 0 %}
+                        <span class="badge bg-success">{{ item.change_percent | round(2)}}%</span>
+                        {% else %}
                         <span class="badge bg-danger">{{ item.change_percent | round(2)}}%</span>
+                        {% endif %}
                         <small class="text-muted">{{ item.change | round(2)}}</small>
                     </div>
                 </div>
@@ -735,7 +739,11 @@
                     </div>
                     <div class="index-value text-dark">{{ item.price | round(2)}}</div>
                     <div class="change-indicator">
+                        {% if item.change <= 0 %}
+                        <span class="badge bg-success">{{ item.change_percent | round(2)}}%</span>
+                        {% else %}
                         <span class="badge bg-danger">{{ item.change_percent | round(2)}}%</span>
+                        {% endif %}
                         <small class="text-muted">{{ item.change | round(2)}}</small>
                     </div>
                 </div>

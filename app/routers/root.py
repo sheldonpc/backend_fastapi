@@ -2,14 +2,15 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter
 from fastapi import Request
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
-    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3
+    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate
 from app.core.templates import templates
-
+import markdown
 from app.utils.redis_client import cache_get, cache_set
 
 CACHE_KEY = "homepage_data"
 CACHE_TTL = 30  # 秒
 router = APIRouter(prefix="")
+
 
 async def _build_homepage_data():
     from datetime import datetime, timedelta
@@ -123,6 +124,8 @@ async def _build_homepage_data():
         "vix": vix_data,
         "ai_update_time": ai_update_time.strftime("%Y-%m-%d %H:%M:%S"),
     }
+
+
 @router.get("/")
 async def index(request: Request):
     # 尝试从缓存读取
@@ -265,9 +268,9 @@ async def index(request: Request):
 
 @router.get("/news")
 async def news(request: Request):
-
-    results_news2 = await News2.all().order_by("-publish_time").limit(20)
-    news_data = [{"title": news.title, "content": news.content, "publish_time": news.publish_time} for news in results_news2]
+    results_news2 = await News2.all().order_by("-publish_time").limit(15)
+    news_data = [{"title": news.title, "content": news.content, "publish_time": news.publish_time} for news in
+                 results_news2]
 
     # global_news_list
     # class News3(models.Model):
@@ -281,7 +284,28 @@ async def news(request: Request):
     results_news3 = await News3.all().order_by("-publish_time").limit(20)
     global_news_list = [{"publish_time": news.publish_time, "content": news.title} for news in results_news3]
 
-    return templates.TemplateResponse("public/news.html", {"request": request, "news2_list": news_data, "global_news_list": global_news_list})
+    market_summary = await DifyTemplate().all().order_by("-created_at").first()
+
+    if market_summary and market_summary.dify_answer:
+        # 使用 python-markdown 库转换 Markdown 为 HTML
+        market_summary.dify_answer_html = markdown.markdown(
+            market_summary.dify_answer,
+            extensions=['fenced_code', 'tables', 'nl2br']  # 添加常用扩展
+        )
+    else:
+        # 创建默认对象或处理空值情况
+        market_summary = type('Object', (), {})()  # 创建空对象
+        market_summary.dify_answer_html = "今日市场数据正在分析中，请稍后查看..."
+
+    return templates.TemplateResponse(
+        "public/news.html",
+        {"request": request,
+         "news2_list": news_data,
+         "global_news_list": global_news_list,
+         "market_summary": market_summary,
+         }
+    )
+
 
 @router.get("/login")
 async def login_page(request: Request):

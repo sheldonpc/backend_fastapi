@@ -312,12 +312,200 @@
         font-size: 0.95rem;
         line-height: 1.4;
         transition: background-color 0.2s ease;
-        margin-bottom: 1rem!important;
+        margin-bottom: 1rem !important;
     }
+
     .global-hot-item:hover {
         background-color: #f8fafc;
     }
 
+    .offcanvas_link {
+        text-decoration: none;
+    }
+
+    /* Offcanvas 整体样式优化 */
+    .offcanvas {
+        --bs-offcanvas-bg: #ffffff;
+        --bs-offcanvas-border-width: 0;
+        --bs-offcanvas-box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        border-radius: 0 20px 20px 0 !important;
+    }
+
+    /* Offcanvas 头部 */
+    .offcanvas-header {
+        padding: 1.5rem 1.5rem 1rem;
+        border-bottom: 1px solid #eef2f7;
+        background: linear-gradient(to right, var(--primary-color), #4f46e5);
+        color: white;
+    }
+
+    .offcanvas-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .offcanvas-header .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .offcanvas-header .btn-close:hover {
+        opacity: 1;
+    }
+
+    /* Offcanvas 主体内容 */
+    .offcanvas-body {
+        padding: 1.5rem;
+        color: #374151;
+        line-height: 1.7;
+        font-size: 1rem;
+        background-color: #fafbff;
+    }
+
+    .offcanvas-body p {
+        margin-bottom: 1rem;
+    }
+
+    .offcanvas-body p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* 响应式：小屏设备圆角取消 */
+    @media (max-width: 991.98px) {
+        .offcanvas {
+            border-radius: 0 !important;
+        }
+    }
+
+    @media (min-width: 992px) {
+        .offcanvas-start {
+            width: 500px !important;
+        }
+    }
+
+    .offcanvas {
+        transition: transform 0.45s,
+        opacity 0.45s ease-out !important;
+    }
+
+    /* 初始状态：隐藏在左侧 + 透明 */
+    .offcanvas.offcanvas-start {
+        transform: translateX(-100%);
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    /* 显示时：滑入 + 显现 */
+    .offcanvas.showing,
+    .offcanvas.show:not(.hiding) {
+        transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* 隐藏过程中：平滑退出 */
+    .offcanvas.hiding {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    /* 确保内容在动画过程中可交互 */
+    .offcanvas.show {
+        pointer-events: auto;
+    }
+
+    /* 背景遮罩（Backdrop）也加淡入淡出 */
+    .offcanvas-backdrop {
+        background-color: rgba(0, 0, 0, 0.4) !important;
+        transition: opacity 0.45s ease-out !important;
+    }
+
+    .market-summary-content {
+        line-height: 1.6;
+    }
+
+    /* Markdown 内容样式 */
+    .market-summary-content h1,
+    .market-summary-content h2,
+    .market-summary-content h3 {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .market-summary-content h1 {
+        font-size: 1.4rem;
+    }
+
+    .market-summary-content h2 {
+        font-size: 1.3rem;
+    }
+
+    .market-summary-content h3 {
+        font-size: 1.2rem;
+    }
+
+    .market-summary-content p {
+        margin-bottom: 0.75rem;
+    }
+
+    .market-summary-content ul,
+    .market-summary-content ol {
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+    }
+
+    .market-summary-content li {
+        margin-bottom: 0.25rem;
+    }
+
+    .market-summary-content blockquote {
+        border-left: 4px solid #ddd;
+        padding-left: 1rem;
+        margin-left: 0;
+        color: #666;
+        font-style: italic;
+    }
+
+    .market-summary-content code {
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.875em;
+    }
+
+    .market-summary-content pre {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+
+    .market-summary-content pre code {
+        background: none;
+        padding: 0;
+    }
+
+    .market-summary-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+    }
+
+    .market-summary-content table th,
+    .market-summary-content table td {
+        border: 1px solid #dee2e6;
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    .market-summary-content table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
 
 
 </style>
@@ -331,7 +519,7 @@
             <h2 class="h3 mb-1" style="color: var(--primary-color); font-weight: 700;">
                 <i class="bi bi-newspaper me-2"></i>财经新闻
             </h2>
-            <p class="text-muted mb-0">实时财经资讯，把握市场脉搏</p>
+            <p class="text-muted mb-0">阅读财经资讯，把握市场脉搏</p>
         </div>
         <div class="d-flex align-items-center">
             <small class="text-muted me-3">
@@ -344,34 +532,51 @@
         </div>
     </div>
 
+
     <!-- 两栏布局 -->
     <div class="row g-4">
         <!-- 左侧：资讯快报 -->
-        <div class="col-md-8">
+        <div class="col-md-7">
             <h3 class="section-title">
                 <i class="bi bi-lightning-charge"></i> 资讯快报
             </h3>
             <div class="news-section">
                 {% if news2_list %}
                 {% for news in news2_list %}
-                <div class="news-card mb-3">
-                    <div class="news-card-body">
-                        <h3 class="news-title">{{ news.title }}</h3>
-                        <div class="news-content">
-                            {{ news.content | truncate(150) }}
-                        </div>
-                        <div class="news-meta">
-                            <div class="news-source">
-                                <i class="bi bi-building"></i>
-<!--                                <span>{{ news.source or '财经快报' }}</span>-->
+                <a class="offcanvas_link" data-bs-toggle="offcanvas" href="#offcanvasExample{{ loop.index }}"
+                   aria-controls="offcanvasExample">
+                    <div class="news-card mb-3">
+                        <div class="news-card-body">
+                            <h3 class="news-title">{{ news.title }}</h3>
+                            <div class="news-content">
+                                {{ news.content | truncate(80) }}
                             </div>
-                            <div class="news-time">
-                                <i class="bi bi-clock"></i>
-                                <span>{{ news.publish_time.strftime('%m-%d %H:%M') }}</span>
+                            <div class="news-meta">
+                                <div class="news-source">
+                                    <i class="bi bi-building"></i>
+                                    <!--                                <span>{{ news.source or '财经快报' }}</span>-->
+                                </div>
+                                <div class="news-time">
+                                    <i class="bi bi-clock"></i>
+                                    <span>{{ news.publish_time.strftime('%m-%d %H:%M') }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </a>
+                <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample{{ loop.index }}"
+                     aria-labelledby="offcanvasExampleLabel{{ loop.index }}">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasExampleLabel">{{ news.title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div>
+                            &nbsp;&nbsp;&nbsp;&nbsp;{{ news.content }}
+                        </div>
+                    </div>
                 </div>
+
                 {% endfor %}
 
                 <!-- 分页 -->
@@ -413,27 +618,37 @@
                 {% else %}
                 <div class="text-center py-5">
                     <div class="loading-skeleton" style="width: 100%; height: 120px; border-radius: 15px;"></div>
-                    <div class="loading-skeleton mt-3" style="width: 80%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
-                    <div class="loading-skeleton mt-3" style="width: 90%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
+                    <div class="loading-skeleton mt-3"
+                         style="width: 80%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
+                    <div class="loading-skeleton mt-3"
+                         style="width: 90%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
                 </div>
                 {% endif %}
             </div>
         </div>
 
         <!-- 右侧：市场总结 + 全球热点 -->
-        <div class="col-md-4">
+        <div class="col-md-5">
             <!-- 市场总结 -->
             <div class="market-summary-card mb-4">
                 <div class="market-summary-title">
                     <i class="bi bi-bar-chart-line me-2"></i>昨日市场总结
                 </div>
                 <div class="market-summary-content">
-                    {{ market_summary.content if market_summary else "今日市场数据正在分析中，请稍后查看..." }}
+                    {% if market_summary and market_summary.dify_answer_html %}
+                    {# 使用 dify_answer_html 并标记为 safe #}
+                    {{ market_summary.dify_answer_html|safe }}
+                    {% else %}
+                    <div class="text-muted">
+                        <i class="bi bi-hourglass-split me-2"></i>
+                        今日市场数据正在分析中，请稍后查看...
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="market-summary-meta">
                     <div>
                         <i class="bi bi-clock me-1"></i>
-                        {{ market_summary.publish_time.strftime('%Y-%m-%d %H:%M') if market_summary else '--:--' }}
+                        {{ market_summary.created_at.strftime('%Y-%m-%d %H:%M') if market_summary else '--:--' }}
                     </div>
                     <div>
                         <span class="badge bg-light bg-opacity-25">
@@ -449,14 +664,14 @@
             </h3>
             <div class="global-hot-news">
                 {% if global_news_list %}
-                    {% for item in global_news_list %}
-                    <div class="global-hot-item mb-2 p-2 border-start border-3 border-primary bg-light rounded">
-                        <small class="text-muted">{{ item.publish_time.strftime('%m-%d %H:%M') }}</small>
-                        <p class="mb-0">{{ item.content | truncate(100) }}</p>
-                    </div>
-                    {% endfor %}
+                {% for item in global_news_list %}
+                <div class="global-hot-item mb-2 p-2 border-start border-3 border-primary bg-light rounded">
+                    <small class="text-muted">{{ item.publish_time.strftime('%m-%d %H:%M') }}</small>
+                    <p class="mb-0">{{ item.content | truncate(100) }}</p>
+                </div>
+                {% endfor %}
                 {% else %}
-                    <div class="text-muted">暂无全球热点资讯</div>
+                <div class="text-muted">暂无全球热点资讯</div>
                 {% endif %}
             </div>
         </div>

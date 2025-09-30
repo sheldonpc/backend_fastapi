@@ -83,3 +83,47 @@ async def talk_to_dify(query: str) -> dict:
         except Exception as e:
             logger.error(f"Dify 请求异常: {e}")
     return None
+
+DIFY_SUMMARY_API_KEY = config.DIFY_SUMMARY_API_KEY
+
+
+async def dify_summarize(query: str) -> dict:
+    """调用 Dify API 并返回完整 JSON 响应"""
+    API_KEY = DIFY_SUMMARY_API_KEY
+    DIFY_API_URL = "https://api.dify.ai/v1/chat-messages"
+
+    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "inputs": {},
+        "query": query,
+        "response_mode": "blocking",  # 使用阻塞模式
+        "conversation_id": "",
+        "user": "user-sheldon"
+    }
+
+    timeout = aiohttp.ClientTimeout(total=60)
+
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        try:
+            async with session.post(DIFY_API_URL, headers=headers, json=payload) as resp:
+                if resp.status == 200:
+                    response_data = await resp.json()  # 解析 JSON
+
+                    # 提取需要的数据
+                    result = {
+                        "answer": response_data.get("answer", ""),  # 主要分析内容
+                        "task_id": response_data.get("task_id", ""),
+                        "conversation_id": response_data.get("conversation_id", ""),
+                        "usage": response_data.get("metadata", {}).get("usage", {})
+                    }
+                    return result
+
+                else:
+                    logger.error(f"dify_summarize 请求失败: {resp.status}")
+                    return None
+
+        except asyncio.TimeoutError:
+            logger.error("Dify API 请求超时")
+        except Exception as e:
+            logger.error(f"dify_summarize 请求异常: {e}")
+    return None

@@ -99,3 +99,4 @@ def _load_financial_targets():
 
 FINANCIAL_TARGETS = _load_financial_targets()
 API_KEY=os.getenv("API_KEY", "")
+DIFY_SUMMARY_API_KEY=os.getenv("DIFY_SUMMARY_API_KEY", "")

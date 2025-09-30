@@ -358,7 +358,7 @@ class MinuteLevelCNStockData(models.Model):
     #  序号   代码                     名称    最新价  涨跌额  涨跌幅  \
     # 今开      最高      最低      昨收        成交量        成交额
 class MinuteLevelHKStockData(models.Model):
-    # id = fields.IntField(pk=True)
+
     code = fields.CharField(max_length=20, pk=True)
     name = fields.CharField(max_length=50)
     price = fields.DecimalField(max_digits=15, decimal_places=4)
@@ -1332,3 +1332,14 @@ class StockMarketActivity(models.Model):
     class Meta:
         table = "stock_market_activity"
         ordering = ["-date"]
+
+class DifyTemplate(models.Model):
+    """Dify 模板数据模型"""
+    id = fields.IntField(pk=True)
+    news_brief = fields.TextField(description="新闻摘要")
+    complete_text = fields.TextField(description="完整文本")
+    dify_answer = fields.TextField(description="Dify 回复", null=True)
+    created_at = fields.DatetimeField()
+
+    class Meta:
+        table = "dify_template"

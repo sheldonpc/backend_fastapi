@@ -5,7 +5,6 @@ from datetime import datetime, time, timedelta
 from functools import wraps
 from zoneinfo import ZoneInfo
 
-from app.models import EastMoneyHistoryNews
 from app.services.market_data_service import (
     fetch_realtime_market_data,
     fetch_fx_market_data, fetch_stock_hot_follow_market_data,
@@ -16,14 +15,13 @@ from app.services.market_data_service import (
     fetch_global_market_data3, fetch_global_market_data4,
     fetch_fx_market_history_data,
     fetch_oil_data, fetch_gold_data, fetch_silver_data, fetch_eastmoney_history_market_data, crawl_llm_insight,
-    brief_rise_down_data
+    brief_rise_down_data, news_ai_summary
 )
-from app.utils.crawl_report import crawl_report_func
 
 logger = logging.getLogger(__name__)
 
 # ==== 交易时间配置 ====
-CN_SESSIONS = [(time(9, 30), time(11, 30)), (time(13, 0), time(16, 0))]
+CN_SESSIONS = [(time(9, 30), time(11, 30)), (time(13, 0), time(23, 0))]
 US_SESSIONS = [(time(9, 30), time(17, 0))]
 
 
@@ -70,10 +68,6 @@ class NewMarketScheduler:
     @log_task("外汇数据")
     async def update_fx_market_data(self):
         await fetch_fx_market_data()
-
-    # @log_task("热门股票数据")
-    # async def update_hot_stock(self):
-    #     await fetch_stock_hot_follow_market_data()
 
     @log_task("中国分时数据")
     async def update_minute_level_cn_data(self):
@@ -152,17 +146,9 @@ class NewMarketScheduler:
     async def yearly_update_hurun_rank(self):
         await fetch_hurun_rank_market_data()
 
-    # ==== 任务集合 ====
-    # async def run_cn_5min_tasks(self):
-    #     await asyncio.gather(
-    #         self.update_fx_market_data(),
-    #         self.update_oil_data(),
-    #         self.update_gold_data(),
-    #         self.update_silver_data(),
-    #         self.update_vix_index(),
-    #         self.update_rise_down_data(),
-    #         self.update_notice_rise_down(),
-    #     )
+    @log_task("AI昨日总结")
+    async def update_ai_yesterday_summary(self):
+        await news_ai_summary()
 
     async def run_cn_5min_tasks(self):
         tasks = [
@@ -215,6 +201,12 @@ class NewMarketScheduler:
             self.update_minute_level_hk_data(),
         )
 
+    # 每天早上7点运行一次
+    async def run_ai_daily_tasks(self):
+        await asyncio.gather(
+            self.update_ai_yesterday_summary()
+        )
+
     # ==== force_run_once 统一退出方法 ====
     def _shutdown_after_force_once(self):
         """当 force_run_once 启用时，运行一次后关闭整个调度器"""
@@ -262,6 +254,28 @@ class NewMarketScheduler:
                 if self._shutdown_after_force_once():
                     break
 
+    async def _scheduler_loop_daily_ai_summary(self):
+        daily_times = [time(7, 0)]
+        while self.running:
+            now = datetime.now(ZoneInfo("Asia/Shanghai"))
+            today = now.date()
+            next_run = min(
+                (datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai"))
+                 for t in daily_times
+                 if datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai")) > now),
+                default=datetime.combine(today + timedelta(days=1), daily_times[0], tzinfo=ZoneInfo("Asia/Shanghai"))
+            )
+            sleep_sec = (next_run - now).total_seconds()
+            logger.info(f"AI News Summary 每日任务将在 {sleep_sec:.0f} 秒后执行")
+            await self._safe_sleep(sleep_sec)
+
+            if not self.running:
+                break
+            if self.is_cn_trading_day():
+                await self.run_ai_daily_tasks()
+                if self._shutdown_after_force_once():
+                    break
+
     async def _scheduler_loop_hourly(self):
         daily_times = [time(h, 0) for h in range(10, 19)]
         while self.running:
@@ -306,6 +320,7 @@ class NewMarketScheduler:
             asyncio.create_task(self._scheduler_loop_daily_cn()),
             asyncio.create_task(self._scheduler_loop_5min_global()),
             asyncio.create_task(self._scheduler_loop_hourly()),
+            asyncio.create_task(self._scheduler_loop_daily_ai_summary()),
         ]
 
     async def stop_scheduler(self):
@@ -318,7 +333,6 @@ class NewMarketScheduler:
             task.cancel()
         await asyncio.gather(*self.tasks, return_exceptions=True)
         logger.info("✅ 调度器已停止")
-
 
 if __name__ == "__main__":
     scheduler = NewMarketScheduler()
