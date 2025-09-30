@@ -1,0 +1,524 @@
+{% extends "public/base.html" %}
+
+{% block title %}财经新闻 - 五市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 页面整体动画 */
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 市场总结卡片 - 特殊样式 */
+    .market-summary-card {
+        background: linear-gradient(135deg, var(--primary-color) 0%, rgba(59, 130, 246, 0.9) 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .market-summary-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .market-summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .market-summary-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .market-summary-content {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        opacity: 0.95;
+    }
+
+    .market-summary-meta {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* 普通新闻卡片 */
+    .news-card {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .news-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--primary-gradient);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-color);
+    }
+
+    .news-card:hover::after {
+        transform: scaleX(1);
+    }
+
+    .news-card-body {
+        padding: 1.5rem;
+    }
+
+    .news-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+        transition: color 0.3s ease;
+    }
+
+    .news-card:hover .news-title {
+        color: var(--primary-color);
+    }
+
+    .news-content {
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+
+    .news-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+        color: #9ca3af;
+        border-top: 1px solid #f3f4f6;
+        padding-top: 0.75rem;
+    }
+
+    .news-source {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .news-time {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* 加载动画 */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 8px;
+        height: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* 新闻卡片进入动画 */
+    .news-card, .market-summary-card {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: slideInUp 0.6s ease forwards;
+    }
+
+    .market-summary-card {
+        animation-delay: 0.1s;
+    }
+
+    .news-section:nth-child(2) .news-card:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    .news-section:nth-child(2) .news-card:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    .news-section:nth-child(2) .news-card:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    .news-section:nth-child(3) .news-card:nth-child(1) {
+        animation-delay: 0.5s;
+    }
+
+    .news-section:nth-child(3) .news-card:nth-child(2) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes slideInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 更新指示器 */
+    .update-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        animation: pulse_indicator 2s infinite;
+    }
+
+    @keyframes pulse_indicator {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+
+    /* 刷新按钮 */
+    .refresh-btn {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 25px;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        color: white;
+    }
+
+    .refresh-btn:hover .bi-arrow-clockwise {
+        animation: rotate 0.5s ease-in-out;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* 分页样式 */
+    .pagination .page-link {
+        color: var(--primary-color);
+        border: 1px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+        margin: 0 0.25rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--primary-gradient);
+        border-color: var(--primary-color);
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .market-summary-card {
+            padding: 1.5rem;
+        }
+
+        .news-card-body {
+            padding: 1rem;
+        }
+    }
+
+    /* 区块标题 */
+    .section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin: 2.5rem 0 1.5rem;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: 1.2rem;
+    }
+
+    /* 全球热点短讯样式 */
+    .global-hot-item {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        transition: background-color 0.2s ease;
+        margin-bottom: 1rem!important;
+    }
+    .global-hot-item:hover {
+        background-color: #f8fafc;
+    }
+
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- 页面标题 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" style="color: var(--primary-color); font-weight: 700;">
+                <i class="bi bi-newspaper me-2"></i>财经新闻
+            </h2>
+            <p class="text-muted mb-0">实时财经资讯，把握市场脉搏</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <small class="text-muted me-3">
+                <span class="update-indicator"></span>
+                更新时间：<span id="updateTime">{{ update_time }}</span>
+            </small>
+            <button class="btn refresh-btn" id="refreshNews">
+                <i class="bi bi-arrow-clockwise me-1"></i>刷新
+            </button>
+        </div>
+    </div>
+
+    <!-- 两栏布局 -->
+    <div class="row g-4">
+        <!-- 左侧：资讯快报 -->
+        <div class="col-md-8">
+            <h3 class="section-title">
+                <i class="bi bi-lightning-charge"></i> 资讯快报
+            </h3>
+            <div class="news-section">
+                {% if news2_list %}
+                {% for news in news2_list %}
+                <div class="news-card mb-3">
+                    <div class="news-card-body">
+                        <h3 class="news-title">{{ news.title }}</h3>
+                        <div class="news-content">
+                            {{ news.content | truncate(150) }}
+                        </div>
+                        <div class="news-meta">
+                            <div class="news-source">
+                                <i class="bi bi-building"></i>
+<!--                                <span>{{ news.source or '财经快报' }}</span>-->
+                            </div>
+                            <div class="news-time">
+                                <i class="bi bi-clock"></i>
+                                <span>{{ news.publish_time.strftime('%m-%d %H:%M') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- 分页 -->
+                {% if news2_pagination and news2_pagination.pages > 1 %}
+                <nav aria-label="News2 pagination" class="mt-4">
+                    <ul class="pagination justify-content-start">
+                        {% if news2_pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="?news2_page={{ news2_pagination.prev_num }}">上一页</a>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in news2_pagination.iter_pages() %}
+                        {% if page_num %}
+                        {% if page_num != news2_pagination.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="?news2_page={{ page_num }}">{{ page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if news2_pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?news2_page={{ news2_pagination.next_num }}">下一页</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="loading-skeleton" style="width: 100%; height: 120px; border-radius: 15px;"></div>
+                    <div class="loading-skeleton mt-3" style="width: 80%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
+                    <div class="loading-skeleton mt-3" style="width: 90%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 右侧：市场总结 + 全球热点 -->
+        <div class="col-md-4">
+            <!-- 市场总结 -->
+            <div class="market-summary-card mb-4">
+                <div class="market-summary-title">
+                    <i class="bi bi-bar-chart-line me-2"></i>昨日市场总结
+                </div>
+                <div class="market-summary-content">
+                    {{ market_summary.content if market_summary else "今日市场数据正在分析中，请稍后查看..." }}
+                </div>
+                <div class="market-summary-meta">
+                    <div>
+                        <i class="bi bi-clock me-1"></i>
+                        {{ market_summary.publish_time.strftime('%Y-%m-%d %H:%M') if market_summary else '--:--' }}
+                    </div>
+                    <div>
+                        <span class="badge bg-light bg-opacity-25">
+                            <i class="bi bi-robot me-1"></i>AI生成
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 全球热点 -->
+            <h3 class="section-title">
+                <i class="bi bi-globe"></i> 全球热点
+            </h3>
+            <div class="global-hot-news">
+                {% if global_news_list %}
+                    {% for item in global_news_list %}
+                    <div class="global-hot-item mb-2 p-2 border-start border-3 border-primary bg-light rounded">
+                        <small class="text-muted">{{ item.publish_time.strftime('%m-%d %H:%M') }}</small>
+                        <p class="mb-0">{{ item.content | truncate(100) }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-muted">暂无全球热点资讯</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 刷新按钮功能
+        document.getElementById('refreshNews')?.addEventListener('click', function () {
+            const button = this;
+            const icon = button.querySelector('.bi-arrow-clockwise');
+
+            button.disabled = true;
+            icon.style.animation = 'rotate 1s linear infinite';
+
+            setTimeout(() => {
+                button.disabled = false;
+                icon.style.animation = '';
+
+                const now = new Date();
+                const timeString = now.toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                document.getElementById('updateTime').textContent = timeString;
+
+                console.log('新闻数据已刷新');
+            }, 2000);
+        });
+
+        // 卡片悬停效果（保留）
+        const cards = document.querySelectorAll('.news-card, .market-summary-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(-5px) scale(1)';
+            });
+        });
+
+        // 更新时间（如果未设置）
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const updateTimeEl = document.getElementById('updateTime');
+            if (updateTimeEl && !updateTimeEl.textContent.trim()) {
+                updateTimeEl.textContent = timeString;
+            }
+        }
+
+        updateCurrentTime();
+    });
+</script>
+{% endblock %}

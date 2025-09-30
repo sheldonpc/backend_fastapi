@@ -39,8 +39,8 @@
         width: 100%;
         height: 100%;
         /* background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); */
-        /* background: yellow; */
-        /* transition: left 0.5s; */
+    /* background: yellow; */
+    /* transition: left 0.5s; */
     /* } */
 
     /* .major-index-card:hover::before {
@@ -49,7 +49,7 @@
 
     .major-index-card:hover {
         transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
 
     /* 普通市场卡片 */
@@ -75,7 +75,7 @@
 
     .market-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         border-color: var(--primary-color);
     }
 
@@ -93,7 +93,7 @@
 
     .major-index-card .index-value {
         font-size: 1.8rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     /* 涨跌幅样式优化 */
@@ -124,7 +124,7 @@
         background: linear-gradient(135deg, #F8FAF8 0%, #ffffff 80%);
         border-radius: 15px;
         padding: 1.5rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     }
 
     .section-title {
@@ -178,8 +178,8 @@
     }
 
     .ai-insight {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 10px;
         padding: 1.25rem;
         backdrop-filter: blur(10px);
@@ -213,10 +213,10 @@
         background: #10b981;
         border-radius: 50%;
         margin-right: 0.5rem;
-        animation: pulse 2s infinite;
+        animation: pulse_indicator 2s infinite;
     }
 
-    @keyframes pulse {
+    @keyframes pulse_indicator {
         0% {
             box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
         }
@@ -241,29 +241,86 @@
     }
 
     /* 为不同位置的图标添加延迟 */
-    .col-6:nth-child(1) .trend-icon { animation-delay: 0s; }
-    .col-6:nth-child(2) .trend-icon { animation-delay: 0.3s; }
-    .col-6:nth-child(3) .trend-icon { animation-delay: 0.6s; }
-    .col-6:nth-child(4) .trend-icon { animation-delay: 0.9s; }
-    .col-6:nth-child(5) .trend-icon { animation-delay: 1.2s; }
-    .col-6:nth-child(6) .trend-icon { animation-delay: 0.15s; }
-    .col-6:nth-child(7) .trend-icon { animation-delay: 0.45s; }
-    .col-6:nth-child(8) .trend-icon { animation-delay: 0.75s; }
+    .col-6:nth-child(1) .trend-icon {
+        animation-delay: 0s;
+    }
+
+    .col-6:nth-child(2) .trend-icon {
+        animation-delay: 0.3s;
+    }
+
+    .col-6:nth-child(3) .trend-icon {
+        animation-delay: 0.6s;
+    }
+
+    .col-6:nth-child(4) .trend-icon {
+        animation-delay: 0.9s;
+    }
+
+    .col-6:nth-child(5) .trend-icon {
+        animation-delay: 1.2s;
+    }
+
+    .col-6:nth-child(6) .trend-icon {
+        animation-delay: 0.15s;
+    }
+
+    .col-6:nth-child(7) .trend-icon {
+        animation-delay: 0.45s;
+    }
+
+    .col-6:nth-child(8) .trend-icon {
+        animation-delay: 0.75s;
+    }
 
     /* 或者根据卡片类型添加不同延迟 */
-    .major-index-card:nth-of-type(1) .trend-icon { animation-delay: 0s; }
-    .major-index-card:nth-of-type(2) .trend-icon { animation-delay: 0.4s; }
-    .major-index-card:nth-of-type(3) .trend-icon { animation-delay: 0.8s; }
-    .major-index-card:nth-of-type(4) .trend-icon { animation-delay: 1.2s; }
+    .major-index-card:nth-of-type(1) .trend-icon {
+        animation-delay: 0s;
+    }
 
-    .market-card:nth-of-type(1) .trend-icon { animation-delay: 0.2s; }
-    .market-card:nth-of-type(2) .trend-icon { animation-delay: 0.6s; }
-    .market-card:nth-of-type(3) .trend-icon { animation-delay: 1.0s; }
-    .market-card:nth-of-type(4) .trend-icon { animation-delay: 0.3s; }
-    .market-card:nth-of-type(5) .trend-icon { animation-delay: 0.7s; }
-    .market-card:nth-of-type(6) .trend-icon { animation-delay: 1.1s; }
-    .market-card:nth-of-type(7) .trend-icon { animation-delay: 0.5s; }
-    .market-card:nth-of-type(8) .trend-icon { animation-delay: 0.9s; }
+    .major-index-card:nth-of-type(2) .trend-icon {
+        animation-delay: 0.4s;
+    }
+
+    .major-index-card:nth-of-type(3) .trend-icon {
+        animation-delay: 0.8s;
+    }
+
+    .major-index-card:nth-of-type(4) .trend-icon {
+        animation-delay: 1.2s;
+    }
+
+    .market-card:nth-of-type(1) .trend-icon {
+        animation-delay: 0.2s;
+    }
+
+    .market-card:nth-of-type(2) .trend-icon {
+        animation-delay: 0.6s;
+    }
+
+    .market-card:nth-of-type(3) .trend-icon {
+        animation-delay: 1.0s;
+    }
+
+    .market-card:nth-of-type(4) .trend-icon {
+        animation-delay: 0.3s;
+    }
+
+    .market-card:nth-of-type(5) .trend-icon {
+        animation-delay: 0.7s;
+    }
+
+    .market-card:nth-of-type(6) .trend-icon {
+        animation-delay: 1.1s;
+    }
+
+    .market-card:nth-of-type(7) .trend-icon {
+        animation-delay: 0.5s;
+    }
+
+    .market-card:nth-of-type(8) .trend-icon {
+        animation-delay: 0.9s;
+    }
 
     /* 上升箭头动画：自下而上运动 */
     @keyframes moveUpward {
@@ -351,7 +408,7 @@
     }
 
 
-        /* 趋势图标动态效果 */
+    /* 趋势图标动态效果 */
     .trend-icon {
         font-size: 1rem;
         margin-left: 0.5rem;
@@ -361,13 +418,13 @@
 
     /* 市场分析标签页样式 */
     .market-analysis-tabs .nav-pills {
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         padding: 0.25rem;
     }
 
     .market-analysis-tabs .market-tab {
-        color: rgba(255,255,255,0.7);
+        color: rgba(255, 255, 255, 0.7);
         border: none;
         border-radius: 6px;
         font-size: 0.85rem;
@@ -378,7 +435,7 @@
 
     .market-analysis-tabs .market-tab:hover {
         color: white;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         transform: translateY(-1px);
     }
 
@@ -403,14 +460,15 @@
     /* 市场分析卡片 */
     .market-analysis-tabs .ai-insight {
         min-height: 140px;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .market-analysis-tabs .ai-insight:hover {
-        background: rgba(255,255,255,0.12);
-        border-color: rgba(255,255,255,0.25);
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.25);
     }
+
     /* AI 研判区域 */
     .ai-insight-container {
         background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
@@ -433,8 +491,8 @@
     }
 
     .ai-insight {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 10px;
         padding: 1rem;
         backdrop-filter: blur(10px);
@@ -444,8 +502,8 @@
     }
 
     .ai-insight:hover {
-        background: rgba(255,255,255,0.15);
-        border-color: rgba(255,255,255,0.3);
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
     }
 
@@ -455,8 +513,13 @@
         animation: fadeInLeft 0.6s ease forwards;
     }
 
-    .ai-insight p:nth-child(3) { animation-delay: 0.1s; }
-    .ai-insight p:nth-child(4) { animation-delay: 0.2s; }
+    .ai-insight p:nth-child(3) {
+        animation-delay: 0.1s;
+    }
+
+    .ai-insight p:nth-child(4) {
+        animation-delay: 0.2s;
+    }
 
     @keyframes fadeInLeft {
         from {
@@ -472,7 +535,7 @@
     /* 情绪指标数值动画 */
     .ai-insight .h6 {
         font-weight: bold;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         transition: all 0.3s ease;
     }
 
@@ -489,13 +552,13 @@
 
     .ai-insight .badge:hover {
         transform: scale(1.05);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     /* 刷新按钮动画 */
     .btn-outline-light:hover {
-        background: rgba(255,255,255,0.2);
-        border-color: rgba(255,255,255,0.4);
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
         transform: translateY(-1px);
     }
 
@@ -504,21 +567,96 @@
     }
 
     @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
     }
+
+    .scrolling-notice-wrapper {
+        white-space: nowrap;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+    }
+
+    .scrolling-notice-content {
+        display: inline-block;
+        animation: scroll-left 20s linear infinite;
+        padding-left: 100%; /* 从右侧开始 */
+    }
+
+    .notice-item {
+        display: inline-block;
+        padding: 12px 16px;
+        font-size: 1rem;
+    }
+
+    /* 滚动动画：匀速从右向左 */
+    @keyframes scroll-left {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+
+    /* 悬停暂停（可选） */
+    .scrolling-notice-wrapper:hover .scrolling-notice-content {
+        animation-play-state: paused;
+    }
+
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="fade-in">
     <!-- 欢迎信息 -->
+    <!--    <div class="row mb-4">-->
+    <!--        <div class="col-12">-->
+    <!--            <div class="alert alert-info alert-dismissible fade show border-0" role="alert" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">-->
+    <!--                <i class="bi bi-graph-up-arrow me-2"></i>-->
+    <!--                <strong>欢迎访问五市信息平台！</strong> 实时掌握全球市场动态-->
+    <!--                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--    </div>-->
+    <!-- 滚动欢迎信息 -->
+    <!--    <div class="row mb-4">-->
+    <!--        <div class="col-12">-->
+    <!--            <div class="alert alert-info alert-dismissible fade show border-0 p-0 m-0" role="alert"-->
+    <!--                 style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); overflow: hidden;">-->
+    <!--                <div class="scrolling-welcome-text">-->
+    <!--                    <i class="bi bi-graph-up-arrow me-2"></i>-->
+    <!--                    <strong>欢迎访问五市信息平台！</strong> 实时掌握全球市场动态-->
+    <!--                </div>-->
+    <!--                <div class="scrolling-welcome-text">-->
+    <!--                    <i class="bi bi-graph-up-arrow me-2"></i>-->
+    <!--                    测试信息-->
+    <!--                </div>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--    </div>-->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="alert alert-info alert-dismissible fade show border-0" role="alert" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
-                <i class="bi bi-graph-up-arrow me-2"></i>
-                <strong>欢迎访问五市信息平台！</strong> 实时掌握全球市场动态
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="alert alert-info alert-dismissible fade show border-0 p-0 m-0" role="alert"
+                 style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); overflow: hidden; position: relative;">
+                <!-- 滚动容器 -->
+                <div class="scrolling-notice-wrapper">
+                    <div class="scrolling-notice-content" id="noticeContent">
+                        <span class="notice-item">
+                            <i class="bi bi-graph-up-arrow me-2"></i>
+                            <strong>{{ data.notice }}</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 关闭按钮 -->
+                <!--                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"-->
+                <!--                        style="position: absolute; top: 8px; right: 8px; z-index: 10;"></button>-->
             </div>
         </div>
     </div>
@@ -542,13 +680,13 @@
                     <div class="index-value">{{ item.price | round(2) }}</div>
                     <div class="change-indicator justify-content-center">
                         {% if item.change <= 0 %}
-                            <span class="badge bg-light text-success">{{ item.change_percent | round(2) }}%</span>
-                            <span class="small opacity-70">{{ item.change | round(2) }}</span>
-                            <i class="bi bi-caret-down-fill trend-icon trend-icon-down"></i>
+                        <span class="badge bg-light text-success">{{ item.change_percent | round(2) }}%</span>
+                        <span class="small opacity-70">{{ item.change | round(2) }}</span>
+                        <i class="bi bi-caret-down-fill trend-icon trend-icon-down"></i>
                         {% else %}
-                            <span class="badge bg-light text-danger">{{ item.change_percent | round(2) }}%</span>
-                            <span class="small opacity-70">{{ item.change | round(2) }}</span>
-                            <i class="bi bi-caret-up-fill trend-icon trend-icon-up"></i>
+                        <span class="badge bg-light text-danger">{{ item.change_percent | round(2) }}%</span>
+                        <span class="small opacity-70">{{ item.change | round(2) }}</span>
+                        <i class="bi bi-caret-up-fill trend-icon trend-icon-up"></i>
                         {% endif %}
                     </div>
                 </div>
@@ -568,9 +706,9 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="small text-muted">{{ item.name }}</div>
                         {% if item.change <= 0 %}
-                            <i class="bi bi-graph-down-arrow text-success"></i>
+                        <i class="bi bi-graph-down-arrow text-success"></i>
                         {% else %}
-                            <i class="bi bi-graph-up-arrow text-danger"></i>
+                        <i class="bi bi-graph-up-arrow text-danger"></i>
                         {% endif %}
                     </div>
                     <div class="index-value text-dark">{{ item.price | round(2)}}</div>
@@ -590,9 +728,9 @@
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="small text-muted">{{ item.name }}</div>
                         {% if item.name == "布伦特原油" %}
-                            <i class="bi bi-fuel-pump text-info"></i>
+                        <i class="bi bi-fuel-pump text-info"></i>
                         {% else %}
-                            <i class="bi bi-minecart-loaded text-info"></i>
+                        <i class="bi bi-minecart-loaded text-info"></i>
                         {% endif %}
                     </div>
                     <div class="index-value text-dark">{{ item.price | round(2)}}</div>
@@ -659,7 +797,7 @@
                         <span class="badge bg-success me-2">
                             <i class="bi bi-lightning-fill me-1"></i>实时
                         </span>
-                        <small class="opacity-75">DeepSeek</small>
+                        <small class="opacity-75">DeepSeek V3.1</small>
                     </div>
                 </div>
 
@@ -674,119 +812,171 @@
                     <div class="row text-center">
                         <div class="col-4">
                             <div class="small opacity-75">VIX指数</div>
-                            <div class="h6 mb-0 text-warning">52</div>
+                            <div class="h6 mb-0 text-warning">{{ data.vix | round(2) }}</div>
                         </div>
                         <div class="col-4">
                             <div class="small opacity-75">市场温度</div>
-                            <div class="h6 mb-0 text-success">65%</div>
+                            <div class="h6 mb-0 text-success">{{ data.market_data_activity }}</div>
                         </div>
                         <div class="col-4">
                             <div class="small opacity-75">AI信心度</div>
-                            <div class="h6 mb-0 text-info">75%</div>
+                            <div class="h6 mb-0 text-info">{{ data.average_confidence | round(2) }}%</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- A股市场分析 -->
+                {% for item in data.ai_insight %}
+                {% if item.market_region == "cn_market" %}
                 <div class="ai-insight mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">
                             <i class="bi bi-flag me-2"></i>A股判断
                         </h6>
-                        <span class="badge bg-success">看好</span>
+                        {% if item.sentiment == "看好" %}
+                        <span class="badge bg-success">{{ item.sentiment }}</span>
+                        {% elif item.sentiment == "中性" %}
+                        <span class="badge bg-warning">{{ item.sentiment }}</span>
+                        {% else %}
+                        <span class="badge bg-danger">{{ item.sentiment }}</span>
+                        {% endif %}
                     </div>
+                    {% for point in item.key_points %}
                     <p class="small mb-2">
+                        {% if point.type == "positive" %}
                         <i class="bi bi-arrow-up-circle-fill text-success me-1"></i>
-                        政策底确认，消费复苏预期增强
-                    </p>
-                    <p class="small mb-2">
+                        {% elif point.type == "negative" %}
+                        <i class="bi bi-arrow-down-circle-fill text-danger me-1"></i>
+                        {% elif point.type == "warning" %}
                         <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-                        外资流入放缓，关注北向资金动向
+                        {% else %}
+                        <i class="bi bi-info-circle-fill text-info me-1"></i>
+                        {% endif %}
+
+                        {{ point.content }}
                     </p>
+                    {% endfor %}
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="small opacity-75">重点关注</div>
                             <div class="d-flex flex-wrap gap-1 mt-1">
-                                <span class="badge bg-success bg-opacity-75">消费</span>
-                                <span class="badge bg-success bg-opacity-75">医药</span>
+                                {% for keyword in item.focus_sectors %}
+                                <span class="badge bg-success bg-opacity-75">{{ keyword }}</span>
+                                {% endfor %}
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="small opacity-75">支撑位</div>
-                            <div class="text-info fw-bold mt-1">3150点</div>
-                        </div>
+<!--                        <div class="col-6">-->
+<!--                            <div class="small opacity-75">支撑位</div>-->
+<!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
+<!--                        </div>-->
                     </div>
                 </div>
+                {% endif %}
+                {% endfor %}
 
-                <!-- 美股市场分析 -->
+                {% for item in data.ai_insight %}
+                {% if item.market_region == "usa_market" %}
                 <div class="ai-insight mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">
-                            <i class="bi bi-star me-2"></i>美股判断
+                            <i class="bi bi-star"></i> 美股判断
                         </h6>
-                        <span class="badge bg-info">中性</span>
+                        {% if item.sentiment == "看好" %}
+                        <span class="badge bg-success">{{ item.sentiment }}</span>
+                        {% elif item.sentiment == "中性" %}
+                        <span class="badge bg-warning">{{ item.sentiment }}</span>
+                        {% else %}
+                        <span class="badge bg-danger">{{ item.sentiment }}</span>
+                        {% endif %}
                     </div>
+                    {% for point in item.key_points %}
                     <p class="small mb-2">
-                        <i class="bi bi-check-circle-fill text-success me-1"></i>
-                        降息预期支撑，科技股企稳反弹
-                    </p>
-                    <p class="small mb-2">
+                        {% if point.type == "positive" %}
+                        <i class="bi bi-arrow-up-circle-fill text-success me-1"></i>
+                        {% elif point.type == "negative" %}
+                        <i class="bi bi-arrow-down-circle-fill text-danger me-1"></i>
+                        {% elif point.type == "warning" %}
                         <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
-                        通胀数据仍需关注，波动性或加大
+                        {% else %}
+                        <i class="bi bi-info-circle-fill text-info me-1"></i>
+                        {% endif %}
+
+                        {{ point.content }}
                     </p>
+                    {% endfor %}
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="small opacity-75">重点关注</div>
                             <div class="d-flex flex-wrap gap-1 mt-1">
-                                <span class="badge bg-info bg-opacity-75">AI芯片</span>
-                                <span class="badge bg-info bg-opacity-75">云计算</span>
+                                {% for keyword in item.focus_sectors %}
+                                <span class="badge bg-info bg-opacity-75">{{ keyword }}</span>
+                                {% endfor %}
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="small opacity-75">支撑位</div>
-                            <div class="text-info fw-bold mt-1">4200点</div>
-                        </div>
+<!--                        <div class="col-6">-->
+<!--                            <div class="small opacity-75">支撑位</div>-->
+<!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
+<!--                        </div>-->
                     </div>
                 </div>
+                {% endif %}
+                {% endfor %}
 
-                <!-- 贵金属市场分析 -->
+                {% for item in data.ai_insight %}
+                {% if item.market_region == "metal" %}
                 <div class="ai-insight mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">
                             <i class="bi bi-gem me-2"></i>贵金属判断
                         </h6>
-                        <span class="badge bg-warning">震荡</span>
+                        {% if item.sentiment == "看好" %}
+                        <span class="badge bg-success">{{ item.sentiment }}</span>
+                        {% elif item.sentiment == "中性" %}
+                        <span class="badge bg-warning">{{ item.sentiment }}</span>
+                        {% else %}
+                        <span class="badge bg-danger">{{ item.sentiment }}</span>
+                        {% endif %}
                     </div>
+                    {% for point in item.key_points %}
                     <p class="small mb-2">
+                        {% if point.type == "positive" %}
                         <i class="bi bi-arrow-up-circle-fill text-success me-1"></i>
-                        地缘风险溢价支撑黄金避险需求
-                    </p>
-                    <p class="small mb-2">
+                        {% elif point.type == "negative" %}
+                        <i class="bi bi-arrow-down-circle-fill text-danger me-1"></i>
+                        {% elif point.type == "warning" %}
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        {% else %}
                         <i class="bi bi-info-circle-fill text-info me-1"></i>
-                        铜价反映经济预期，关注需求复苏
+                        {% endif %}
+
+                        {{ point.content }}
                     </p>
+                    {% endfor %}
                     <div class="row">
-                        <div class="col-4">
-                            <div class="small opacity-75">黄金</div>
-                            <div class="text-warning fw-bold">看涨</div>
+                        <div class="col-12">
+                            <div class="small opacity-75">重点关注</div>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                {% for keyword in item.focus_sectors %}
+                                <span class="badge bg-info bg-opacity-75">{{ keyword }}</span>
+                                {% endfor %}
+                            </div>
                         </div>
-                        <div class="col-4">
-                            <div class="small opacity-75">白银</div>
-                            <div class="text-info fw-bold">震荡</div>
-                        </div>
-                        <div class="col-4">
-                            <div class="small opacity-75">铜</div>
-                            <div class="text-success fw-bold">回暖</div>
-                        </div>
+<!--                        <div class="col-6">-->
+<!--                            <div class="small opacity-75">支撑位</div>-->
+<!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
+<!--                        </div>-->
                     </div>
                 </div>
+                {% endif %}
+                {% endfor %}
+
 
                 <div class="mt-3 d-flex justify-content-between align-items-center">
                     <small class="opacity-75">
-                        <i class="bi bi-clock me-1"></i>更新于：2025-09-29 16:30
+                        <i class="bi bi-clock me-1"></i>更新于：{{ data.ai_update_time }}
                     </small>
                     <button class="btn btn-outline-light btn-sm" id="refreshAnalysis">
-                        <i class="bi bi-arrow-clockwise me-1"></i>刷新分析
+                        <i class="bi bi-arrow-clockwise me-1"></i>动态更新中
                     </button>
                 </div>
             </div>
@@ -797,183 +987,187 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    const trendIcons = document.querySelectorAll('.trend-icon');
+        // const content = document.getElementById('noticeContent');
+        // 克隆一份内容，避免滚动到末尾出现空白
+        // content.innerHTML += content.innerHTML;
+
+        const trendIcons = document.querySelectorAll('.trend-icon');
         trendIcons.forEach((icon, index) => {
             // 生成0到1.5秒之间的随机延迟
             const randomDelay = Math.random() * 1.5;
             icon.style.animationDelay = `${randomDelay}s`;
-    });
+        });
 
-    const dataMappring = {
-        'sh000001': {selector: '[data-index="sh000001"]', name: '上证指数'},
-        'sz399001': {selector: '[data-index="sz399001"]', name: '深证成指'},
-        'sz399006': {selector: '[data-index="sz399006"]', name: '创业板指'},
-        'hsi': {selector: '[data-index="hsi"]', name: '恒生指数'},
-        'djia': {selector: '[data-index="djia"]', name: '道琼斯'},
-        'spx': {selector: '[data-index="spx"]', name: '标普500'},
-        'ndx': {selector: '[data-index="ndx"]', name: '纳斯达克'},
-    }
-
-    let currentData = {};
-
-    // 数据更新动画
-    function animateValueUpdate(element) {
-        element.classList.add('value-update');
-        setTimeout(() => {
-            element.classList.remove('value-update');
-        }, 600);
-    }
-
-    // 更新指数卡片数据
-    function updateIndexCard(cardElement, data, animate = false) {
-        if (!data || !cardElement) return;
-
-        const priceElement = cardElement.querySelector('.index-price');
-        if (priceElement && data.price !== undefiend) {
-            if (animate) animateValueUpdate(priceElement)
-            priceElement.textContent = parseFloat(data.price).toFixed(2);
+        const dataMappring = {
+            'sh000001': {selector: '[data-index="sh000001"]', name: '上证指数'},
+            'sz399001': {selector: '[data-index="sz399001"]', name: '深证成指'},
+            'sz399006': {selector: '[data-index="sz399006"]', name: '创业板指'},
+            'hsi': {selector: '[data-index="hsi"]', name: '恒生指数'},
+            'djia': {selector: '[data-index="djia"]', name: '道琼斯'},
+            'spx': {selector: '[data-index="spx"]', name: '标普500'},
+            'ndx': {selector: '[data-index="ndx"]', name: '纳斯达克'},
         }
 
-        const changeIndicator = cardElement.querySelector('.change-indicator');
-        if (changeIndicator && data.change_percent !== undifiend && data.change !== undefiend) {
-            const isPositive = data.change > 0;
-            const isNegative = data.change < 0;
+        let currentData = {};
 
-            changeIndicator.innerHTML = '';
-            // 百分比
-            const badge = document.createElement('span');
-            badge.className = `badge ${isNegative ? 'bg-light text-success' : 'bg-light text-danger' }`
-            badge.textContent = `${isPositive ? '+' : ''}${parseFloat(data.change_percent).toFixed(2)}%`
-            // 涨跌额
-            const changeAmount = document.createElement('span');
-            changeAmount.className = 'small opacity-70'
-            changeAmount.textContent = `(${isPositive ? '+' : ''}${parseFloat(data.change).toFixed(2)})`
-
-            const trendIcon = document.createElement('i');
-            if (isPositive) {
-                trendIcon.className = 'bi bi-caret-up-fill trend-icon trend-icon-up';
-            } else if (isNegative) {
-                trendIcon.className = '\'bi bi-caret-down-fill trend-icon trend-icon-down';
-            }
-
-        }
-
-    }
-
-    // 模拟实时数据更新
-    function simulateDataUpdate() {
-        const values = document.querySelectorAll('.index-value[data-value]');
-        values.forEach((element, index) => {
+        // 数据更新动画
+        function animateValueUpdate(element) {
+            element.classList.add('value-update');
             setTimeout(() => {
-                animateValueUpdate(element);
-            }, index * 200);
-        });
+                element.classList.remove('value-update');
+            }, 600);
+        }
 
-        // 更新时间
-        const now = new Date();
-        const timeString = now.toLocaleString('zh-CN', {
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        document.getElementById('updateTime').textContent = timeString;
-    }
+        // 更新指数卡片数据
+        function updateIndexCard(cardElement, data, animate = false) {
+            if (!data || !cardElement) return;
 
-    // 每30秒模拟一次数据更新
-    setInterval(simulateDataUpdate, 30000);
-
-    // 卡片进入视图动画
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animationDelay = Math.random() * 0.3 + 's';
-                entry.target.classList.add('fade-in');
+            const priceElement = cardElement.querySelector('.index-price');
+            if (priceElement && data.price !== undefiend) {
+                if (animate) animateValueUpdate(priceElement)
+                priceElement.textContent = parseFloat(data.price).toFixed(2);
             }
-        });
-    }, observerOptions);
 
-    // 观察所有卡片
-    document.querySelectorAll('.card').forEach(card => {
-        observer.observe(card);
-    });
+            const changeIndicator = cardElement.querySelector('.change-indicator');
+            if (changeIndicator && data.change_percent !== undifiend && data.change !== undefiend) {
+                const isPositive = data.change > 0;
+                const isNegative = data.change < 0;
 
-    // AI研判刷新功能
-    document.getElementById('refreshAnalysis')?.addEventListener('click', function() {
-        const button = this;
-        const insights = document.querySelectorAll('.ai-insight');
+                changeIndicator.innerHTML = '';
+                // 百分比
+                const badge = document.createElement('span');
+                badge.className = `badge ${isNegative ? 'bg-light text-success' : 'bg-light text-danger'}`
+                badge.textContent = `${isPositive ? '+' : ''}${parseFloat(data.change_percent).toFixed(2)}%`
+                // 涨跌额
+                const changeAmount = document.createElement('span');
+                changeAmount.className = 'small opacity-70'
+                changeAmount.textContent = `(${isPositive ? '+' : ''}${parseFloat(data.change).toFixed(2)})`
 
-        // 添加加载状态
-        button.disabled = true;
-        insights.forEach(insight => insight.classList.add('loading'));
+                const trendIcon = document.createElement('i');
+                if (isPositive) {
+                    trendIcon.className = 'bi bi-caret-up-fill trend-icon trend-icon-up';
+                } else if (isNegative) {
+                    trendIcon.className = '\'bi bi-caret-down-fill trend-icon trend-icon-down';
+                }
 
-        // 模拟AI分析更新
-        setTimeout(() => {
-            // 移除加载状态
-            insights.forEach(insight => insight.classList.remove('loading'));
-            button.disabled = false;
+            }
 
-            // 添加数据更新视觉反馈
-            insights.forEach((insight, index) => {
+        }
+
+        // 模拟实时数据更新
+        function simulateDataUpdate() {
+            const values = document.querySelectorAll('.index-value[data-value]');
+            values.forEach((element, index) => {
                 setTimeout(() => {
-                    insight.classList.add('data-updated');
-                    setTimeout(() => {
-                        insight.classList.remove('data-updated');
-                    }, 600);
-                }, index * 150);
+                    animateValueUpdate(element);
+                }, index * 200);
             });
 
-            // 更新时间戳
-            const timeElement = document.querySelector('.ai-insight-container small');
-            if (timeElement) {
-                const now = new Date();
-                const timeString = now.toLocaleString('zh-CN', {
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
+            // 更新时间
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('updateTime').textContent = timeString;
+        }
+
+        // 每30秒模拟一次数据更新
+        setInterval(simulateDataUpdate, 30000);
+
+        // 卡片进入视图动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationDelay = Math.random() * 0.3 + 's';
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // 观察所有卡片
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // AI研判刷新功能
+        document.getElementById('refreshAnalysis')?.addEventListener('click', function () {
+            const button = this;
+            const insights = document.querySelectorAll('.ai-insight');
+
+            // 添加加载状态
+            button.disabled = true;
+            insights.forEach(insight => insight.classList.add('loading'));
+
+            // 模拟AI分析更新
+            setTimeout(() => {
+                // 移除加载状态
+                insights.forEach(insight => insight.classList.remove('loading'));
+                button.disabled = false;
+
+                // 添加数据更新视觉反馈
+                insights.forEach((insight, index) => {
+                    setTimeout(() => {
+                        insight.classList.add('data-updated');
+                        setTimeout(() => {
+                            insight.classList.remove('data-updated');
+                        }, 600);
+                    }, index * 150);
                 });
-                timeElement.innerHTML = `<i class="bi bi-clock me-1"></i>更新于：${timeString}`;
-            }
 
-            console.log('AI分析已刷新');
-        }, 2000);
+                // 更新时间戳
+                const timeElement = document.querySelector('.ai-insight-container small');
+                if (timeElement) {
+                    const now = new Date();
+                    const timeString = now.toLocaleString('zh-CN', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    timeElement.innerHTML = `<i class="bi bi-clock me-1"></i>更新于：${timeString}`;
+                }
+
+                console.log('AI分析已刷新');
+            }, 2000);
+        });
+
+        // 情绪指标交互效果
+        const emotionIndicators = document.querySelectorAll('.ai-insight .h6');
+        emotionIndicators.forEach(indicator => {
+            indicator.addEventListener('mouseenter', function () {
+                this.style.transform = 'scale(1.05)';
+                this.style.filter = 'brightness(1.1)';
+            });
+
+            indicator.addEventListener('mouseleave', function () {
+                this.style.transform = 'scale(1)';
+                this.style.filter = 'brightness(1)';
+            });
+        });
+
+        // 标签hover效果增强
+        const analysisbadges = document.querySelectorAll('.ai-insight .badge');
+        analysisbadges.forEach(badge => {
+            badge.addEventListener('mouseenter', function () {
+                this.style.transform = 'scale(1.1)';
+                this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            });
+
+            badge.addEventListener('mouseleave', function () {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+            });
+        });
     });
-
-    // 情绪指标交互效果
-    const emotionIndicators = document.querySelectorAll('.ai-insight .h6');
-    emotionIndicators.forEach(indicator => {
-        indicator.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.05)';
-            this.style.filter = 'brightness(1.1)';
-        });
-
-        indicator.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-            this.style.filter = 'brightness(1)';
-        });
-    });
-
-    // 标签hover效果增强
-    const analysisbadges = document.querySelectorAll('.ai-insight .badge');
-    analysisbadges.forEach(badge => {
-        badge.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1)';
-            this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-        });
-
-        badge.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-            this.style.boxShadow = 'none';
-        });
-    });
-});
 </script>
 {% endblock %}

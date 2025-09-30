@@ -217,7 +217,6 @@ class GlobalIndexLatest(models.Model):
 
     class Meta:
         table = "global_index_latest"
-        unique_together = ("code", "timestamp")
 
 class GlobalIndexHistory(models.Model):
     """全球指数历史数据（历史表）"""
@@ -237,9 +236,7 @@ class GlobalIndexHistory(models.Model):
 
     class Meta:
         table = "global_index_history"
-        unique_together = ("code", "timestamp")  # 避免重复
 
-# "代码", "名称", "最新价", "涨跌额", "涨跌幅", "开盘价", "最高价", "最低价", "昨收价", "振幅", "最新行情时间"
 # 废弃
 class CNIndexRealtimeData(models.Model):
     """中国指数实时数据"""
@@ -337,9 +334,9 @@ class HotStock(models.Model):
 # 代码      名称   最新价  涨跌额   涨跌幅     买入     卖出     昨收  \
 class MinuteLevelCNStockData(models.Model):
     """中国股票分钟级数据"""
-    id = fields.IntField(pk=True)
+    # id = fields.IntField(pk=True)
 
-    code = fields.CharField(max_length=20)
+    code = fields.CharField(max_length=20, pk=True)  # 主键！
     name = fields.CharField(max_length=50)
     price = fields.DecimalField(max_digits=15, decimal_places=4)
     change = fields.DecimalField(max_digits=15, decimal_places=4)
@@ -356,14 +353,13 @@ class MinuteLevelCNStockData(models.Model):
 
     class Meta:
         table = "minute_level_cn_stock_data"
-        unique_together = ("code", "name")
 
 # 港股分钟级数据
     #  序号   代码                     名称    最新价  涨跌额  涨跌幅  \
     # 今开      最高      最低      昨收        成交量        成交额
 class MinuteLevelHKStockData(models.Model):
-    id = fields.IntField(pk=True)
-    code = fields.CharField(max_length=20)
+    # id = fields.IntField(pk=True)
+    code = fields.CharField(max_length=20, pk=True)
     name = fields.CharField(max_length=50)
     price = fields.DecimalField(max_digits=15, decimal_places=4)
     change = fields.DecimalField(max_digits=15, decimal_places=4)
@@ -378,7 +374,6 @@ class MinuteLevelHKStockData(models.Model):
 
     class Meta:
         table = "minute_level_hk_stock_data"
-        unique_together = ("code", "name")
 
 class CNSpecificStockData(models.Model):
     """特定数据模型 (精确匹配15个字段)"""
@@ -747,7 +742,7 @@ class VIXRealTimeData(models.Model):
 
     class Meta:
         table = "vix_real_time_data"
-        ordering = ["-created_at"]
+        ordering = ["-update_time"]
 
     def __str__(self):
         return f"VIX指数 {self.current_price}"
@@ -1262,11 +1257,11 @@ class KeyPoint(models.Model):
 class CNMarket(models.Model):
     """市场研判结果（Tortoise ORM 模型）"""
     id = fields.IntField(pk=True)
-    market_region = fields.CharField(max_length=2, default="CN", description="市场区域")
-    data_type = fields.CharField(max_length=10, default="index", description="数据类型")
+    market_region = fields.CharField(max_length=50, default="CN", description="市场区域")
+    data_type = fields.CharField(max_length=50, default="index", description="数据类型")
     confidence = fields.IntField(description="置信度 (0-100)")
-    sentiment = fields.CharField(max_length=10, description="情绪: 看好/中性/看空/乐观/悲观")
-    sentiment_level = fields.CharField(max_length=10, description="情绪级别: bullish/neutral/bearish")
+    sentiment = fields.CharField(max_length=50, description="情绪: 看好/中性/看空/乐观/悲观")
+    sentiment_level = fields.CharField(max_length=50, description="情绪级别: bullish/neutral/bearish")
     focus_sectors = fields.JSONField(description="关注行业列表", default=list)
     support_level = fields.FloatField(null=True, description="支撑位（可选）")
     resistance_level = fields.FloatField(null=True, description="阻力位（可选）")
@@ -1317,3 +1312,23 @@ class CNMarket(models.Model):
             ])
 
         return market
+
+class StockMarketActivity(models.Model):
+    """股票市场活跃度数据模型"""
+    id = fields.IntField(pk=True)
+    rise = fields.FloatField(description="上涨")
+    limit_up = fields.FloatField(description="涨停")
+    real_limit_up = fields.FloatField(description="真实涨停")
+    st_limit_up = fields.FloatField(description="st st*涨停")
+    fall = fields.FloatField(description="下跌")
+    limit_down = fields.FloatField(description="跌停")
+    real_limit_down = fields.FloatField(description="真实跌停")
+    st_limit_down = fields.FloatField(description="st st*跌停")
+    plate_up = fields.FloatField(description="平盘")
+    stop = fields.FloatField(description="停牌")
+    activity = fields.FloatField(description="活跃度")
+    date = fields.DatetimeField(description="统计日期")
+    update_time = fields.DatetimeField(description="更新时间")
+    class Meta:
+        table = "stock_market_activity"
+        ordering = ["-date"]

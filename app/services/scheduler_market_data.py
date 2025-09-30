@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import random
 from datetime import datetime, time, timedelta
 from functools import wraps
 from zoneinfo import ZoneInfo
@@ -14,15 +15,16 @@ from app.services.market_data_service import (
     fetch_global_market_data, fetch_global_market_data2,
     fetch_global_market_data3, fetch_global_market_data4,
     fetch_fx_market_history_data,
-    fetch_oil_data, fetch_gold_data, fetch_silver_data, fetch_eastmoney_history_market_data
+    fetch_oil_data, fetch_gold_data, fetch_silver_data, fetch_eastmoney_history_market_data, crawl_llm_insight,
+    brief_rise_down_data
 )
 from app.utils.crawl_report import crawl_report_func
 
 logger = logging.getLogger(__name__)
 
 # ==== 交易时间配置 ====
-CN_SESSIONS = [(time(9, 30), time(11, 30)), (time(13, 0), time(15, 0))]
-US_SESSIONS = [(time(9, 30), time(16, 0))]
+CN_SESSIONS = [(time(9, 30), time(11, 30)), (time(13, 0), time(16, 0))]
+US_SESSIONS = [(time(9, 30), time(17, 0))]
 
 
 def log_task(name: str):
@@ -138,26 +140,55 @@ class NewMarketScheduler:
     async def update_news_four(self):
         await fetch_global_market_data4()
 
+    @log_task("dify")
+    async def update_ai_insight(self):
+        await crawl_llm_insight()
+
+    @log_task("notice_rise_down")
+    async def update_notice_rise_down(self):
+        await brief_rise_down_data()
+
     @log_task("胡润排行榜")
     async def yearly_update_hurun_rank(self):
         await fetch_hurun_rank_market_data()
 
     # ==== 任务集合 ====
+    # async def run_cn_5min_tasks(self):
+    #     await asyncio.gather(
+    #         self.update_fx_market_data(),
+    #         self.update_oil_data(),
+    #         self.update_gold_data(),
+    #         self.update_silver_data(),
+    #         self.update_vix_index(),
+    #         self.update_rise_down_data(),
+    #         self.update_notice_rise_down(),
+    #     )
+
     async def run_cn_5min_tasks(self):
-        await asyncio.gather(
-            self.update_fx_market_data(),
-            self.update_oil_data(),
-            self.update_gold_data(),
-            self.update_silver_data(),
-            self.update_vix_index(),
-            self.update_rise_down_data(),
-        )
+        tasks = [
+            self.update_fx_market_data,
+            self.update_oil_data,
+            self.update_gold_data,
+            self.update_silver_data,
+            self.update_vix_index,
+            self.update_rise_down_data,
+            self.update_notice_rise_down,
+        ]
+
+        for task in tasks:
+            try:
+                await task()
+                sleep_time = random.uniform(5, 10)
+                await asyncio.sleep(sleep_time)
+            except Exception as e:
+                logger.error(f"run_cn_5min_tasks任务执行失败: {task.__name__} - {str(e)}")
 
     async def run_global_5min_tasks(self):
+        await asyncio.sleep(random.uniform(5, 10))
         await self.run_update_global_index_data()
 
     async def run_cn_daily_tasks(self):
-        await asyncio.gather(
+        tasks = [
             self.update_index_history_data(),
             self.update_fx_history_data(),
             self.update_bond_data(),
@@ -166,7 +197,16 @@ class NewMarketScheduler:
             self.update_news_two(),
             self.update_news_three(),
             self.update_news_four(),
-        )
+            self.update_ai_insight(),
+        ]
+
+        for task in tasks:
+            try:
+                await task
+                sleep_time = random.uniform(5, 10)
+                await asyncio.sleep(sleep_time)
+            except Exception as e:
+                logger.error(f"run_cn_daily_tasks任务执行失败: {task.__name__} - {str(e)}")
 
     async def run_hourly_tasks(self):
         await asyncio.gather(
@@ -191,7 +231,7 @@ class NewMarketScheduler:
                 await self.run_cn_5min_tasks()
                 if self._shutdown_after_force_once():
                     break
-            await self._safe_sleep(300)
+            await self._safe_sleep(120)
 
     async def _scheduler_loop_5min_global(self):
         while self.running:
@@ -201,7 +241,7 @@ class NewMarketScheduler:
             await self._safe_sleep(300)
 
     async def _scheduler_loop_daily_cn(self):
-        daily_times = [time(10, 0), time(18, 0)]
+        daily_times = [time(7, 0), time(10, 0),time(14, 0), time(18, 0)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
