@@ -214,6 +214,7 @@ class GlobalIndexLatest(models.Model):
     amplitude = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
     timestamp = fields.DatetimeField()   # 行情时间
     updated_at = fields.DatetimeField(auto_now=True)
+    region = fields.CharField(max_length=50, default="其他")
 
     class Meta:
         table = "global_index_latest"
@@ -233,6 +234,8 @@ class GlobalIndexHistory(models.Model):
     amplitude = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
     timestamp = fields.DatetimeField()   # 行情时间
     updated_at = fields.DatetimeField(auto_now=True)
+    region = fields.CharField(max_length=50, default="其他")
+
 
     class Meta:
         table = "global_index_history"

@@ -4,7 +4,7 @@ import random
 from datetime import datetime, time, timedelta
 from functools import wraps
 from zoneinfo import ZoneInfo
-
+import chinese_calendar as cn_calendar
 from app.services.market_data_service import (
     fetch_realtime_market_data,
     fetch_fx_market_data, fetch_stock_hot_follow_market_data,
@@ -49,16 +49,28 @@ class NewMarketScheduler:
         self.force_run_once = False
 
     # ==== 交易时间判断 ====
-    def is_cn_trading_time(self) -> bool:
+    def is_cn_trading_day(self) -> bool:
         now = datetime.now(ZoneInfo("Asia/Shanghai"))
-        return now.weekday() < 5 and any(start <= now.time() < end for start, end in CN_SESSIONS)
+        current_date = now.date()
+
+        # 判断是否为周末
+        if now.weekday() >= 5:
+            return False
+
+        # 判断是否为节假日
+        if cn_calendar.is_holiday(current_date):
+            return False
+
+        # 判断是否为调休工作日（节假日但需要上班）
+        if cn_calendar.is_in_lieu(current_date):
+            return True
+
+        # 检查交易时间段
+        return any(start <= now.time() < end for start, end in CN_SESSIONS)
 
     def is_usa_trading_time(self) -> bool:
         now = datetime.now(ZoneInfo("America/New_York"))
         return now.weekday() < 5 and any(start <= now.time() < end for start, end in US_SESSIONS)
-
-    def is_cn_trading_day(self) -> bool:
-        return datetime.now(ZoneInfo("Asia/Shanghai")).weekday() < 5
 
     # ==== 任务定义 ====
     @log_task("全球市场指数信息")
@@ -161,6 +173,9 @@ class NewMarketScheduler:
             self.update_notice_rise_down,
         ]
 
+        if not self.is_cn_trading_day():
+            return
+
         for task in tasks:
             try:
                 await task()
@@ -179,11 +194,23 @@ class NewMarketScheduler:
             self.update_fx_history_data(),
             self.update_bond_data(),
             self.update_eastmoney_news(),
+        ]
+
+        for task in tasks:
+            try:
+                await task
+                sleep_time = random.uniform(5, 10)
+                await asyncio.sleep(sleep_time)
+            except Exception as e:
+                logger.error(f"run_cn_daily_tasks任务执行失败: {task.__name__} - {str(e)}")
+
+    async def run_news_hourly_tasks(self):
+        tasks = [
+            self.update_eastmoney_news(),
             self.update_news_one(),
             self.update_news_two(),
             self.update_news_three(),
             self.update_news_four(),
-            self.update_ai_insight(),
         ]
 
         for task in tasks:
@@ -201,8 +228,13 @@ class NewMarketScheduler:
             self.update_minute_level_hk_data(),
         )
 
+    async def run_first_ai_daily_tasks(self):
+        await asyncio.gather(
+            self.update_ai_insight()
+        )
+
     # 每天早上7点运行一次
-    async def run_ai_daily_tasks(self):
+    async def run_second_ai_daily_tasks(self):
         await asyncio.gather(
             self.update_ai_yesterday_summary()
         )
@@ -219,14 +251,17 @@ class NewMarketScheduler:
     # ==== 调度循环 ====
     async def _scheduler_loop_5min_cn(self):
         while self.running:
-            if self.is_cn_trading_time():
+            if self.is_cn_trading_day():
                 await self.run_cn_5min_tasks()
                 if self._shutdown_after_force_once():
                     break
             await self._safe_sleep(120)
 
+    # 全球指数信息5分钟更新一次
     async def _scheduler_loop_5min_global(self):
         while self.running:
+            if not self.is_cn_trading_day():
+                return
             await self.run_global_5min_tasks()
             if self._shutdown_after_force_once():
                 break
@@ -254,8 +289,8 @@ class NewMarketScheduler:
                 if self._shutdown_after_force_once():
                     break
 
-    async def _scheduler_loop_daily_ai_summary(self):
-        daily_times = [time(7, 0)]
+    async def _scheduler_second_loop_daily_ai_summary(self):
+        daily_times = [time(10, 30)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
@@ -266,13 +301,35 @@ class NewMarketScheduler:
                 default=datetime.combine(today + timedelta(days=1), daily_times[0], tzinfo=ZoneInfo("Asia/Shanghai"))
             )
             sleep_sec = (next_run - now).total_seconds()
-            logger.info(f"AI News Summary 每日任务将在 {sleep_sec:.0f} 秒后执行")
+            logger.info(f"Second: AI News Summary 每日任务将在 {sleep_sec:.0f} 秒后执行")
             await self._safe_sleep(sleep_sec)
 
             if not self.running:
                 break
             if self.is_cn_trading_day():
-                await self.run_ai_daily_tasks()
+                await self.run_second_ai_daily_tasks()
+                if self._shutdown_after_force_once():
+                    break
+
+    async def _scheduler_first_loop_daily_ai_summary(self):
+        daily_times = [time(10, 20)]
+        while self.running:
+            now = datetime.now(ZoneInfo("Asia/Shanghai"))
+            today = now.date()
+            next_run = min(
+                (datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai"))
+                 for t in daily_times
+                 if datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai")) > now),
+                default=datetime.combine(today + timedelta(days=1), daily_times[0], tzinfo=ZoneInfo("Asia/Shanghai"))
+            )
+            sleep_sec = (next_run - now).total_seconds()
+            logger.info(f"First: AI News Summary 每日任务将在 {sleep_sec:.0f} 秒后执行")
+            await self._safe_sleep(sleep_sec)
+
+            if not self.running:
+                break
+            if self.is_cn_trading_day():
+                await self.run_first_ai_daily_tasks()
                 if self._shutdown_after_force_once():
                     break
 
@@ -298,6 +355,27 @@ class NewMarketScheduler:
                 if self._shutdown_after_force_once():
                     break
 
+    async def _scheduler_news_loop_real_hourly(self):
+        daily_times = [time(h, 5) for h in range(7, 23)]
+        while self.running:
+            now = datetime.now(ZoneInfo("Asia/Shanghai"))
+            today = now.date()
+            next_run = min(
+                (datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai"))
+                 for t in daily_times
+                 if datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai")) > now),
+                default=datetime.combine(today + timedelta(days=1), daily_times[0], tzinfo=ZoneInfo("Asia/Shanghai"))
+            )
+            sleep_sec = (next_run - now).total_seconds()
+            logger.info(f"新闻小时任务将在 {sleep_sec:.0f} 秒后执行")
+            await self._safe_sleep(sleep_sec)
+
+            if not self.running:
+                break
+            await self.run_news_hourly_tasks()
+            if self._shutdown_after_force_once():
+                break
+
     async def _safe_sleep(self, seconds: float):
         """安全 sleep，支持取消"""
         try:
@@ -320,7 +398,9 @@ class NewMarketScheduler:
             asyncio.create_task(self._scheduler_loop_daily_cn()),
             asyncio.create_task(self._scheduler_loop_5min_global()),
             asyncio.create_task(self._scheduler_loop_hourly()),
-            asyncio.create_task(self._scheduler_loop_daily_ai_summary()),
+            asyncio.create_task(self._scheduler_first_loop_daily_ai_summary()),
+            asyncio.create_task(self._scheduler_second_loop_daily_ai_summary()),
+            asyncio.create_task(self._scheduler_news_loop_real_hourly()),
         ]
 
     async def stop_scheduler(self):
@@ -336,4 +416,4 @@ class NewMarketScheduler:
 
 if __name__ == "__main__":
     scheduler = NewMarketScheduler()
-    print("是否在中国交易时间:", scheduler.is_cn_trading_time())
+    print("是否在中国交易时间:", scheduler.is_cn_trading_day())

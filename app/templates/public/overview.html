@@ -1,0 +1,166 @@
+{% extends "public/base.html" %}
+
+{% block title %}财经新闻 - 五市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 区域标题 */
+    .region-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 1.5rem 0 0.75rem;
+        padding-bottom: 0.5rem;
+        /*border-bottom: 2px solid var(--primary-color);*/
+    }
+
+    /* 自定义表格容器 */
+    .market-table {
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-secondary);
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* 表头 */
+    .market-table thead th {
+        /*background: var(--primary-gradient);*/
+        background-color: #397ff1;
+        color: white;
+        font-weight: 600;
+        padding: 12px 16px;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    /* 表格行 */
+    .market-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .market-table tbody tr:hover {
+        background-color: rgba(248, 250, 252, 0.7);
+    }
+
+    .market-table tbody td,
+    .market-table tbody th {
+        padding: 12px 16px;
+        text-align: center;
+        border: none;
+        font-size: 0.95rem;
+        color: #334155;
+    }
+
+    /* 指数名称加粗 */
+    .market-table tbody th {
+        font-weight: 600;
+        text-align: left;
+    }
+
+    /* 涨跌幅颜色 */
+    .change-up {
+        color: #047857 !important; /* 绿色上涨 */
+        font-weight: 600;
+    }
+
+    .change-down {
+        color: #dc2626 !important; /* 红色下跌 */
+        font-weight: 600;
+    }
+
+    /* 响应式：小屏时缩小内边距 */
+    @media (max-width: 768px) {
+        .market-table thead th,
+        .market-table tbody td,
+        .market-table tbody th {
+            padding: 10px 8px;
+            font-size: 0.875rem;
+        }
+
+        .region-title {
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="accordion" id="accordionPanelsStayOpenExample">
+            {% for region, indexes in ordered_result.items() %}
+            {% if indexes %}
+            {% set is_first = loop.first %}
+            {% set collapse_id = "panelsStayOpen-collapse-" + loop.index|string %}
+            {% set heading_id = "panelsStayOpen-heading-" + loop.index|string %}
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="{{ heading_id }}">
+                    <button
+                            class="accordion-button{% if not is_first %} collapsed{% endif %}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#{{ collapse_id }}"
+                            aria-expanded="{{ 'true' if is_first else 'false' }}"
+                            aria-controls="{{ collapse_id }}">
+                        {{ region }}
+                    </button>
+                </h2>
+                <div
+                        id="{{ collapse_id }}"
+                        class="accordion-collapse collapse{% if is_first %} show{% endif %}"
+                        aria-labelledby="{{ heading_id }}"
+                        data-bs-parent="#accordionPanelsStayOpenExample">
+                    <div class="accordion-body">
+                        <div class="market-table">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>指数名称</th>
+                                    <th>最新价</th>
+                                    <th>涨跌幅</th>
+                                    <th>涨跌额</th>
+                                    <th>更新时间</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for index in indexes %}
+                                <tr>
+                                    <th scope="row">{{ index.name }}</th>
+                                    <td>{{ index.price }}</td>
+                                    <td class="{% if index.change_percent|float >= 0 %}change-down{% else %}change-up{% endif %}">
+                                        {{ '%+.2f'|format(index.change_percent|float) }}%
+                                    </td>
+                                    <td class="{% if index.change|float >= 0 %}change-down{% else %}change-up{% endif %}">
+                                        {{ '%+.2f'|format(index.change|float) }}
+                                    </td>
+                                    <td>{{ index.timestamp }}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card" style="width: 18rem;">
+            <div class="card-header">
+                Featured
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">An item</li>
+                <li class="list-group-item">A second item</li>
+                <li class="list-group-item">A third item</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

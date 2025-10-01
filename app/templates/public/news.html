@@ -507,6 +507,97 @@
         font-weight: 600;
     }
 
+    .pagination_nav {
+        margin-top: 2rem !important;
+    }
+
+    /* 刷新提示框样式 */
+    .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1055;
+    }
+
+    .refresh-toast {
+        background: linear-gradient(135deg, #3b82f6 50%, #4f46e5 100%);
+        border: none;
+        /*border-radius: 12px;*/
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        color: white;
+        min-width: 250px;
+        opacity: 0;
+        transform: translateX(100px) scale(0.8) rotate(5deg);
+        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .refresh-toast .toast-body {
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+
+    .refresh-toast .toast-body i {
+        font-size: 1.1rem;
+        transform: scale(0);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+    }
+
+    /* 进场动画 */
+    .refresh-toast.show {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotate(0deg);
+    }
+
+    .refresh-toast.show .toast-body i {
+        transform: scale(1);
+    }
+
+    /* 退场动画 */
+    .refresh-toast.hiding {
+        opacity: 0;
+        transform: translateX(100px) scale(0.8) rotate(-5deg);
+        transition: all 0.4s cubic-bezier(0.64, 0.04, 0.85, 0.06);
+    }
+
+    .refresh-toast.hiding .toast-body i {
+        transform: scale(0) rotate(-180deg);
+        transition: transform 0.3s cubic-bezier(0.64, 0.04, 0.85, 0.06);
+    }
+
+    /* 进度条动画 */
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+        border-radius: 0 0 12px 12px;
+        width: 100%;
+        transform-origin: left center;
+        animation: toastProgress 3s linear forwards;
+    }
+
+    @keyframes toastProgress {
+        from {
+            transform: scaleX(1);
+            opacity: 1;
+        }
+        to {
+            transform: scaleX(0);
+            opacity: 0.5;
+        }
+    }
+
+    /* 悬停效果 */
+    .refresh-toast:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+
 
 </style>
 {% endblock %}
@@ -524,7 +615,7 @@
         <div class="d-flex align-items-center">
             <small class="text-muted me-3">
                 <span class="update-indicator"></span>
-                更新时间：<span id="updateTime">{{ update_time }}</span>
+                当前时间：<span id="updateTime">{{ update_time }}</span>
             </small>
             <button class="btn refresh-btn" id="refreshNews">
                 <i class="bi bi-arrow-clockwise me-1"></i>刷新
@@ -535,7 +626,7 @@
 
     <!-- 两栏布局 -->
     <div class="row g-4">
-        <!-- 左侧：资讯快报 -->
+
         <div class="col-md-7">
             <h3 class="section-title">
                 <i class="bi bi-lightning-charge"></i> 资讯快报
@@ -578,53 +669,68 @@
                 </div>
 
                 {% endfor %}
-
-                <!-- 分页 -->
-                {% if news2_pagination and news2_pagination.pages > 1 %}
-                <nav aria-label="News2 pagination" class="mt-4">
-                    <ul class="pagination justify-content-start">
-                        {% if news2_pagination.has_prev %}
-                        <li class="page-item">
-                            <a class="page-link" href="?news2_page={{ news2_pagination.prev_num }}">上一页</a>
-                        </li>
-                        {% endif %}
-
-                        {% for page_num in news2_pagination.iter_pages() %}
-                        {% if page_num %}
-                        {% if page_num != news2_pagination.page %}
-                        <li class="page-item">
-                            <a class="page-link" href="?news2_page={{ page_num }}">{{ page_num }}</a>
-                        </li>
-                        {% else %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ page_num }}</span>
-                        </li>
-                        {% endif %}
-                        {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
-
-                        {% if news2_pagination.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?news2_page={{ news2_pagination.next_num }}">下一页</a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
-                {% else %}
-                <div class="text-center py-5">
-                    <div class="loading-skeleton" style="width: 100%; height: 120px; border-radius: 15px;"></div>
-                    <div class="loading-skeleton mt-3"
-                         style="width: 80%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
-                    <div class="loading-skeleton mt-3"
-                         style="width: 90%; height: 120px; border-radius: 15px; margin: 0 auto;"></div>
-                </div>
-                {% endif %}
+                {% endif %}  <!-- 这里添加了缺失的 endif -->
             </div>
+
+            <!-- 添加分页-->
+            {% if pagination and pagination.total_pages > 1 %}
+            <nav class="pagination_nav" aria-label="Page navigation example" style="font-size: small;">
+                <ul class="pagination justify-content-end">
+                    {# 首页 #}
+                    <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{% if pagination.page != 1 %}?page=1&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
+                           aria-label="First"
+                        >
+                            首页
+                        </a>
+                    </li>
+
+                    {# 上一页 #}
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{% if pagination.has_prev %}?page={{ pagination.prev_num }}&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
+                           aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    {# 页码数字 #}
+                    {% for page_num in pagination.iter_pages() %}
+                    {% if page_num %}
+                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page_num }}&per_page={{ pagination.per_page }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {# 下一页 #}
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{% if pagination.has_next %}?page={{ pagination.next_num }}&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
+                           aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+
+                    {# 尾页 #}
+                    <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{% if pagination.page != pagination.total_pages %}?page={{ pagination.total_pages }}&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
+                           aria-label="Last">
+                            尾页
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            {% endif %}
         </div>
 
         <!-- 右侧：市场总结 + 全球热点 -->
@@ -677,23 +783,97 @@
         </div>
     </div>
 </div>
+
+<!-- 刷新提示框容器 -->
+<div class="toast-container">
+    <div id="refreshToast" class="toast refresh-toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>已催促更新...</span>
+        </div>
+        <div class="toast-progress"></div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // 刷新按钮功能
-        document.getElementById('refreshNews')?.addEventListener('click', function () {
+        const refreshBtn = document.getElementById('refreshNews');
+        const refreshToast = document.getElementById('refreshToast');
+        let toastTimeout;
+
+// 显示提示框的函数
+        function showRefreshToast() {
+            if (!refreshToast) return;
+
+            // 清除之前的定时器
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+            }
+
+            // 移除所有动画类
+            refreshToast.classList.remove('show', 'hiding');
+
+            // 强制重绘
+            void refreshToast.offsetWidth;
+
+            // 添加进场动画
+            refreshToast.classList.add('show');
+
+            // 重置进度条动画
+            const progressBar = refreshToast.querySelector('.toast-progress');
+            if (progressBar) {
+                progressBar.style.animation = 'none';
+                void progressBar.offsetWidth;
+                progressBar.style.animation = 'toastProgress 3s linear forwards';
+            }
+
+            // 3秒后开始退场动画
+            toastTimeout = setTimeout(() => {
+                hideRefreshToast();
+            }, 3000);
+        }
+
+// 隐藏提示框的函数
+        function hideRefreshToast() {
+            if (!refreshToast) return;
+
+            // 清除定时器
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toastTimeout = null;
+            }
+
+            // 添加退场动画类
+            refreshToast.classList.add('hiding');
+            refreshToast.classList.remove('show');
+
+            // 动画完成后完全隐藏
+            setTimeout(() => {
+                refreshToast.classList.remove('hiding');
+            }, 400); // 匹配CSS退场动画时长
+        }
+
+// 点击提示框可手动关闭
+        refreshToast?.addEventListener('click', function () {
+            hideRefreshToast();
+        });
+
+// 刷新按钮功能
+        refreshBtn?.addEventListener('click', function () {
             const button = this;
             const icon = button.querySelector('.bi-arrow-clockwise');
 
             button.disabled = true;
             icon.style.animation = 'rotate 1s linear infinite';
 
+            // 模拟刷新过程
             setTimeout(() => {
                 button.disabled = false;
                 icon.style.animation = '';
 
+                // 更新时间显示
                 const now = new Date();
                 const timeString = now.toLocaleString('zh-CN', {
                     month: '2-digit',
@@ -701,10 +881,17 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                document.getElementById('updateTime').textContent = timeString;
+
+                const updateTimeEl = document.getElementById('updateTime');
+                if (updateTimeEl) {
+                    updateTimeEl.textContent = timeString;
+                }
+
+                // 显示成功提示
+                showRefreshToast();
 
                 console.log('新闻数据已刷新');
-            }, 2000);
+            }, 1500);
         });
 
         // 卡片悬停效果（保留）
@@ -735,5 +922,6 @@
 
         updateCurrentTime();
     });
+
 </script>
 {% endblock %}
