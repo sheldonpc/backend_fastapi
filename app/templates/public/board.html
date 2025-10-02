@@ -1,0 +1,841 @@
+{% extends "public/base.html" %}
+{% block title %}榜单中心 - 五市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 页面整体动画 */
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Tab 导航优化 */
+    #rankingTabs .nav-link {
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        color: #6c757d;
+        transition: all 0.25s ease;
+    }
+
+    #rankingTabs .nav-link:hover {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.04);
+        border-radius: 6px;
+    }
+
+    #rankingTabs .nav-link.active {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+        border-radius: 6px;
+        box-shadow: inset 0 -2px 0 #0d6efd;
+    }
+
+    /* 周期/池按钮组 */
+    .period-btn, .zt-pool-btn {
+        border: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-size: 0.875rem;
+        padding: 0.35rem 0.75rem;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+    }
+
+    .period-btn:hover, .zt-pool-btn:hover {
+        background-color: #e9ecef;
+        color: #0d6efd;
+    }
+
+    .period-btn.active, .zt-pool-btn.active {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    }
+
+    /* 表格优化 */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    table.table {
+        margin-bottom: 0;
+    }
+
+    table.table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        padding: 0.75rem 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    table.table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    table.table tbody tr:hover {
+        background-color: #f1f5ff !important;
+    }
+
+    table.table td {
+        padding: 0.7rem 1rem;
+        vertical-align: middle;
+    }
+
+    /* 加载状态 */
+    .text-center.py-3 {
+        padding: 1.5rem !important;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    /* Tab 内容切换动画 */
+    .tab-content {
+        position: relative;
+    }
+
+    .tab-pane {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .tab-pane.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .tab-pane.show {
+        display: block !important;
+    }
+
+    /* 按钮组间距优化 */
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+
+    /* 响应式优化 */
+    @media (max-width: 768px) {
+        .container.py-4 {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+
+        h2.mb-4 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #rankingTabs .nav-link {
+            padding: 0.5rem 0.8rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    .industry-content,
+    .stock-content,
+    .concept-content,
+    .lhb-content,
+    .hot-content,
+    .zt-content {
+        min-height: 240px; /* 根据你的表格行数调整，建议 200~300px */
+        position: relative;
+    }
+
+    /* 加载状态居中且不改变布局 */
+    .industry-content > div.text-center,
+    .stock-content > div.text-center,
+    .concept-content > div.text-center,
+    .lhb-content > div.text-center,
+    .hot-content > div.text-center,
+    .zt-content > div.text-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        text-align: center;
+        padding: 0;
+    }
+
+    /* 表格固定布局，防止列宽跳动 */
+    .table-responsive table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .table-responsive th,
+    .table-responsive td {
+        word-wrap: break-word;
+        white-space: normal;
+        overflow: hidden;
+    }
+
+    .tab-content {
+        position: relative;
+        min-height: 500px; /* 设置固定最小高度，防止高度突变 */
+    }
+
+    .tab-pane {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(20px);
+        transition: all 0.3s ease-in-out;
+        z-index: 1;
+    }
+
+    .tab-pane.active {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        z-index: 2;
+    }
+
+    /* 确保只有一个pane可见 */
+    .tab-pane:not(.active) {
+        display: none !important;
+    }
+
+    .tab-pane.active.show {
+        display: block !important;
+    }
+
+    /* Tab 导航优化 */
+    #rankingTabs .nav-link {
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        color: #6c757d;
+        transition: all 0.25s ease;
+    }
+
+    #rankingTabs .nav-link:hover {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.04);
+        border-radius: 6px;
+    }
+
+    #rankingTabs .nav-link.active {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.1);
+        border-radius: 6px;
+        box-shadow: inset 0 -2px 0 #0d6efd;
+    }
+
+    /* 周期/池按钮组 */
+    .period-btn, .zt-pool-btn {
+        border: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-size: 0.875rem;
+        padding: 0.35rem 0.75rem;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+    }
+
+    .period-btn:hover, .zt-pool-btn:hover {
+        background-color: #e9ecef;
+        color: #0d6efd;
+    }
+
+    .period-btn.active, .zt-pool-btn.active {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    }
+
+    /* 表格优化 */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    table.table {
+        margin-bottom: 0;
+        table-layout: fixed; /* 固定表格布局，防止列宽跳动 */
+        width: 100%;
+    }
+
+    table.table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        padding: 0.75rem 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    table.table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    table.table tbody tr:hover {
+        background-color: #f1f5ff !important;
+    }
+
+    table.table td {
+        padding: 0.7rem 1rem;
+        vertical-align: middle;
+        word-wrap: break-word;
+        white-space: normal;
+        overflow: hidden;
+    }
+
+    /* 内容区域统一高度 */
+    .industry-content,
+    .stock-content,
+    .concept-content,
+    .lhb-content,
+    .hot-content,
+    .zt-content {
+        min-height: 400px; /* 统一最小高度 */
+        position: relative;
+    }
+
+    /* 加载状态 */
+    .text-center.py-3 {
+        padding: 2rem !important;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    /* 加载状态居中且不改变布局 */
+    .industry-content > div.text-center,
+    .stock-content > div.text-center,
+    .concept-content > div.text-center,
+    .lhb-content > div.text-center,
+    .hot-content > div.text-center,
+    .zt-content > div.text-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        text-align: center;
+        padding: 0;
+    }
+
+    /* 按钮组间距优化 */
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+
+    /* 响应式优化 */
+    @media (max-width: 768px) {
+        .container.py-4 {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+
+        h2.mb-4 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #rankingTabs .nav-link {
+            padding: 0.5rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .tab-content {
+            min-height: 400px; /* 移动端适当减小高度 */
+        }
+
+        .industry-content,
+        .stock-content,
+        .concept-content,
+        .lhb-content,
+        .hot-content,
+        .zt-content {
+            min-height: 300px;
+        }
+    }
+
+    /* 列宽优化 - 根据内容调整 */
+    table.table th:nth-child(1), table.table td:nth-child(1) {
+        width: 8%;
+    }
+
+    /* 排名 */
+    table.table th:nth-child(2), table.table td:nth-child(2) {
+        width: 12%;
+    }
+
+    /* 代码 */
+    table.table th:nth-child(3), table.table td:nth-child(3) {
+        width: 15%;
+    }
+
+    /* 名称 */
+    table.table th:nth-child(4), table.table td:nth-child(4) {
+        width: 10%;
+    }
+
+    /* 价格/指数 */
+    table.table th:nth-child(5), table.table td:nth-child(5) {
+        width: 10%;
+    }
+
+    /* 涨跌幅 */
+    table.table th:nth-child(6), table.table td:nth-child(6) {
+        width: 12%;
+    }
+
+    /* 净额 */
+    table.table th:nth-child(7), table.table td:nth-child(7) {
+        width: 12%;
+    }
+
+    /* 流入 */
+    table.table th:nth-child(8), table.table td:nth-child(8) {
+        width: 10%;
+    }
+
+    /* 流出/换手 */
+    table.table th:nth-child(9), table.table td:nth-child(9) {
+        width: 11%;
+    }
+
+    /* 其他 */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 fade-in">
+    <h2 class="mb-4">📊 榜单中心</h2>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="rankingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="industry-tab" data-bs-toggle="tab" data-bs-target="#industry"
+                    type="button" role="tab">行业
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="stock-tab" data-bs-toggle="tab" data-bs-target="#stock" type="button"
+                    role="tab">个股
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="concept-tab" data-bs-toggle="tab" data-bs-target="#concept" type="button"
+                    role="tab">概念
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lhb-tab" data-bs-toggle="tab" data-bs-target="#lhb" type="button" role="tab">
+                龙虎榜
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="hot-tab" data-bs-toggle="tab" data-bs-target="#hot" type="button" role="tab">
+                热门股
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="zt-tab" data-bs-toggle="tab" data-bs-target="#zt" type="button" role="tab">
+                涨停股池
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content mt-3" id="rankingTabContent">
+        <!-- 行业 -->
+        <div class="tab-pane fade show active" id="industry" role="tabpanel">
+            <div class="d-flex gap-2 mb-3">
+                {% for period in ['latest', '3d', '5d', '10d', '20d'] %}
+                <button class="btn btn-outline-secondary btn-sm period-btn {% if period=='latest' %}active{% endif %}"
+                        data-period="{{ period }}">
+                    {{
+                    period|replace('latest','最新')|replace('3d','3日')|replace('5d','5日')|replace('10d','10日')|replace('20d','20日')
+                    }}
+                </button>
+                {% endfor %}
+            </div>
+            <div class="industry-content">点击加载数据...</div>
+        </div>
+
+        <!-- 个股 -->
+        <div class="tab-pane fade" id="stock" role="tabpanel">
+            <div class="d-flex gap-2 mb-3">
+                {% for period in ['latest', '3d', '5d', '10d', '20d'] %}
+                <button class="btn btn-outline-secondary btn-sm period-btn {% if period=='latest' %}active{% endif %}"
+                        data-period="{{ period }}">
+                    {{
+                    period|replace('latest','最新')|replace('3d','3日')|replace('5d','5日')|replace('10d','10日')|replace('20d','20日')
+                    }}
+                </button>
+                {% endfor %}
+            </div>
+            <div class="stock-content">点击加载数据...</div>
+        </div>
+
+        <!-- 概念 -->
+        <div class="tab-pane fade" id="concept" role="tabpanel">
+            <div class="d-flex gap-2 mb-3">
+                {% for period in ['latest', '3d', '5d', '10d', '20d'] %}
+                <button class="btn btn-outline-secondary btn-sm period-btn {% if period=='latest' %}active{% endif %}"
+                        data-period="{{ period }}">
+                    {{
+                    period|replace('latest','最新')|replace('3d','3日')|replace('5d','5日')|replace('10d','10日')|replace('20d','20日')
+                    }}
+                </button>
+                {% endfor %}
+            </div>
+            <div class="concept-content">点击加载数据...</div>
+        </div>
+
+        <!-- 龙虎榜 -->
+        <div class="tab-pane fade" id="lhb" role="tabpanel">
+            <div class="lhb-content">加载中...</div>
+        </div>
+
+        <!-- 热门股 -->
+        <div class="tab-pane fade" id="hot" role="tabpanel">
+            <div class="hot-content">加载中...</div>
+        </div>
+
+        <!-- 涨停股池 -->
+        <div class="tab-pane fade" id="zt" role="tabpanel">
+            <div class="d-flex gap-2 mb-3">
+                {% for pool in ['today', 'yesterday', 'strong', 'down'] %}
+                <button class="btn btn-outline-secondary btn-sm zt-pool-btn {% if pool=='today' %}active{% endif %}"
+                        data-pool="{{ pool }}">
+                    {{
+                    pool|replace('today','今日涨停')|replace('yesterday','昨日涨停')|replace('strong','强势股')|replace('down','跌停股')
+                    }}
+                </button>
+                {% endfor %}
+            </div>
+            <div class="zt-content">加载中...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('#rankingTabs button[data-bs-toggle="tab"]');
+        const periodBtns = document.querySelectorAll('.period-btn');
+        const ztPoolBtns = document.querySelectorAll('.zt-pool-btn');
+
+        // 行业/个股/概念：点击周期按钮加载
+        periodBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const period = this.dataset.period;
+                const tabPane = this.closest('.tab-pane');
+                const type = tabPane.id; // 'industry', 'stock', 'concept'
+
+                // 更新 active 状态
+                tabPane.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                loadBoardData(type, period, tabPane.querySelector(`.${type}-content`));
+            });
+        });
+
+        // 涨停股池：点击子类型
+        ztPoolBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const pool = this.dataset.pool;
+                const tabPane = document.getElementById('zt');
+                tabPane.querySelectorAll('.zt-pool-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                loadBoardData('zt', pool, tabPane.querySelector('.zt-content'));
+            });
+        });
+
+        function smoothTabSwitch(targetTab) {
+            const allPanes = document.querySelectorAll('.tab-pane');
+            const targetPane = document.querySelector(targetTab);
+
+            // 先隐藏所有pane
+            allPanes.forEach(pane => {
+                pane.classList.remove('active', 'show');
+            });
+
+            // 然后显示目标pane
+            setTimeout(() => {
+                targetPane.classList.add('active', 'show');
+            }, 50);
+        }
+
+// 修改你的tab切换事件监听器
+        tabs.forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function (e) {
+                const target = e.target.getAttribute('data-bs-target');
+                smoothTabSwitch(target);
+
+                const type = target.replace('#', '');
+                const contentEl = document.querySelector(`${target} .${type}-content`);
+
+                // 原有的数据加载逻辑保持不变
+                if (contentEl && (contentEl.innerText.includes('加载中') || contentEl.innerText.includes('点击加载'))) {
+                    let period = null;
+
+                    if (type === 'industry' || type === 'stock' || type === 'concept') {
+                        const activePeriodBtn = document.querySelector(`${target} .period-btn.active`);
+                        period = activePeriodBtn ? activePeriodBtn.dataset.period : 'latest';
+                    } else if (type === 'zt') {
+                        const activePoolBtn = document.querySelector(`${target} .zt-pool-btn.active`);
+                        period = activePoolBtn ? activePoolBtn.dataset.pool : 'today';
+                    }
+
+                    loadBoardData(type, period, contentEl);
+                }
+            });
+        });
+
+        // Tab切换事件
+        // tabs.forEach(tab => {
+        //     tab.addEventListener('shown.bs.tab', function (e) {
+        //         const target = e.target.getAttribute('data-bs-target');
+        //         const type = target.replace('#', '');
+        //         const contentEl = document.querySelector(`${target} .${type}-content`);
+        //
+        //         // 如果内容还没加载过
+        //         if (contentEl && (contentEl.innerText.includes('加载中') || contentEl.innerText.includes('点击加载'))) {
+        //             let period = null;
+        //
+        //             if (type === 'industry' || type === 'stock' || type === 'concept') {
+        //                 // 获取当前激活的周期按钮
+        //                 const activePeriodBtn = document.querySelector(`${target} .period-btn.active`);
+        //                 period = activePeriodBtn ? activePeriodBtn.dataset.period : 'latest';
+        //             } else if (type === 'zt') {
+        //                 // 获取当前激活的涨停池按钮
+        //                 const activePoolBtn = document.querySelector(`${target} .zt-pool-btn.active`);
+        //                 period = activePoolBtn ? activePoolBtn.dataset.pool : 'today';
+        //             }
+        //
+        //             loadBoardData(type, period, contentEl);
+        //         }
+        //     });
+        // });
+
+        // 首次加载行业最新数据
+        loadBoardData('industry', 'latest', document.querySelector('.industry-content'));
+
+        function loadBoardData(type, period, container) {
+            container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> 加载中...</div>';
+
+            // 构建URL：/api/board/{type}/{period}/
+            let url = `/api/board/${type}/`;
+            if (period) {
+                url += `${period}/`;
+            }
+
+            console.log('Loading data from:', url); // 调试信息
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    container.innerHTML = renderRankingTable(type, data);
+                })
+                .catch(err => {
+                    console.error('加载失败:', err);
+                    container.innerHTML = `<div class="alert alert-warning">加载失败：${err.message}</div>`;
+                });
+        }
+
+        function renderRankingTable(type, data) {
+            if (!data || data.length === 0) {
+                return '<div class="text-muted">暂无数据</div>';
+            }
+
+            let html = `<div class="table-responsive"><table class="table table-hover table-sm align-middle mb-0">`;
+
+            // 表头根据类型动态生成
+            if (type === 'industry') {
+                html += `<thead><tr>
+            <th>排名</th>
+            <th>行业名称</th>
+            <th>行业指数</th>
+            <th>涨跌幅</th>
+            <th>净额(亿)</th>
+            <th>流入资金</th>
+            <th>流出资金</th>
+            <th>公司数量</th>
+            <th>龙头股</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const changeClass = item.industry_index_change_rate > 0 ? 'text-danger' : 'text-success';
+                    const net = (item.net_amount / 1e8).toFixed(2);
+                    html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.industry_name}</td>
+                <td>${item.industry_index?.toFixed(2) || '--'}</td>
+                <td class="${changeClass}">${(item.industry_index_change_rate || 0).toFixed(2)}%</td>
+                <td>${item.net_amount?.toFixed(2)}</td>
+                <td>${item.inflow_volume}</td>
+                <td>${item.outflow_volume}</td>
+                <td>${item.company_num || '--'}</td>
+                <td>${item.leading_stock || '--'}</td>
+            </tr>`;
+                });
+            } else if (type === 'stock') {
+                const sampleItem = data[0];
+                const isLatest = sampleItem && (
+                    sampleItem.inflow_volume !== undefined ||
+                    sampleItem.outflow_volume !== undefined
+                );
+
+                html += `<thead><tr>
+            <th>排名</th>
+            <th>代码</th>
+            <th>名称</th>
+            <th>最新价</th>
+            <th>涨跌幅</th>
+            ${isLatest ? '<th>流入资金(亿)</th><th>流出资金(亿)</th>' : ''}
+            <th>净额(亿)</th>
+            <th>换手率</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
+                    const net = (item.net_amount / 1e8).toFixed(2);
+
+                    const formatAmount = (amount) => {
+                        if (!amount && amount !== 0) return '--';
+                        return (amount / 1e8).toFixed(2);
+                    };
+
+                    const inflow = formatAmount(item.inflow_volume);
+                    const outflow = formatAmount(item.outflow_volume);
+
+                    html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.stock_code}</td>
+                <td>${item.stock_name}</td>
+                <td>${item.current_price?.toFixed(2) || '--'}</td>
+                <td class="${changeClass}">${(item.change_rate || 0).toFixed(2)}%</td>
+                ${isLatest ? `<td>${inflow}</td><td>${outflow}</td>` : ''}
+                <td>${net}</td>
+                <td>${item.turnover_rate ? item.turnover_rate.toFixed(2) + '%' : item.continuous_turnover_rate.toFixed(2) + '%'}</td>
+            </tr>`;
+                });
+            } else if (type === 'concept') {
+                html += `<thead><tr>
+            <th>排名</th>
+            <th>概念名称</th>
+            <th>概念指数</th>
+            <th>涨跌幅</th>
+            <th>净额(亿)</th>
+            <th>流入资金</th>
+            <th>流出资金</th>
+            <th>公司数量</th>
+            <th>领涨股</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const changeClass = (item.concept_index_change_rate || item.change_rate) > 0 ? 'text-danger' : 'text-success';
+                    // const net = (item.net_amount / 1e8).toFixed(2);
+                    html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.concept_name}</td>
+                <td>${item.concept_index ? item.concept_index.toFixed(2) : '--'}</td>
+                <td class="${changeClass}">${(item.concept_index_change_rate || item.change_rate || 0).toFixed(2)}%</td>
+                <td>${item.net_amount}</td>
+                <td>${item.inflow_volume}</td>
+                <td>${item.outflow_volume}</td>
+                <td>${item.company_num || '--'}</td>
+                <td>${item.leading_stock || '--'}</td>
+            </tr>`;
+                });
+            } else if (type === 'lhb') {
+                html += `<thead><tr>
+            <th>序号</th>
+            <th>代码</th>
+            <th>名称</th>
+            <th>涨跌幅</th>
+            <th>净买额(亿)</th>
+            <th>上榜原因</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
+                    const net = (item.lhb_net_buy_amount / 1e8).toFixed(2);
+                    html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.stock_code}</td>
+                <td>${item.stock_name}</td>
+                <td class="${changeClass}">${(item.change_rate || 0).toFixed(2)}%</td>
+                <td>${net}</td>
+                <td class="small">${item.listing_reason || '--'}</td>
+            </tr>`;
+                });
+            } else if (type === 'hot') {
+                html += `<thead><tr>
+            <th>排名</th>
+            <th>代码</th>
+            <th>名称</th>
+            <th>最新价</th>
+            <th>涨跌幅</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
+                    html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.stock_code}</td>
+                <td>${item.stock_name}</td>
+                <td>${item.latest_price?.toFixed(2) || '--'}</td>
+                <td class="${changeClass}">${(item.change_rate || 0).toFixed(2)}%</td>
+            </tr>`;
+                });
+            } else if (type === 'zt') {
+                html += `<thead><tr>
+            <th>排名</th>
+            <th>代码</th>
+            <th>名称</th>
+            <th>涨跌幅</th>
+            <th>最新价</th>
+            <th>连板数</th>
+            <th>所属行业</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
+                    html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.stock_code}</td>
+                <td>${item.stock_name}</td>
+                <td class="${changeClass}">${(item.change_rate || 0).toFixed(2)}%</td>
+                <td>${item.latest_price?.toFixed(2) || '--'}</td>
+                <td>${item.consecutive_boards || item.previous_consecutive_boards || '--'}</td>
+                <td>${item.industry || '--'}</td>
+            </tr>`;
+                });
+            }
+
+            html += '</tbody></table></div>';
+            return html;
+        }
+    });
+</script>
+{% endblock %}

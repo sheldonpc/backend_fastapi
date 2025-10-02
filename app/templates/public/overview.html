@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <style>
+
     /* 区域标题 */
     .region-title {
         font-size: 1.25rem;
@@ -84,36 +85,67 @@
             margin-top: 1.25rem;
         }
     }
+
+    .text-success {
+        color: #047857 !important;
+    }
+
+    .text-danger {
+        color: #dc2626 !important;
+    }
+
+    /* 自定义开关样式 */
+    .form-check-input:checked {
+        background-color: #397ff1;
+        border-color: #397ff1;
+    }
+
+    .form-check-input:focus {
+        border-color: #397ff1;
+        box-shadow: 0 0 0 0.25rem rgba(57, 127, 241, 0.25);
+    }
+
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row g-4">
+<div class="row g-4 fade-in">
     <div class="col-md-8">
-        <div class="accordion" id="accordionPanelsStayOpenExample">
+        <!-- 添加控制按钮 -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">全球股指行情</h5>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="toggleAllBtn">
+                <label class="form-check-label" for="toggleAllBtn">全部展开</label>
+            </div>
+        </div>
+
+        <div class="accordion" id="stockIndexAccordion">
             {% for region, indexes in ordered_result.items() %}
             {% if indexes %}
-            {% set is_first = loop.first %}
-            {% set collapse_id = "panelsStayOpen-collapse-" + loop.index|string %}
-            {% set heading_id = "panelsStayOpen-heading-" + loop.index|string %}
+            {% set collapse_id = "collapse-" + loop.index|string %}
+            {% set heading_id = "heading-" + loop.index|string %}
+            {% set is_expanded = loop.index0 < 2 %}  <!-- 前两个项目展开 (索引0和1) -->
 
             <div class="accordion-item">
                 <h2 class="accordion-header" id="{{ heading_id }}">
                     <button
-                            class="accordion-button{% if not is_first %} collapsed{% endif %}"
+                            class="accordion-button{% if not is_expanded %} collapsed{% endif %}"
                             type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#{{ collapse_id }}"
-                            aria-expanded="{{ 'true' if is_first else 'false' }}"
+                            aria-expanded="{{ 'true' if is_expanded else 'false' }}"
                             aria-controls="{{ collapse_id }}">
                         {{ region }}
                     </button>
                 </h2>
                 <div
                         id="{{ collapse_id }}"
-                        class="accordion-collapse collapse{% if is_first %} show{% endif %}"
-                        aria-labelledby="{{ heading_id }}"
-                        data-bs-parent="#accordionPanelsStayOpenExample">
+                        class="accordion-collapse collapse{% if is_expanded %} show{% endif %}"
+                        aria-labelledby="{{ heading_id }}">
                     <div class="accordion-body">
                         <div class="market-table">
                             <table class="table">
@@ -150,17 +182,161 @@
             {% endfor %}
         </div>
     </div>
+
+
     <div class="col-md-4">
-        <div class="card" style="width: 18rem;">
-            <div class="card-header">
-                Featured
+        <div class="card market-table" style="height: fit-content; box-shadow: var(--shadow-secondary);">
+            <div class="card-header py-2" style="background-color: #303b4e; color: white;">
+                <h6 class="mb-0 text-center" style="font-weight: 600; font-size: 0.95rem;">国债收益率（%）</h6>
             </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">An item</li>
-                <li class="list-group-item">A second item</li>
-                <li class="list-group-item">A third item</li>
-            </ul>
+            <div class="card-body p-3">
+                <div class="row g-5 align-items-center"> <!-- 使用 g-3 增加列间距 -->
+                    <!-- 中国 -->
+                    <div class="col-6">
+                        <div class="text-center mb-2">
+                            <small class="fw-bold" style="color: #dc2626;">🇨🇳 中国</small>
+                        </div>
+                        <div class="small">
+                            <div class="d-flex justify-content-between py-1">
+                                <span>2年</span>
+                                <span class="fw-bold">{{ cn_bond.cn_2y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span>5年</span>
+                                <span class="fw-bold">{{ cn_bond.cn_5y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span>10年</span>
+                                <span class="fw-bold">{{ cn_bond.cn_10y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span>30年</span>
+                                <span class="fw-bold">{{ cn_bond.cn_30y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1 mt-2 border-top"
+                                 style="border-color: rgba(0,0,0,0.08);">
+                                <span>利差</span>
+                                <span class="fw-bold {% if cn_bond.cn_spread_10y_2y|float > 0 %}text-success{% else %}text-danger{% endif %}">
+                {{ cn_bond.cn_spread_10y_2y }}
+              </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 美国 -->
+                    <div class="col-6">
+                        <div class="text-center mb-2">
+                            <small class="fw-bold" style="color: #397ff1;">🇺🇸 美国</small>
+                        </div>
+                        <div class="small">
+                            <div class="d-flex justify-content-between py-1">
+                                <span>2年</span>
+                                <span class="fw-bold">{{ us_bond.us_2y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span>5年</span>
+                                <span class="fw-bold">{{ us_bond.us_5y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span>10年</span>
+                                <span class="fw-bold">{{ us_bond.us_10y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1">
+                                <span>30年</span>
+                                <span class="fw-bold">{{ us_bond.us_30y }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-1 mt-2 border-top"
+                                 style="border-color: rgba(0,0,0,0.08);">
+                                <span>利差</span>
+                                <span class="fw-bold {% if us_bond.us_spread_10y_2y|float > 0 %}text-success{% else %}text-danger{% endif %}">
+                {{ us_bond.us_spread_10y_2y }}
+              </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- === 新增：解读文字 === -->
+                <div class="mt-3 pt-2 border-top" style="border-color: rgba(0,0,0,0.06);">
+                    <p class="small text-muted mb-0" style="line-height: 1.5;">
+                        中美利率呈现“东边日出西边雨”的格局：美国为抗通胀维持高利率，中国为稳增长处于低利率周期。
+                        巨大的利差给人民币带来贬值压力，并制约了中国央行的降息空间。
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- === 商品期货行情 === -->
+        <div class="mt-4">
+            <h6 class="fw-bold text-muted mb-3">商品期货</h6>
+            <div class="small">
+                {% for item in commodities %}
+                <div class="d-flex justify-content-between py-1 align-items-center border-bottom"
+                     style="border-color: rgba(0,0,0,0.06);">
+                    <div>
+                        <span class="me-2">{{ item.name }}</span>
+                        <small class="text-muted">{{ item.symbol }}</small>
+                    </div>
+                    <div class="text-end">
+                        <div>
+                            <span class="fw-bold">{{ item.rmb_price | round(2) }}</span>
+                            <span class="ms-1 {% if item.change_amount|float > 0 %}text-danger{% else %}text-success{% endif %}">
+                        {% if item.change_amount|float > 0 %}+{% endif %}{{ item.change_amount | round(2) }}
+                    </span>
+                        </div>
+                        <div class="text-muted small">
+                            ({{ item.change_percent }}%)
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleAllBtn = document.getElementById('toggleAllBtn');
+        const toggleLabel = document.querySelector('.form-check-label');
+
+        // 初始化状态
+        updateToggleLabel(toggleAllBtn.checked);
+
+        toggleAllBtn.addEventListener('change', function () {
+            updateToggleLabel(this.checked);
+
+            if (this.checked) {
+                // 展开所有
+                const collapses = document.querySelectorAll('.accordion-collapse');
+                collapses.forEach(collapse => {
+                    const bsCollapse = new bootstrap.Collapse(collapse, {
+                        toggle: false
+                    });
+                    bsCollapse.show();
+                });
+            } else {
+                // 收起所有
+                const collapses = document.querySelectorAll('.accordion-collapse');
+                collapses.forEach(collapse => {
+                    const bsCollapse = new bootstrap.Collapse(collapse, {
+                        toggle: false
+                    });
+                    bsCollapse.hide();
+                });
+            }
+        });
+
+        function updateToggleLabel(isExpanded) {
+            if (toggleLabel) {
+                toggleLabel.textContent = isExpanded ? '全部收起' : '全部展开';
+            }
+        }
+    });
+</script>
+
 {% endblock %}

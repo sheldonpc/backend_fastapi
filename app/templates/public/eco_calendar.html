@@ -1,0 +1,567 @@
+{% extends "public/base.html" %}
+
+{% block title %}财经日历 - 五市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calendar-container {
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+        padding: 16px;
+        margin-top: 16px;
+    }
+
+    .filter-section {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-item {
+        flex-shrink: 0;
+    }
+
+    .event-card {
+        border-left: 3px solid #e9ecef;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .event-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .event-card.high-importance {
+        border-left-color: #dc3545;
+        background: #fff5f5;
+    }
+
+    .event-card.medium-importance {
+        border-left-color: #fd7e14;
+        background: #fff9f0;
+    }
+
+    .event-card.low-importance {
+        border-left-color: #20c997;
+    }
+
+    .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 6px;
+        gap: 8px;
+    }
+
+    .event-title {
+        font-weight: 600;
+        color: #2c3e50;
+        flex: 1;
+        font-size: 0.95em;
+        line-height: 1.3;
+    }
+
+    .event-meta {
+        display: flex;
+        gap: 8px;
+        font-size: 0.8em;
+        color: #6c757d;
+        flex-shrink: 0;
+    }
+
+    .event-region {
+        padding: 1px 6px;
+        background: #e9ecef;
+        border-radius: 10px;
+        font-size: 0.75em;
+        white-space: nowrap;
+    }
+
+    .event-time {
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.85em;
+        margin-bottom: 4px;
+    }
+
+    .event-data {
+        display: flex;
+        gap: 16px;
+        margin-top: 4px;
+    }
+
+    .event-value {
+        font-size: 0.85em;
+    }
+
+    .event-value .label {
+        color: #6c757d;
+    }
+
+    .event-value .value {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+        color: #6c757d;
+    }
+
+    .empty-state .display-4 {
+        font-size: 2.5rem;
+    }
+
+    .date-navigation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+    }
+
+    .current-date {
+        font-weight: 600;
+        color: #2c3e50;
+        min-width: 100px;
+        text-align: center;
+        font-size: 0.95em;
+    }
+
+    .btn-date-nav {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85em;
+    }
+
+    .btn-date-nav:hover {
+        background: #0056b3;
+    }
+
+    .btn-date-nav:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .importance-badge {
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-size: 0.7em;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .importance-high {
+        background: #dc3545;
+        color: white;
+    }
+
+    .importance-medium {
+        background: #fd7e14;
+        color: white;
+    }
+
+    .importance-low {
+        background: #20c997;
+        color: white;
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 30px;
+        display: none;
+    }
+
+    .form-label {
+        font-size: 0.85em;
+        margin-bottom: 2px;
+        font-weight: 500;
+    }
+
+    .form-select-sm, .form-control-sm {
+        font-size: 0.85em;
+        padding: 4px 8px;
+    }
+
+    .btn-sm {
+        padding: 4px 12px;
+        font-size: 0.85em;
+    }
+
+    /* 紧凑的页面标题区域 */
+    .page-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .calendar-container {
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .filter-section {
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+
+        .filter-group {
+            gap: 8px;
+        }
+
+        .filter-item {
+            flex: 1 1 calc(50% - 8px);
+            min-width: 120px;
+        }
+
+        .event-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .event-meta {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .date-navigation {
+            gap: 12px;
+        }
+
+        .btn-date-nav {
+            padding: 4px 8px;
+            font-size: 0.8em;
+        }
+
+        .current-date {
+            min-width: 80px;
+            font-size: 0.9em;
+        }
+
+        .form-select, .form-control {
+            width: 100% !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filter-item {
+            flex: 1 1 100%;
+        }
+
+        .event-card {
+            padding: 10px;
+        }
+
+        .event-meta {
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="calendar-container">
+                <!-- 页面标题 -->
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h4 mb-0">
+                            <i class="bi bi-calendar-event me-2"></i>财经日历
+                        </h1>
+                        <div class="text-muted small">
+                            更新: <span id="last-updated">{{ last_updated.strftime('%Y-%m-%d %H:%M') if last_updated else '--' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 日期导航和筛选 -->
+                <div class="filter-section">
+                    <div class="date-navigation">
+                        <button class="btn-date-nav" id="prev-day">
+                            <i class="bi bi-chevron-left"></i> 前一天
+                        </button>
+                        <div class="current-date" id="current-date">
+                            {{ current_date }}
+                        </div>
+                        <button class="btn-date-nav" id="next-day">
+                            后一天 <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label for="region-filter" class="form-label">地区筛选</label>
+                            <select class="form-select form-select-sm" id="region-filter" style="width: 140px;">
+                                <option value="">全部地区</option>
+                                <option value="中国" {% if selected_region=='中国' %}selected{% endif %}>中国</option>
+                                <option value="美国" {% if selected_region=='美国' %}selected{% endif %}>美国</option>
+                                <option value="欧洲" {% if selected_region=='欧洲' %}selected{% endif %}>欧洲</option>
+                                <option value="日本" {% if selected_region=='日本' %}selected{% endif %}>日本</option>
+                                <option value="英国" {% if selected_region=='英国' %}selected{% endif %}>英国</option>
+                                <option value="其他" {% if selected_region=='其他' %}selected{% endif %}>其他</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-item">
+                            <label for="importance-filter" class="form-label">重要性</label>
+                            <select class="form-select form-select-sm" id="importance-filter" style="width: 110px;">
+                                <option value="">全部级别</option>
+                                <option value="高" {% if selected_importance=='高' %}selected{% endif %}>高重要性
+                                </option>
+                                <option value="中" {% if selected_importance=='中' %}selected{% endif %}>中重要性
+                                </option>
+                                <option value="低" {% if selected_importance=='低' %}selected{% endif %}>低重要性
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="filter-item">
+                            <label for="search-input" class="form-label">事件搜索</label>
+                            <input type="text" class="form-control form-control-sm" id="search-input"
+                                   placeholder="输入事件名称..." style="width: 180px;" value="{{ search_keyword }}">
+                        </div>
+
+                        <div class="filter-item d-flex align-items-end">
+                            <button class="btn btn-primary btn-sm" id="apply-filters">
+                                <i class="bi bi-funnel"></i> 筛选
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 事件列表 -->
+                <div id="events-container">
+                    {% if events %}
+                    {% for event in events %}
+                    <div class="event-card {{ event.importance }}-importance"
+                         data-region="{{ event.region }}"
+                         data-importance="{{ event.importance }}"
+                         data-name="{{ event.name }}">
+                        <div class="event-header">
+                            <div class="event-title">{{ event.name }}</div>
+                            <div class="event-meta">
+                                <span class="event-region">{{ event.region }}</span>
+                                <span class="importance-badge importance-{{ event.importance }}">
+                                    {{ event.importance }}重要性
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="event-time">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ event.datetime.strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+
+                        {% if event.previous_value and event.previous_value != 'None' %}
+                        <div class="event-data">
+                            <div class="event-value">
+                                <span class="label">前值:</span>
+                                <span class="value">{{ event.previous_value }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x display-4 text-muted"></i>
+                        <h5 class="mt-2">暂无事件数据</h5>
+                        <p class="text-muted small">当前筛选条件下没有找到相关财经事件</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 加载状态 -->
+                <div id="loading-spinner" class="loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-2 text-muted small">正在加载数据...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let currentDate = '{{ current_date }}';
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const eventsContainer = document.getElementById('events-container');
+
+        // 初始化隐藏加载状态
+        loadingSpinner.style.display = 'none';
+
+        // 日期导航
+        document.getElementById('prev-day').addEventListener('click', function () {
+            navigateDate(-1);
+        });
+
+        document.getElementById('next-day').addEventListener('click', function () {
+            navigateDate(1);
+        });
+
+        // 应用筛选
+        document.getElementById('apply-filters').addEventListener('click', function () {
+            applyFilters();
+        });
+
+        // 回车键搜索
+        document.getElementById('search-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+
+        function navigateDate(days) {
+            const date = new Date(currentDate);
+            date.setDate(date.getDate() + days);
+            currentDate = formatDate(date);
+            updateEvents();
+        }
+
+        function applyFilters() {
+            updateEvents();
+        }
+
+        function updateEvents() {
+            loadingSpinner.style.display = 'block';
+            eventsContainer.style.display = 'none';
+
+            const region = document.getElementById('region-filter').value;
+            const importance = document.getElementById('importance-filter').value;
+            const search = document.getElementById('search-input').value;
+
+            // 构建查询参数
+            const params = new URLSearchParams({
+                date: currentDate
+            });
+            if (region) params.append('region', region);
+            if (importance) params.append('importance', importance);
+            if (search) params.append('search', search);
+
+            // AJAX请求获取数据
+            fetch(`/api/calendar/events?${params.toString()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updateEventsDisplay(data);
+                    updateCurrentDate(currentDate);
+                    updateURL(params.toString());
+                })
+                .catch(error => {
+                    console.error('Error fetching events:', error);
+                    alert('加载数据失败，请重试');
+                })
+                .finally(() => {
+                    loadingSpinner.style.display = 'none';
+                    eventsContainer.style.display = 'block';
+                });
+        }
+
+        function updateEventsDisplay(events) {
+            const container = document.getElementById('events-container');
+
+            if (events.length === 0) {
+                container.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x display-4 text-muted"></i>
+                    <h5 class="mt-2">暂无事件数据</h5>
+                    <p class="text-muted small">当前筛选条件下没有找到相关财经事件</p>
+                </div>
+            `;
+                return;
+            }
+
+            let html = '';
+            events.forEach(event => {
+                const eventDate = new Date(event.datetime);
+                const hasPreviousValue = event.previous_value && event.previous_value !== 'None';
+
+                html += `
+                <div class="event-card ${event.importance}-importance"
+                     data-region="${event.region}"
+                     data-importance="${event.importance}"
+                     data-name="${event.name}">
+                    <div class="event-header">
+                        <div class="event-title">${event.name}</div>
+                        <div class="event-meta">
+                            <span class="event-region">${event.region}</span>
+                            <span class="importance-badge importance-${event.importance}">
+                                ${event.importance}重要性
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="event-time">
+                        <i class="bi bi-clock me-1"></i>
+                        ${eventDate.toLocaleString('zh-CN')}
+                    </div>
+
+                    ${hasPreviousValue ? `
+                    <div class="event-data">
+                        <div class="event-value">
+                            <span class="label">前值:</span>
+                            <span class="value">${event.previous_value}</span>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateCurrentDate(dateStr) {
+            document.getElementById('current-date').textContent = dateStr;
+        }
+
+        function updateURL(params) {
+            // 更新浏览器URL，但不刷新页面
+            const newUrl = `${window.location.pathname}?${params}`;
+            window.history.pushState({}, '', newUrl);
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 初始化页面状态
+        updateCurrentDate(currentDate);
+    });
+</script>
+{% endblock %}

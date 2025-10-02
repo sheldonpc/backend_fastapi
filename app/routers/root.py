@@ -4,7 +4,7 @@ from math import ceil
 from fastapi import APIRouter, Query
 from fastapi import Request
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
-    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate
+    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData
 from app.core.templates import templates
 import markdown
 from app.utils.redis_client import cache_get, cache_set
@@ -256,6 +256,34 @@ async def news(
 #     timestamp = fields.DatetimeField()   # 行情时间
 #     updated_at = fields.DatetimeField(auto_now=True)
 
+async def get_latest_bond_data():
+    """
+    获取最新的中国和美国国债数据
+    如果最新日期的数据不完整，则继续查找后续日期的数据
+    """
+    try:
+        # 先查找有完整中国国债数据的最新记录
+        cn_bond = await BondYieldHistory.filter(
+            cn_2y__isnull=False,
+            cn_5y__isnull=False,
+            cn_10y__isnull=False,
+            cn_30y__isnull=False,
+            cn_spread_10y_2y__isnull=False,
+        ).order_by("-date").first()
+
+        # 查找有完整美国国债数据的最新记录
+        us_bond = await BondYieldHistory.filter(
+            us_2y__isnull=False,
+            us_5y__isnull=False,
+            us_10y__isnull=False,
+            us_30y__isnull=False,
+            us_spread_10y_2y__isnull=False,
+        ).order_by("-date").first()
+        return cn_bond, us_bond
+
+    except Exception as e:
+        return None, None
+
 @router.get("/overview")
 async def overview(request: Request):
     all_indexes = await GlobalIndexLatest.all()
@@ -310,9 +338,212 @@ async def overview(request: Request):
     for region in region_order:
         ordered_result[region] = grouped_indexes.get(region, [])
 
-    # print(ordered_result)
+    cn_bond, us_bond = await get_latest_bond_data()
 
-    return templates.TemplateResponse("public/overview.html", {"request": request, "ordered_result": ordered_result})
+    commodities = await ForeignCommodityRealTimeData2.all().only(
+        'symbol', 'name', 'rmb_price', 'change_amount', 'change_percent'
+    ).order_by('symbol')
+
+    return templates.TemplateResponse("public/overview.html", {"request": request, "ordered_result": ordered_result, "cn_bond": cn_bond, "us_bond": us_bond, "commodities": commodities})
+
+
+@router.get("/board")
+async def board(request: Request):
+    return templates.TemplateResponse("public/board.html", {"request": request})
+# @router.get("/calendar")
+# async def calendar_page(
+#         request: Request,
+#         date: str = Query(None, description="查询日期，格式: YYYY-MM-DD"),
+#         region: str = Query(None, description="地区筛选"),
+#         importance: str = Query(None, description="重要性筛选"),
+#         search: str = Query(None, description="搜索关键词")
+# ):
+#     """财经日历页面"""
+#     # 默认显示今天的数据
+#     if not date:
+#         date = datetime.now().strftime("%Y-%m-%d")
+#
+#     # 构建查询条件
+#     query_filters = {}
+#
+#     # 日期范围查询 (当天的00:00:00到23:59:59)
+#     start_date = datetime.strptime(date, "%Y-%m-%d")
+#     end_date = start_date + timedelta(days=8) - timedelta(seconds=1)
+#
+#     query_filters["datetime__gte"] = start_date
+#     query_filters["datetime__lte"] = end_date
+#
+#     if region:
+#         query_filters["region"] = region
+#     if importance:
+#         query_filters["importance"] = importance
+#
+#     # 查询事件数据
+#     events = await EventData.filter(**query_filters).order_by("datetime")
+#
+#     # 如果有搜索关键词，进行筛选
+#     if search:
+#         events = [event for event in events if search.lower() in event.name.lower()]
+#
+#     # 获取最新数据更新时间
+#     latest_event = await EventData.all().order_by("-scraped_at").first()
+#     last_updated = latest_event.scraped_at if latest_event else None
+#
+#     return templates.TemplateResponse("public/eco_calendar.html", {
+#         "request": request,
+#         "events": events,
+#         "current_date": date,
+#         "selected_region": region,
+#         "selected_importance": importance,
+#         "search_keyword": search or "",
+#         "last_updated": last_updated
+#     })
+#
+#
+# @router.get("/api/calendar/events")
+# async def get_calendar_events_api(
+#         date: str = Query(..., description="查询日期，格式: YYYY-MM-DD"),
+#         region: str = Query(None, description="地区筛选"),
+#         importance: str = Query(None, description="重要性筛选"),
+#         search: str = Query(None, description="搜索关键词")
+# ):
+#     """财经日历API接口，供AJAX调用"""
+#     # 日期范围查询
+#     start_date = datetime.strptime(date, "%Y-%m-%d")
+#     end_date = start_date + timedelta(days=8) - timedelta(seconds=1)
+#
+#     query_filters = {
+#         "datetime__gte": start_date,
+#         "datetime__lte": end_date
+#     }
+#
+#     if region:
+#         query_filters["region"] = region
+#     if importance:
+#         query_filters["importance"] = importance
+#
+#     events = await EventData.filter(**query_filters).order_by("datetime")
+#
+#     # 搜索筛选
+#     if search:
+#         events = [event for event in events if search.lower() in event.name.lower()]
+#
+#     # 序列化事件数据
+#     events_data = []
+#     for event in events:
+#         events_data.append({
+#             "id": event.id,
+#             "region": event.region,
+#             "name": event.name,
+#             "previous_value": event.previous_value,
+#             "importance": event.importance,
+#             "datetime": event.datetime.isoformat(),
+#             "scraped_at": event.scraped_at.isoformat() if event.scraped_at else None
+#         })
+#
+#     return events_data
+
+from tortoise.expressions import Q
+
+
+@router.get("/calendar")
+async def calendar_page(
+        request: Request,
+        date: str = Query(None, description="查询日期，格式: YYYY-MM-DD"),
+        region: str = Query(None, description="地区筛选"),
+        importance: str = Query(None, description="重要性筛选"),
+        search: str = Query(None, description="搜索关键词")
+):
+    """财经日历页面"""
+    # 默认显示今天的数据
+    if not date:
+        date = datetime.now().strftime("%Y-%m-%d")
+
+    # 构建查询条件 - 使用 Q 对象进行复杂查询
+    query = Q()
+
+    # 日期范围查询 (当天的00:00:00到23:59:59)
+    start_date = datetime.strptime(date, "%Y-%m-%d")
+    end_date = start_date + timedelta(days=8) - timedelta(seconds=1)
+
+    query &= Q(datetime__gte=start_date) & Q(datetime__lte=end_date)
+
+    # 地区筛选 - 使用包含关系
+    if region:
+        query &= Q(region__contains=region)
+
+    # 重要性筛选 - 完全匹配
+    if importance:
+        query &= Q(importance=importance)
+
+    # 查询事件数据
+    events = await EventData.filter(query).order_by("datetime")
+
+    # 如果有搜索关键词，进行筛选（名称包含关键词）
+    if search:
+        events = [event for event in events if search.lower() in event.name.lower()]
+
+    # 获取最新数据更新时间
+    latest_event = await EventData.all().order_by("-scraped_at").first()
+    last_updated = latest_event.scraped_at if latest_event else None
+
+    return templates.TemplateResponse("public/eco_calendar.html", {
+        "request": request,
+        "events": events,
+        "current_date": date,
+        "selected_region": region,
+        "selected_importance": importance,
+        "search_keyword": search or "",
+        "last_updated": last_updated
+    })
+
+
+@router.get("/api/calendar/events")
+async def get_calendar_events_api(
+        date: str = Query(..., description="查询日期，格式: YYYY-MM-DD"),
+        region: str = Query(None, description="地区筛选"),
+        importance: str = Query(None, description="重要性筛选"),
+        search: str = Query(None, description="搜索关键词")
+):
+    """财经日历API接口，供AJAX调用"""
+    # 构建查询条件 - 使用 Q 对象
+    query = Q()
+
+    # 日期范围查询
+    start_date = datetime.strptime(date, "%Y-%m-%d")
+    end_date = start_date + timedelta(days=8) - timedelta(seconds=1)
+
+    query &= Q(datetime__gte=start_date) & Q(datetime__lte=end_date)
+
+    # 地区筛选 - 包含关系
+    if region:
+        query &= Q(region__contains=region)
+
+    # 重要性筛选 - 完全匹配
+    if importance:
+        query &= Q(importance=importance)
+
+    # 查询事件数据
+    events = await EventData.filter(query).order_by("datetime")
+
+    # 搜索筛选 - 名称包含关键词
+    if search:
+        events = [event for event in events if search.lower() in event.name.lower()]
+
+    # 序列化事件数据
+    events_data = []
+    for event in events:
+        events_data.append({
+            "id": event.id,
+            "region": event.region,
+            "name": event.name,
+            "previous_value": event.previous_value,
+            "importance": event.importance,
+            "datetime": event.datetime.isoformat(),
+            "scraped_at": event.scraped_at.isoformat() if event.scraped_at else None
+        })
+
+    return events_data
 
 @router.get("/login")
 async def login_page(request: Request):

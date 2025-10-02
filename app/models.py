@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 
+
 class User(models.Model):
     id = fields.IntField(pk=True)
     username = fields.CharField(max_length=255)
@@ -15,26 +16,31 @@ class User(models.Model):
 
     role = fields.CharField(max_length=50, default="user")  # 新增角色字段，默认普通用户
 
-
     def __str__(self):
         return self.username
 
+
 User_Pydantic = pydantic_model_creator(User, name="User")
 UserIn_Pydantic = pydantic_model_creator(User, name="UserIn", exclude_readonly=True)
+
 
 class Category(models.Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50, unique=True)
     created_at = fields.DatetimeField(auto_now_add=True)
+
     def __str__(self):
         return self.name
+
 
 class Tag(models.Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=50, unique=True)
     created_at = fields.DatetimeField()
+
     def __str__(self):
         return self.name
+
 
 class Article(models.Model):
     id = fields.IntField(pk=True)
@@ -49,9 +55,9 @@ class Article(models.Model):
     category = fields.ForeignKeyField("models.Category", related_name="articles")
     tag = fields.ManyToManyField("models.Tag", related_name="articles", through="article_tag")
 
-
     def __str__(self):
         return self.title
+
 
 Category_Pydantic = pydantic_model_creator(Category, name="Category")
 CategoryIn_Pydantic = pydantic_model_creator(Category, name="CategoryIn", exclude_readonly=True)
@@ -77,8 +83,10 @@ class Comment(models.Model):
     def __str__(self):
         return f"Comment {self.id} by {self.author.username}"
 
+
 Comment_Pydantic = pydantic_model_creator(Comment, name="Comment")
 CommentIn_Pydantic = pydantic_model_creator(Comment, name="CommentIn", exclude_readonly=True)
+
 
 class ArticleLike(models.Model):
     id = fields.IntField(pk=True)
@@ -89,6 +97,7 @@ class ArticleLike(models.Model):
     class Meta:
         unique_together = ("user", "article")  # 同一个用户只能点赞一次
 
+
 class CommentLike(models.Model):
     id = fields.IntField(pk=True)
     user = fields.ForeignKeyField("models.User", related_name="comment_likes")
@@ -98,6 +107,7 @@ class CommentLike(models.Model):
     class Meta:
         unique_together = ("user", "comment")
 
+
 class ArticleFavorite(models.Model):
     id = fields.IntField(pk=True)
     user = fields.ForeignKeyField("models.User", related_name="favorites")
@@ -106,6 +116,7 @@ class ArticleFavorite(models.Model):
 
     class Meta:
         unique_together = ("user", "article")
+
 
 # 金融资讯
 class FinancialNews(models.Model):
@@ -145,12 +156,12 @@ class IndexData(models.Model):
     symbol = fields.CharField(max_length=50, unique=True)  # Shanghai, Shenzhen, ChiNext等
     name = fields.CharField(max_length=100)  # 中文名称
     timestamp = fields.DatetimeField()  # 数据时间戳
-    
+
     # 价格相关字段
     price = fields.DecimalField(max_digits=15, decimal_places=4)  # 当前价格
     change = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 涨跌额
     change_percent = fields.CharField(max_length=20, null=True)  # 涨跌幅百分比
-    
+
     # 详细交易数据（可能为空）
     open_today = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 今开
     close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 昨收
@@ -158,22 +169,24 @@ class IndexData(models.Model):
     lowest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)  # 最低
     volume = fields.CharField(max_length=50, null=True)  # 成交量（字符串格式，如"5.57亿手"）
     amount = fields.CharField(max_length=50, null=True)  # 成交额（字符串格式，如"9497.23亿元"）
-    
+
     # 数据类型分类
     data_type = fields.CharField(max_length=30)  # index(指数), precious_metal(贵金属), us_stock(美股)
     market_region = fields.CharField(max_length=30)  # CN(中国), US(美国), Global(全球)
-    
+
     # 更新时间
     updated_at = fields.DatetimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.name}({self.symbol}): {self.price}"
-    
+
     class Meta:
         table = "index_data"
 
+
 def shanghai_now():
     return datetime.now(tz=ZoneInfo("Asia/Shanghai"))
+
 
 # class GlobalIndexRealtimeData(models.Model):
 #     """中国指数实时数据"""
@@ -212,12 +225,13 @@ class GlobalIndexLatest(models.Model):
     lowest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
     close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
     amplitude = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
-    timestamp = fields.DatetimeField()   # 行情时间
+    timestamp = fields.DatetimeField()  # 行情时间
     updated_at = fields.DatetimeField(auto_now=True)
     region = fields.CharField(max_length=50, default="其他")
 
     class Meta:
         table = "global_index_latest"
+
 
 class GlobalIndexHistory(models.Model):
     """全球指数历史数据（历史表）"""
@@ -232,13 +246,13 @@ class GlobalIndexHistory(models.Model):
     lowest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
     close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
     amplitude = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
-    timestamp = fields.DatetimeField()   # 行情时间
+    timestamp = fields.DatetimeField()  # 行情时间
     updated_at = fields.DatetimeField(auto_now=True)
     region = fields.CharField(max_length=50, default="其他")
 
-
     class Meta:
         table = "global_index_history"
+
 
 # 废弃
 class CNIndexRealtimeData(models.Model):
@@ -261,6 +275,8 @@ class CNIndexRealtimeData(models.Model):
 
     class Meta:
         table = "cn_index_data"
+
+
 # 废弃
 class USAIndexRealtimeData(models.Model):
     """美国指数实时数据"""
@@ -283,12 +299,14 @@ class USAIndexRealtimeData(models.Model):
     class Meta:
         table = "usa_index_data"
 
+
 class RealTimeForeignCurrencyData(models.Model):
     """外汇实时数据"""
     id = fields.IntField(pk=True)
     code = fields.CharField(max_length=20)
     buying_price = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
     selling_price = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
+
 
 class DailyFxSnapshot(models.Model):
     """每日外汇快照（宽表）"""
@@ -333,6 +351,7 @@ class HotStock(models.Model):
     followers = fields.IntField()
     price = fields.DecimalField(max_digits=15, decimal_places=4)
 
+
 # 今开     最高     最低        成交量        成交额    时间戳
 # 代码      名称   最新价  涨跌额   涨跌幅     买入     卖出     昨收  \
 class MinuteLevelCNStockData(models.Model):
@@ -357,11 +376,11 @@ class MinuteLevelCNStockData(models.Model):
     class Meta:
         table = "minute_level_cn_stock_data"
 
-# 港股分钟级数据
-    #  序号   代码                     名称    最新价  涨跌额  涨跌幅  \
-    # 今开      最高      最低      昨收        成交量        成交额
-class MinuteLevelHKStockData(models.Model):
 
+# 港股分钟级数据
+#  序号   代码                     名称    最新价  涨跌额  涨跌幅  \
+# 今开      最高      最低      昨收        成交量        成交额
+class MinuteLevelHKStockData(models.Model):
     code = fields.CharField(max_length=20, pk=True)
     name = fields.CharField(max_length=50)
     price = fields.DecimalField(max_digits=15, decimal_places=4)
@@ -377,6 +396,7 @@ class MinuteLevelHKStockData(models.Model):
 
     class Meta:
         table = "minute_level_hk_stock_data"
+
 
 class CNSpecificStockData(models.Model):
     """特定数据模型 (精确匹配15个字段)"""
@@ -460,6 +480,7 @@ class SpecificStockHistory(models.Model):
     def __str__(self):
         return f"{self.code} {self.date}"
 
+
 # 弃用
 class OilRealTimeData(models.Model):
     """原油实时数据模型（根据网页显示格式）"""
@@ -514,6 +535,8 @@ class OilRealTimeData(models.Model):
     def is_wti(self) -> bool:
         """是否为WTI原油"""
         return self.symbol == "wti"
+
+
 # 弃用
 class GoldRealTimeData(models.Model):
     """黄金实时数据模型"""
@@ -591,6 +614,8 @@ class GoldRealTimeData(models.Model):
             sign = "+" if float(self.change_amount) > 0 else ""
             return f"{sign}{self.change_amount} ({sign}{self.change_percent}%)"
         return "N/A"
+
+
 # 弃用
 class SilverRealTimeData(models.Model):
     """白银实时数据模型"""
@@ -722,6 +747,7 @@ class ForeignCommodityHistory2(models.Model):
             ("symbol", "timestamp"),
         ]
 
+
 class VIXRealTimeData(models.Model):
     """VIX恐慌指数实时数据模型"""
 
@@ -749,6 +775,7 @@ class VIXRealTimeData(models.Model):
 
     def __str__(self):
         return f"VIX指数 {self.current_price}"
+
 
 class MarketIndexData(models.Model):
     """主要指数涨跌数据模型"""
@@ -911,6 +938,7 @@ class SZ399006History(models.Model):
     def __str__(self):
         return f"创业板指 {self.date} {self.close}"
 
+
 class HSIHistory(models.Model):
     """恒生历史数据模型"""
 
@@ -928,6 +956,7 @@ class HSIHistory(models.Model):
 
     def __str__(self):
         return f"创业板指 {self.date} {self.close}"
+
 
 class SP500History(models.Model):
     """标普500历史数据模型"""
@@ -947,6 +976,7 @@ class SP500History(models.Model):
 
     def __str__(self):
         return f"标普500 {self.date} {self.close}"
+
 
 class NDXHistory(models.Model):
     """纳斯达克指数历史数据模型"""
@@ -968,6 +998,7 @@ class NDXHistory(models.Model):
     def __str__(self):
         return f"纳斯达克 {self.date} {self.close}"
 
+
 class DJIAHistory(models.Model):
     """道琼斯指数历史数据模型"""
 
@@ -988,6 +1019,7 @@ class DJIAHistory(models.Model):
     def __str__(self):
         return f"道琼斯 {self.date} {self.close}"
 
+
 class GoldHistory(models.Model):
     """黄金价格历史数据模型"""
     id = fields.IntField(pk=True)
@@ -1003,6 +1035,7 @@ class GoldHistory(models.Model):
 
     def __str__(self):
         return f"黄金 {self.date} {self.close}"
+
 
 class SilverHistory(models.Model):
     """白银价格历史数据模型"""
@@ -1020,6 +1053,7 @@ class SilverHistory(models.Model):
     def __str__(self):
         return f"白银 {self.date} {self.close}"
 
+
 class PlatinumHistory(models.Model):
     """铂金价格历史数据模型"""
     id = fields.IntField(pk=True)
@@ -1028,6 +1062,7 @@ class PlatinumHistory(models.Model):
     close = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
     high = fields.DecimalField(max_digits=12, decimal_places=3, description="最高")
     low = fields.DecimalField(max_digits=12, decimal_places=3, description="最低")
+
     class Meta:
         table = "platinum_history"
         ordering = ["-date"]
@@ -1047,7 +1082,8 @@ class BondYieldHistory(models.Model):
     cn_5y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率5年", null=True)
     cn_10y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率10年", null=True)
     cn_30y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率30年", null=True)
-    cn_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率10年-2年", null=True)
+    cn_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="中国国债收益率10年-2年",
+                                           null=True)
     cn_gdp_growth = fields.DecimalField(max_digits=8, decimal_places=4, description="中国GDP年增率", null=True)
 
     # 美国国债收益率
@@ -1055,7 +1091,8 @@ class BondYieldHistory(models.Model):
     us_5y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率5年", null=True)
     us_10y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率10年", null=True)
     us_30y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率30年", null=True)
-    us_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率10年-2年", null=True)
+    us_spread_10y_2y = fields.DecimalField(max_digits=8, decimal_places=4, description="美国国债收益率10年-2年",
+                                           null=True)
     us_gdp_growth = fields.DecimalField(max_digits=8, decimal_places=4, description="美国GDP年增率", null=True)
 
     class Meta:
@@ -1121,7 +1158,7 @@ class RichList(models.Model):
 
     class Meta:
         table = "rich_list"
-        ordering = ["rank",]
+        ordering = ["rank", ]
 
     def __str__(self):
         return f"{self.year}年-第{self.rank}名: {self.name}"
@@ -1145,6 +1182,7 @@ class RichList(models.Model):
     def is_top_100(self) -> bool:
         """是否前一百名"""
         return self.rank <= 100
+
 
 class News1(models.Model):
     """新闻数据模型"""
@@ -1180,6 +1218,7 @@ class News1(models.Model):
         """格式化时间显示"""
         return self.publish_time.strftime("%Y-%m-%d %H:%M:%S")
 
+
 # 标题 内容  时间 链接
 class News2(models.Model):
     """新闻数据模型"""
@@ -1196,6 +1235,7 @@ class News2(models.Model):
         ]
         ordering = ["-publish_time"]
 
+
 # 标题 摘要  时间 链接
 class News3(models.Model):
     """新闻数据模型"""
@@ -1204,12 +1244,14 @@ class News3(models.Model):
     content = fields.TextField(description="新闻内容")
     publish_time = fields.DatetimeField(description="发布时间")
     source = fields.CharField(max_length=500, description="新闻来源", null=True)
+
     class Meta:
         table = "news3"
         ordering = ["-publish_time"]
 
     def __str__(self):
         return f"{self.title} ({self.publish_time})"
+
 
 class News4(models.Model):
     """新闻数据模型"""
@@ -1224,6 +1266,7 @@ class News4(models.Model):
     def __str__(self):
         return f"{self.publish_time}"
 
+
 # 标题 摘要 发布时间 链接
 class EastMoneyHistoryNews(models.Model):
     """东方财富历史新闻数据模型"""
@@ -1232,6 +1275,7 @@ class EastMoneyHistoryNews(models.Model):
     summary = fields.TextField(description="新闻摘要", null=True)
     publish_time = fields.DatetimeField(description="发布时间")
     source = fields.CharField(max_length=500, description="新闻来源", null=True)
+
     class Meta:
         table = "east_money_history_news"
         ordering = ["-publish_time"]
@@ -1316,6 +1360,7 @@ class CNMarket(models.Model):
 
         return market
 
+
 class StockMarketActivity(models.Model):
     """股票市场活跃度数据模型"""
     id = fields.IntField(pk=True)
@@ -1332,9 +1377,11 @@ class StockMarketActivity(models.Model):
     activity = fields.FloatField(description="活跃度")
     date = fields.DatetimeField(description="统计日期")
     update_time = fields.DatetimeField(description="更新时间")
+
     class Meta:
         table = "stock_market_activity"
         ordering = ["-date"]
+
 
 class DifyTemplate(models.Model):
     """Dify 模板数据模型"""
@@ -1346,3 +1393,463 @@ class DifyTemplate(models.Model):
 
     class Meta:
         table = "dify_template"
+
+
+#   {
+#     "datetime": "2025-10-02 17:00",
+#     "region": "德国",
+#     "name": "德国:失业率:季调",
+#     "previous_value": "3.7%",
+#     "importance": "高",
+#     "scraped_at": "2025-10-02 11:23:36"
+#   },
+
+class EventData(models.Model):
+    """事件数据模型"""
+    id = fields.IntField(pk=True)
+    region = fields.CharField(max_length=50, description="国家地区")
+    name = fields.CharField(max_length=100, description="事件名称")
+    previous_value = fields.CharField(max_length=50, description="上一期值")
+    importance = fields.CharField(max_length=50, description="重要性")
+    scraped_at = fields.DatetimeField(description="抓取时间")
+    datetime = fields.DatetimeField(description="事件时间")
+
+    class Meta:
+        table = "event_data"
+
+
+class IndustryLatest(models.Model):
+    """行业最新数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    industry_name = fields.CharField(max_length=50, description="行业名称")
+    industry_index = fields.FloatField(description="行业指数")
+    industry_index_change_rate = fields.FloatField(description="行业指数涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    company_num = fields.IntField(description="公司数量")
+    leading_stock = fields.CharField(max_length=50, description="龙头股")
+    leading_stock_change_rate = fields.FloatField(description="龙头股涨跌幅")
+    current_price = fields.FloatField(description="当前价格")
+    update_time = fields.DatetimeField(description="更新时间")
+
+
+class IndustryLast3Days(models.Model):
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    industry_name = fields.CharField(max_length=50, description="行业名称")
+    industry_index = fields.FloatField(description="行业指数")
+    industry_index_change_rate = fields.FloatField(description="行业指数涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    company_num = fields.IntField(description="公司数量")
+    leading_stock = fields.CharField(max_length=50, description="龙头股")
+    leading_stock_change_rate = fields.FloatField(description="龙头股涨跌幅")
+    current_price = fields.FloatField(description="当前价格")
+    update_time = fields.DatetimeField(description="更新时间")
+
+
+class IndustryLast5Days(models.Model):
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    industry_name = fields.CharField(max_length=50, description="行业名称")
+    industry_index = fields.FloatField(description="行业指数")
+    industry_index_change_rate = fields.FloatField(description="行业指数涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    company_num = fields.IntField(description="公司数量")
+    leading_stock = fields.CharField(max_length=50, description="龙头股")
+    leading_stock_change_rate = fields.FloatField(description="龙头股涨跌幅")
+    current_price = fields.FloatField(description="当前价格")
+    update_time = fields.DatetimeField(description="更新时间")
+
+
+class IndustryLast10Days(models.Model):
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    industry_name = fields.CharField(max_length=50, description="行业名称")
+    industry_index = fields.FloatField(description="行业指数")
+    industry_index_change_rate = fields.FloatField(description="行业指数涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    company_num = fields.IntField(description="公司数量")
+    leading_stock = fields.CharField(max_length=50, description="龙头股")
+    leading_stock_change_rate = fields.FloatField(description="龙头股涨跌幅")
+    current_price = fields.FloatField(description="当前价格")
+    update_time = fields.DatetimeField(description="更新时间")
+
+
+class IndustryLast20Days(models.Model):
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    industry_name = fields.CharField(max_length=50, description="行业名称")
+    industry_index = fields.FloatField(description="行业指数")
+    industry_index_change_rate = fields.FloatField(description="行业指数涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    company_num = fields.IntField(description="公司数量")
+    leading_stock = fields.CharField(max_length=50, description="龙头股")
+    leading_stock_change_rate = fields.FloatField(description="龙头股涨跌幅")
+    current_price = fields.FloatField(description="当前价格")
+    update_time = fields.DatetimeField(description="更新时间")
+
+
+class StockLatest(models.Model):
+    """个股最新数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票简称")
+    current_price = fields.FloatField(description="最新价")
+    change_rate = fields.FloatField(description="涨跌幅")
+    turnover_rate = fields.FloatField(description="换手率")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    transaction_amount = fields.FloatField(description="成交额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_latest"
+
+
+class StockLast3Days(models.Model):
+    """个股3日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票简称")
+    current_price = fields.FloatField(description="最新价")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    continuous_turnover_rate = fields.FloatField(description="连续换手率")
+    net_amount = fields.FloatField(description="资金流入净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_last_3_days"
+
+
+class StockLast5Days(models.Model):
+    """个股5日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票简称")
+    current_price = fields.FloatField(description="最新价")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    continuous_turnover_rate = fields.FloatField(description="连续换手率")
+    net_amount = fields.FloatField(description="资金流入净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_last_5_days"
+
+
+class StockLast10Days(models.Model):
+    """个股10日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票简称")
+    current_price = fields.FloatField(description="最新价")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    continuous_turnover_rate = fields.FloatField(description="连续换手率")
+    net_amount = fields.FloatField(description="资金流入净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_last_10_days"
+
+
+class StockLast20Days(models.Model):
+    """个股20日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票简称")
+    current_price = fields.FloatField(description="最新价")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    continuous_turnover_rate = fields.FloatField(description="连续换手率")
+    net_amount = fields.FloatField(description="资金流入净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_last_20_days"
+
+
+class ConceptLatest(models.Model):
+    """概念股最新数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    concept_name = fields.CharField(max_length=100, description="概念名称")
+    concept_index = fields.FloatField(description="概念指数")
+    concept_index_change_rate = fields.FloatField(description="概念指数涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    company_num = fields.IntField(description="公司数量")
+    leading_stock = fields.CharField(max_length=50, description="领涨股")
+    leading_stock_change_rate = fields.FloatField(description="领涨股涨跌幅")
+    current_price = fields.FloatField(description="当前价格")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "concept_latest"
+
+class ConceptLast3Days(models.Model):
+    """概念股3日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    concept_name = fields.CharField(max_length=100, description="概念名称")
+    company_num = fields.IntField(description="公司数量")
+    concept_index = fields.FloatField(description="概念指数")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "concept_last_3_days"
+
+class ConceptLast5Days(models.Model):
+    """概念股5日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    concept_name = fields.CharField(max_length=100, description="概念名称")
+    company_num = fields.IntField(description="公司数量")
+    concept_index = fields.FloatField(description="概念指数")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "concept_last_5_days"
+
+class ConceptLast10Days(models.Model):
+    """概念股10日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    concept_name = fields.CharField(max_length=100, description="概念名称")
+    company_num = fields.IntField(description="公司数量")
+    concept_index = fields.FloatField(description="概念指数")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "concept_last_10_days"
+
+class ConceptLast20Days(models.Model):
+    """概念股20日排行数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="排名")
+    concept_name = fields.CharField(max_length=100, description="概念名称")
+    company_num = fields.IntField(description="公司数量")
+    concept_index = fields.FloatField(description="概念指数")
+    change_rate = fields.FloatField(description="阶段涨跌幅")
+    inflow_volume = fields.FloatField(description="流入资金")
+    outflow_volume = fields.FloatField(description="流出资金")
+    net_amount = fields.FloatField(description="净额")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "concept_last_20_days"
+
+
+class StockLHBDetail(models.Model):
+    """龙虎榜详情数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="序号")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票名称")
+    listing_date = fields.DateField(description="上榜日")
+    interpretation = fields.TextField(description="解读", null=True)
+    close_price = fields.FloatField(description="收盘价")
+    change_rate = fields.FloatField(description="涨跌幅")
+    lhb_net_buy_amount = fields.FloatField(description="龙虎榜净买额")
+    lhb_buy_amount = fields.FloatField(description="龙虎榜买入额")
+    lhb_sell_amount = fields.FloatField(description="龙虎榜卖出额")
+    lhb_transaction_amount = fields.FloatField(description="龙虎榜成交额")
+    market_total_amount = fields.FloatField(description="市场总成交额")
+    net_buy_ratio = fields.FloatField(description="净买额占总成交比")
+    transaction_ratio = fields.FloatField(description="成交额占总成交比")
+    turnover_rate = fields.FloatField(description="换手率")
+    circulating_market_value = fields.FloatField(description="流通市值")
+    listing_reason = fields.TextField(description="上榜原因")
+    after_1_day = fields.FloatField(description="上榜后1日", null=True)
+    after_2_days = fields.FloatField(description="上榜后2日", null=True)
+    after_5_days = fields.FloatField(description="上榜后5日", null=True)
+    after_10_days = fields.FloatField(description="上榜后10日", null=True)
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_lhb_detail"
+
+
+class StockHotRank(models.Model):
+    """热门股票排名数据模型"""
+    id = fields.IntField(pk=True)
+    current_rank = fields.IntField(description="当前排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票名称")
+    latest_price = fields.FloatField(description="最新价")
+    change_amount = fields.FloatField(description="涨跌额")
+    change_rate = fields.FloatField(description="涨跌幅")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_hot_rank"
+
+
+class StockHotUp(models.Model):
+    """上升热门股票数据模型"""
+    id = fields.IntField(pk=True)
+    rank_change = fields.IntField(description="排名较昨日变动")
+    current_rank = fields.IntField(description="当前排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票名称")
+    latest_price = fields.FloatField(description="最新价")
+    change_amount = fields.FloatField(description="涨跌额")
+    change_rate = fields.FloatField(description="涨跌幅")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_hot_up"
+
+class StockHotSearchBaidu(models.Model):
+    """百度热搜股票数据模型"""
+    id = fields.IntField(pk=True)
+    symbol_type = fields.CharField(max_length=10, description="市场类型")  # A股、港股、美股、全部
+    search_date = fields.CharField(max_length=20, description="搜索日期")  # 20250616
+    search_time = fields.CharField(max_length=10, description="时间范围")  # 今日、1小时
+    stock_name_code = fields.CharField(max_length=100, description="名称/代码")
+    change_rate = fields.FloatField(description="涨跌幅", null=True)
+    comprehensive_heat = fields.FloatField(description="综合热度", null=True)
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_hot_search_baidu"
+
+
+class StockZTPool(models.Model):
+    """涨停股池数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="序号")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票名称")
+    change_rate = fields.FloatField(description="涨跌幅")
+    latest_price = fields.FloatField(description="最新价")
+    transaction_amount = fields.FloatField(description="成交额")
+    circulating_market_value = fields.FloatField(description="流通市值")
+    total_market_value = fields.FloatField(description="总市值")
+    turnover_rate = fields.FloatField(description="换手率")
+    seal_board_funds = fields.FloatField(description="封板资金")
+    first_seal_time = fields.CharField(max_length=10, description="首次封板时间", null=True)
+    last_seal_time = fields.CharField(max_length=10, description="最后封板时间", null=True)
+    blast_count = fields.IntField(description="炸板次数")
+    limit_up_stats = fields.CharField(max_length=50, description="涨停统计")
+    consecutive_boards = fields.IntField(description="连板数")
+    industry = fields.CharField(max_length=100, description="所属行业", null=True)
+    trade_date = fields.CharField(max_length=20, description="交易日期")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_zt_pool"
+
+class StockZTPoolPrevious(models.Model):
+    """昨日涨停股池数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="序号")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票名称")
+    change_rate = fields.FloatField(description="涨跌幅")
+    latest_price = fields.FloatField(description="最新价")
+    limit_up_price = fields.FloatField(description="涨停价")
+    transaction_amount = fields.FloatField(description="成交额")
+    circulating_market_value = fields.FloatField(description="流通市值")
+    total_market_value = fields.FloatField(description="总市值")
+    turnover_rate = fields.FloatField(description="换手率")
+    change_speed = fields.FloatField(description="涨速")
+    amplitude = fields.FloatField(description="振幅")
+    previous_seal_time = fields.CharField(max_length=10, description="昨日封板时间", null=True)
+    previous_consecutive_boards = fields.IntField(description="昨日连板数")
+    limit_up_stats = fields.CharField(max_length=50, description="涨停统计")
+    industry = fields.CharField(max_length=100, description="所属行业", null=True)
+    trade_date = fields.CharField(max_length=20, description="交易日期")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_zt_pool_previous"
+
+class StockZTPoolStrong(models.Model):
+    """强势股池数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="序号")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票名称")
+    change_rate = fields.FloatField(description="涨跌幅")
+    latest_price = fields.FloatField(description="最新价")
+    limit_up_price = fields.FloatField(description="涨停价")
+    transaction_amount = fields.FloatField(description="成交额")
+    circulating_market_value = fields.FloatField(description="流通市值")
+    total_market_value = fields.FloatField(description="总市值")
+    turnover_rate = fields.FloatField(description="换手率")
+    change_speed = fields.FloatField(description="涨速")
+    is_new_high = fields.CharField(max_length=10, description="是否新高")  # 是/否
+    volume_ratio = fields.FloatField(description="量比")
+    limit_up_stats = fields.CharField(max_length=50, description="涨停统计")
+    selection_reason = fields.CharField(max_length=50, description="入选理由")
+    industry = fields.CharField(max_length=100, description="所属行业", null=True)
+    trade_date = fields.CharField(max_length=20, description="交易日期")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_zt_pool_strong"
+
+class StockZTPoolDown(models.Model):
+    """跌停股池数据模型"""
+    id = fields.IntField(pk=True)
+    rank = fields.IntField(description="序号")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=50, description="股票名称")
+    change_rate = fields.FloatField(description="涨跌幅")
+    latest_price = fields.FloatField(description="最新价")
+    transaction_amount = fields.FloatField(description="成交额")
+    circulating_market_value = fields.FloatField(description="流通市值")
+    total_market_value = fields.FloatField(description="总市值")
+    dynamic_pe_ratio = fields.FloatField(description="动态市盈率", null=True)
+    turnover_rate = fields.FloatField(description="换手率")
+    seal_order_funds = fields.FloatField(description="封单资金")
+    last_seal_time = fields.CharField(max_length=10, description="最后封板时间", null=True)
+    on_board_transaction_amount = fields.FloatField(description="板上成交额")
+    consecutive_limit_down = fields.IntField(description="连续跌停")
+    open_board_count = fields.IntField(description="开板次数")
+    industry = fields.CharField(max_length=100, description="所属行业", null=True)
+    trade_date = fields.CharField(max_length=20, description="交易日期")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_zt_pool_down"
+
+class StockHKHotRank(models.Model):
+    """港股人气榜数据模型"""
+    id = fields.IntField(pk=True)
+    current_rank = fields.IntField(description="当前排名")
+    stock_code = fields.CharField(max_length=20, description="股票代码")
+    stock_name = fields.CharField(max_length=100, description="股票名称")
+    latest_price = fields.FloatField(description="最新价")
+    change_rate = fields.FloatField(description="涨跌幅")
+    update_time = fields.DatetimeField(description="更新时间")
+
+    class Meta:
+        table = "stock_hk_hot_rank"
