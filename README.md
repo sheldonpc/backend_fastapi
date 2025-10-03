@@ -1,445 +1,301 @@
-# 金融数据平台 / Financial Data Platform
+# 🌟 Smart Financial Blog Platform
 
-[中文](#中文文档) | [English](#english-documentation)
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)
+![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+[English](#english) | [中文](#chinese)
+
+</div>
 
 ---
 
-## 中文文档
+## English
 
-### 项目简介
+### 📋 Project Overview
 
-基于FastAPI构建的现代化金融数据平台，集成AI市场分析和实时数据爬取功能。项目采用RESTful API设计风格，提供完整的金融数据服务。
+Smart Financial Blog Platform is a modern, AI-powered financial information aggregation and blog management system built with FastAPI. It combines real-time market data monitoring, intelligent financial analysis, and comprehensive content management capabilities.
 
-### 技术栈
+### ✨ Key Features
 
-- **后端框架**: FastAPI (Python 3.8+)
-- **数据库**: SQLite with Tortoise ORM
-- **认证**: JWT Token
-- **数据爬取**: Selenium WebDriver
-- **AI分析**: LangChain集成
-- **异步处理**: asyncio
-- **API文档**: Swagger UI / ReDoc
+#### 🚀 Core Capabilities
+- **Real-time Market Data**: Live stock indices, precious metals, and forex data monitoring
+- **AI-Powered Analysis**: Intelligent market sentiment analysis and financial insights
+- **Multi-source Data Integration**: Aggregates data from multiple financial APIs and news sources
+- **Automated Data Pipeline**: Scheduled data collection and processing with Redis caching
 
-### 核心功能
+#### 📊 Financial Intelligence
+- **Market Temperature Monitoring**: Real-time market activity and temperature indicators
+- **VIX Fear Index**: Volatility tracking and market sentiment analysis
+- **Multi-timeframe Analysis**: Support for various time periods (3D, 5D, 10D, 20D)
+- **Sector Performance Tracking**: Industry and concept sector rankings
 
-- ✅ 金融数据爬取（A股指数、美股指数、贵金属）
-- ✅ 智能定时调度器（交易时间自动执行）
-- ✅ RESTful API设计
-- ✅ JWT用户认证和权限管理
-- ✅ 市场情绪AI分析
-- ✅ 数据可视化接口
-- ✅ 多数据源配置管理
+#### 📝 Content Management
+- **Multi-role User System**: Admin, Editor, and User role management
+- **Article Publishing**: Rich text editor with category and tag support
+- **Comment System**: Interactive commenting with moderation features
+- **Like & Favorite**: Social engagement features
 
-### RESTful API设计规范
+#### 🛡️ Security & Performance
+- **JWT Authentication**: Secure token-based authentication
+- **Rate Limiting**: API rate limiting and DDoS protection
+- **Redis Caching**: High-performance data caching layer
+- **Database Migration**: Automated database schema management
 
-#### API设计原则
-
-本项目严格遵循RESTful设计风格：
-
-1. **资源导向**: 每个URL代表一种资源
-2. **HTTP动词**: 使用标准HTTP方法（GET、POST、PUT、DELETE）
-3. **状态码**: 合理使用HTTP状态码
-4. **统一响应格式**: 标准化的JSON响应结构
-5. **版本控制**: 通过URL路径进行版本管理
-
-#### API端点总览
-
-##### 用户认证模块 (`/auth`)
-
-| 方法 | 端点 | 功能 | 权限 |
-|------|------|------|------|
-| `POST` | `/auth/register` | 用户注册 | 公开 |
-| `POST` | `/auth/login` | 用户登录 | 公开 |
-| `GET` | `/auth/me` | 获取用户信息 | 登录用户 |
-| `PUT` | `/auth/profile` | 更新用户资料 | 登录用户 |
-
-##### 金融数据模块 (`/financial`)
-
-| 方法 | 端点 | 功能 | 权限 |
-|------|------|------|------|
-| `GET` | `/financial/market/latest` | 获取最新市场数据 | 公开 |
-| `GET` | `/financial/market/overview` | 获取市场概览 | 公开 |
-| `GET` | `/financial/market/status` | 获取数据状态 | 公开 |
-| `POST` | `/financial/market/crawl` | 手动触发爬取 | 登录用户 |
-| `POST` | `/financial/market/crawl-now` | 立即执行爬取 | 管理员 |
-
-##### 调度器控制模块 (`/financial/scheduler`)
-
-| 方法 | 端点 | 功能 | 权限 |
-|------|------|------|------|
-| `GET` | `/financial/scheduler/status` | 获取调度器状态 | 公开 |
-| `POST` | `/financial/scheduler/start` | 启动调度器 | 管理员 |
-| `POST` | `/financial/scheduler/stop` | 停止调度器 | 管理员 |
-
-##### 内容管理模块 (`/articles`, `/categories`, `/tags`)
-
-| 方法 | 端点 | 功能 | 权限 |
-|------|------|------|------|
-| `GET` | `/articles` | 获取文章列表 | 公开 |
-| `GET` | `/articles/{id}` | 获取文章详情 | 公开 |
-| `POST` | `/articles` | 创建文章 | 登录用户 |
-| `PUT` | `/articles/{id}` | 更新文章 | 作者/管理员 |
-| `DELETE` | `/articles/{id}` | 删除文章 | 作者/管理员 |
-
-#### 响应格式规范
-
-##### 成功响应格式
-```json
-{
-  "success": true,
-  "data": {
-    // 具体数据内容
-  },
-  "message": "操作成功描述"
-}
-```
-
-##### 错误响应格式
-```json
-{
-  "success": false,
-  "error": {
-    "code": 400,
-    "message": "错误描述",
-    "details": "详细错误信息"
-  }
-}
-```
-
-##### 分页响应格式
-```json
-{
-  "success": true,
-  "data": {
-    "items": [],
-    "pagination": {
-      "page": 1,
-      "size": 20,
-      "total": 100,
-      "pages": 5
-    }
-  }
-}
-```
-
-### 项目结构
+### 🏗️ Architecture
 
 ```
-myBlog/
 ├── app/
-│   ├── main.py              # 应用入口
-│   ├── models.py            # 数据模型
-│   ├── schemas.py           # Pydantic模式
-│   ├── deps.py              # 依赖注入
-│   ├── config.py            # 配置管理
-│   ├── routers/             # 路由模块
-│   │   ├── auth.py          # 认证路由
-│   │   ├── users.py         # 用户路由
-│   │   ├── articles.py      # 文章路由
-│   │   ├── comments.py      # 评论路由
-│   │   └── financial.py     # 金融数据路由
-│   └── services/            # 业务服务
-│       ├── market_service.py # 市场数据服务
-│       └── scheduler.py     # 定时调度器
-├── requirements.txt         # 依赖包
-├── .env.example            # 环境变量模板
-└── README.md               # 项目说明
+│   ├── core/              # Core configuration and templates
+│   ├── middlewares/       # Custom middleware (error handling, rate limiting)
+│   ├── routers/           # API route handlers
+│   │   ├── internal/      # Internal services (stock, industry, concept data)
+│   │   ├── admin.py       # Admin management APIs
+│   │   ├── auth.py        # Authentication endpoints
+│   │   ├── articles.py    # Article management
+│   │   ├── board.py       # Financial dashboard APIs
+│   │   └── market.py      # Market data endpoints
+│   ├── services/          # Business logic services
+│   ├── utils/             # Utility functions and helpers
+│   ├── models.py          # Database models
+│   └── schemas.py         # Pydantic data validation schemas
+├── migrations/            # Database migrations
+└── requirements.txt       # Python dependencies
 ```
 
-### 快速开始
+### 🚀 Quick Start
 
-#### 1. 环境准备
+#### Prerequisites
+- Python 3.9+
+- MySQL/PostgreSQL
+- Redis
+
+#### Installation
+
+1. **Clone the repository**
 ```bash
-# 克隆项目
 git clone <repository-url>
 cd myBlog
+```
 
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 安装依赖
+2. **Install dependencies**
+```bash
 pip install -r requirements.txt
 ```
 
-#### 2. 环境配置
+3. **Configure environment**
 ```bash
-# 复制环境变量模板
 cp .env.example .env
-
-# 编辑配置文件
-# 配置数据库连接、JWT密钥、数据源URL等
+# Edit .env with your database and API configurations
 ```
 
-#### 3. 运行项目
+4. **Run database migrations**
 ```bash
-# 启动开发服务器
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# 访问API文档
-# Swagger UI: http://localhost:8000/docs
-# ReDoc: http://localhost:8000/redoc
+aerich upgrade
 ```
 
-### 数据源配置
-
-在`.env`文件中配置数据源：
-
-```env
-# 中国指数数据源
-CHINA_SHANGHAI_URL=http://quote.eastmoney.com/sh000001.html
-CHINA_SHENZHEN_URL=http://quote.eastmoney.com/sz399001.html
-CHINA_CHINEXT_URL=http://quote.eastmoney.com/sz399006.html
-
-# 美股指数数据源
-US_DOW_URL=http://quote.eastmoney.com/gb/DJIA.html
-US_NASDAQ_URL=http://quote.eastmoney.com/gb/IXIC.html
-US_SP500_URL=http://quote.eastmoney.com/gb/SPX.html
-
-# 贵金属数据源
-GOLD_URL=http://quote.eastmoney.com/qh/AU0.html
-SILVER_URL=http://quote.eastmoney.com/qh/AG0.html
-```
-
-### 部署说明
-
-#### Docker部署
+5. **Start the application**
 ```bash
-# 构建镜像
-docker build -t financial-platform .
-
-# 运行容器
-docker run -d -p 8000:8000 --name financial-app financial-platform
+uvicorn app.main:app --reload
 ```
 
-#### 生产环境
-```bash
-# 使用Gunicorn部署
-gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker
+The application will be available at `http://localhost:8000`
+
+### 📚 API Documentation
+
+#### Authentication Endpoints
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/refresh` - Token refresh
+
+#### Market Data APIs
+- `GET /api/index/` - Real-time market indices
+- `GET /api/index/risedown` - Market rise/fall statistics  
+- `GET /api/index/vix` - VIX fear index data
+- `GET /api/board/{board_type}/{period}` - Financial ranking boards
+
+#### Content Management
+- `GET /api/articles/` - Article listing with pagination
+- `POST /api/articles/` - Create new article
+- `PUT /api/articles/{id}` - Update article
+- `DELETE /api/articles/{id}` - Delete article
+
+#### Admin Panel
+- `GET /admin/api/stats` - Dashboard statistics
+- `GET /admin/api/users` - User management
+- `GET /admin/api/roles` - Role management
+
+### 🔧 Configuration
+
+Key configuration options in `app/config.py`:
+
+```python
+DATABASE_URL = "mysql://user:password@localhost/dbname"
+REDIS_URL = "redis://localhost:6379"
+SECRET_KEY = "your-secret-key"
+OPENAI_API_KEY = "your-openai-key"  # For AI analysis features
 ```
+
+### 🌟 Highlights
+
+1. **Real-time Performance**: Sub-second market data updates with Redis caching
+2. **AI Integration**: OpenAI-powered market analysis and sentiment detection
+3. **Scalable Architecture**: Microservice-ready design with clean separation of concerns
+4. **Production Ready**: Comprehensive error handling, logging, and monitoring
+5. **Multi-language Support**: Built-in internationalization framework
+
+### 📄 License
+
+This project is licensed under the MIT License.
 
 ---
 
-## English Documentation
+## Chinese
 
-### Project Overview
+### 📋 项目概述
 
-A modern financial data platform built with FastAPI, integrating AI market analysis and real-time data crawling capabilities. The project follows RESTful API design principles to provide comprehensive financial data services.
+智能金融博客平台是一个基于FastAPI构建的现代化、AI驱动的金融信息聚合和博客管理系统。它融合了实时市场数据监控、智能金融分析和全面的内容管理功能。
 
-### Tech Stack
+### ✨ 核心特性
 
-- **Backend Framework**: FastAPI (Python 3.8+)
-- **Database**: SQLite with Tortoise ORM
-- **Authentication**: JWT Token
-- **Data Crawling**: Selenium WebDriver
-- **AI Analysis**: LangChain Integration
-- **Async Processing**: asyncio
-- **API Documentation**: Swagger UI / ReDoc
+#### 🚀 核心功能
+- **实时市场数据**: 实时股指、贵金属和外汇数据监控
+- **AI智能分析**: 智能市场情绪分析和金融洞察
+- **多源数据整合**: 聚合多个金融API和新闻源数据
+- **自动化数据管道**: 定时数据采集和处理，配合Redis缓存
 
-### Core Features
+#### 📊 金融智能
+- **市场温度监控**: 实时市场活跃度和温度指标
+- **VIX恐慌指数**: 波动率追踪和市场情绪分析
+- **多时间框架分析**: 支持多种时间周期（3日、5日、10日、20日）
+- **板块表现追踪**: 行业和概念板块排行榜
 
-- ✅ Financial data crawling (A-shares, US stocks, precious metals)
-- ✅ Intelligent scheduled tasks (auto-execution during trading hours)
-- ✅ RESTful API design
-- ✅ JWT user authentication and authorization
-- ✅ AI-powered market sentiment analysis
-- ✅ Data visualization interfaces
-- ✅ Multi-source configuration management
+#### 📝 内容管理
+- **多角色用户系统**: 管理员、编辑者和用户角色管理
+- **文章发布**: 富文本编辑器，支持分类和标签
+- **评论系统**: 交互式评论，带审核功能
+- **点赞收藏**: 社交互动功能
 
-### RESTful API Design Standards
+#### 🛡️ 安全与性能
+- **JWT认证**: 安全的基于令牌的身份验证
+- **频率限制**: API速率限制和DDoS防护
+- **Redis缓存**: 高性能数据缓存层
+- **数据库迁移**: 自动化数据库架构管理
 
-#### API Design Principles
-
-This project strictly follows RESTful design patterns:
-
-1. **Resource-Oriented**: Each URL represents a resource
-2. **HTTP Verbs**: Standard HTTP methods (GET, POST, PUT, DELETE)
-3. **Status Codes**: Proper use of HTTP status codes
-4. **Uniform Response Format**: Standardized JSON response structure
-5. **Versioning**: Version control through URL paths
-
-#### API Endpoints Overview
-
-##### Authentication Module (`/auth`)
-
-| Method | Endpoint | Function | Permission |
-|--------|----------|----------|------------|
-| `POST` | `/auth/register` | User registration | Public |
-| `POST` | `/auth/login` | User login | Public |
-| `GET` | `/auth/me` | Get user info | Authenticated |
-| `PUT` | `/auth/profile` | Update profile | Authenticated |
-
-##### Financial Data Module (`/financial`)
-
-| Method | Endpoint | Function | Permission |
-|--------|----------|----------|------------|
-| `GET` | `/financial/market/latest` | Get latest market data | Public |
-| `GET` | `/financial/market/overview` | Get market overview | Public |
-| `GET` | `/financial/market/status` | Get data status | Public |
-| `POST` | `/financial/market/crawl` | Manual crawl trigger | Authenticated |
-| `POST` | `/financial/market/crawl-now` | Execute crawl now | Admin |
-
-##### Scheduler Control Module (`/financial/scheduler`)
-
-| Method | Endpoint | Function | Permission |
-|--------|----------|----------|------------|
-| `GET` | `/financial/scheduler/status` | Get scheduler status | Public |
-| `POST` | `/financial/scheduler/start` | Start scheduler | Admin |
-| `POST` | `/financial/scheduler/stop` | Stop scheduler | Admin |
-
-##### Content Management Module (`/articles`, `/categories`, `/tags`)
-
-| Method | Endpoint | Function | Permission |
-|--------|----------|----------|------------|
-| `GET` | `/articles` | Get article list | Public |
-| `GET` | `/articles/{id}` | Get article details | Public |
-| `POST` | `/articles` | Create article | Authenticated |
-| `PUT` | `/articles/{id}` | Update article | Author/Admin |
-| `DELETE` | `/articles/{id}` | Delete article | Author/Admin |
-
-#### Response Format Standards
-
-##### Success Response Format
-```json
-{
-  "success": true,
-  "data": {
-    // Specific data content
-  },
-  "message": "Success message"
-}
-```
-
-##### Error Response Format
-```json
-{
-  "success": false,
-  "error": {
-    "code": 400,
-    "message": "Error description",
-    "details": "Detailed error information"
-  }
-}
-```
-
-##### Paginated Response Format
-```json
-{
-  "success": true,
-  "data": {
-    "items": [],
-    "pagination": {
-      "page": 1,
-      "size": 20,
-      "total": 100,
-      "pages": 5
-    }
-  }
-}
-```
-
-### Project Structure
+### 🏗️ 系统架构
 
 ```
-myBlog/
 ├── app/
-│   ├── main.py              # Application entry
-│   ├── models.py            # Data models
-│   ├── schemas.py           # Pydantic schemas
-│   ├── deps.py              # Dependency injection
-│   ├── config.py            # Configuration management
-│   ├── routers/             # Router modules
-│   │   ├── auth.py          # Authentication routes
-│   │   ├── users.py         # User routes
-│   │   ├── articles.py      # Article routes
-│   │   ├── comments.py      # Comment routes
-│   │   └── financial.py     # Financial data routes
-│   └── services/            # Business services
-│       ├── market_service.py # Market data service
-│       └── scheduler.py     # Task scheduler
-├── requirements.txt         # Dependencies
-├── .env.example            # Environment template
-└── README.md               # Project documentation
+│   ├── core/              # 核心配置和模板
+│   ├── middlewares/       # 自定义中间件（错误处理、限流）
+│   ├── routers/           # API路由处理器
+│   │   ├── internal/      # 内部服务（股票、行业、概念数据）
+│   │   ├── admin.py       # 管理员管理API
+│   │   ├── auth.py        # 认证端点
+│   │   ├── articles.py    # 文章管理
+│   │   ├── board.py       # 金融看板API
+│   │   └── market.py      # 市场数据端点
+│   ├── services/          # 业务逻辑服务
+│   ├── utils/             # 工具函数和助手
+│   ├── models.py          # 数据库模型
+│   └── schemas.py         # Pydantic数据验证架构
+├── migrations/            # 数据库迁移
+└── requirements.txt       # Python依赖
 ```
 
-### Quick Start
+### 🚀 快速开始
 
-#### 1. Environment Setup
+#### 环境要求
+- Python 3.9+
+- MySQL/PostgreSQL
+- Redis
+
+#### 安装步骤
+
+1. **克隆仓库**
 ```bash
-# Clone the project
 git clone <repository-url>
 cd myBlog
+```
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
+2. **安装依赖**
+```bash
 pip install -r requirements.txt
 ```
 
-#### 2. Configuration
+3. **配置环境**
 ```bash
-# Copy environment template
 cp .env.example .env
-
-# Edit configuration file
-# Configure database connection, JWT secret, data source URLs, etc.
+# 编辑.env文件，配置数据库和API参数
 ```
 
-#### 3. Run the Project
+4. **运行数据库迁移**
 ```bash
-# Start development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Access API documentation
-# Swagger UI: http://localhost:8000/docs
-# ReDoc: http://localhost:8000/redoc
+aerich upgrade
 ```
 
-### Data Source Configuration
-
-Configure data sources in `.env` file:
-
-```env
-# Chinese Index Data Sources
-CHINA_SHANGHAI_URL=http://quote.eastmoney.com/sh000001.html
-CHINA_SHENZHEN_URL=http://quote.eastmoney.com/sz399001.html
-CHINA_CHINEXT_URL=http://quote.eastmoney.com/sz399006.html
-
-# US Stock Index Data Sources
-US_DOW_URL=http://quote.eastmoney.com/gb/DJIA.html
-US_NASDAQ_URL=http://quote.eastmoney.com/gb/IXIC.html
-US_SP500_URL=http://quote.eastmoney.com/gb/SPX.html
-
-# Precious Metals Data Sources
-GOLD_URL=http://quote.eastmoney.com/qh/AU0.html
-SILVER_URL=http://quote.eastmoney.com/qh/AG0.html
-```
-
-### Deployment
-
-#### Docker Deployment
+5. **启动应用**
 ```bash
-# Build image
-docker build -t financial-platform .
-
-# Run container
-docker run -d -p 8000:8000 --name financial-app financial-platform
+uvicorn app.main:app --reload
 ```
 
-#### Production Environment
-```bash
-# Deploy with Gunicorn
-gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker
+应用将在 `http://localhost:8000` 可用
+
+### 📚 API文档
+
+#### 认证接口
+- `POST /auth/register` - 用户注册
+- `POST /auth/login` - 用户登录
+- `POST /auth/refresh` - 令牌刷新
+
+#### 市场数据API
+- `GET /api/index/` - 实时市场指数
+- `GET /api/index/risedown` - 市场涨跌统计
+- `GET /api/index/vix` - VIX恐慌指数数据
+- `GET /api/board/{board_type}/{period}` - 金融排行榜
+
+#### 内容管理
+- `GET /api/articles/` - 文章列表，支持分页
+- `POST /api/articles/` - 创建新文章
+- `PUT /api/articles/{id}` - 更新文章
+- `DELETE /api/articles/{id}` - 删除文章
+
+#### 管理面板
+- `GET /admin/api/stats` - 仪表板统计
+- `GET /admin/api/users` - 用户管理
+- `GET /admin/api/roles` - 角色管理
+
+### 🔧 配置
+
+`app/config.py`中的关键配置选项：
+
+```python
+DATABASE_URL = "mysql://user:password@localhost/dbname"
+REDIS_URL = "redis://localhost:6379"
+SECRET_KEY = "your-secret-key"
+OPENAI_API_KEY = "your-openai-key"  # AI分析功能所需
 ```
+
+### 🌟 项目亮点
+
+1. **实时性能**: 亚秒级市场数据更新，配合Redis缓存
+2. **AI集成**: OpenAI驱动的市场分析和情绪检测
+3. **可扩展架构**: 面向微服务的设计，关注点清晰分离
+4. **生产就绪**: 全面的错误处理、日志记录和监控
+5. **多语言支持**: 内置国际化框架
+
+### 📄 许可证
+
+本项目采用MIT许可证。
 
 ---
 
-## 贡献指南 / Contributing
+<div align="center">
 
-欢迎提交Issue和Pull Request！ / Issues and Pull Requests are welcome!
+**[⬆ Back to top](#-smart-financial-blog-platform)**
 
-## 许可证 / License
-
-MIT License
+</div>
+```
