@@ -18,27 +18,11 @@ from app.core.templates import templates
 router = APIRouter(
     prefix="/admin",
     tags=["admin"],
-    # dependencies=[Depends(get_current_admin)]  # 所有路由自动受管理员限制
 )
 
-# templates = Jinja2Templates(directory="app/admin_ui/templates")
-#
-
-# 在你的 admin 路由中添加：
 @router.get("/verify")
 async def verify_admin(current_admin = Depends(get_current_admin)):
     return {"message": "Authorized", "user_id": current_admin.id, "role": current_admin.role}
-
-# @router.get("/")
-# async def admin_page(request: Request):
-#     token = request.cookies.get("token")
-#     if not token:
-#         return RedirectResponse(f"/login?next=/admin/")
-#     try:
-#         user = get_current_admin(token)  # 校验 JWT 是否有效
-#     except Exception:
-#         return RedirectResponse(f"/login?next=/admin/")
-#     return templates.TemplateResponse("admin.html", {"request": request})
 
 @router.get("/")
 async def admin_page(request: Request):

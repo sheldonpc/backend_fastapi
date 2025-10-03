@@ -9,11 +9,14 @@ from app.models import Comment, ArticleLike, CommentLike, ArticleFavorite, Finan
     StockHKHotRank, IndustryLast3Days, IndustryLast5Days, IndustryLast10Days, IndustryLast20Days, ConceptLatest, \
     ConceptLast3Days, ConceptLast5Days, ConceptLast10Days, ConceptLast20Days
 
+class SendCodeRequest(BaseModel):
+    email: str
 
 class UserCreate(BaseModel):
-    email: EmailStr
     username: str
+    email: EmailStr
     password: str
+    code: str
 
 class UserLogin(BaseModel):
     identifier: str

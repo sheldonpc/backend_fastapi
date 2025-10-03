@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .register-card {
+            width: 380px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        .form-control {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+
+        .form-control:focus {
+            border-color: #4dabf7;
+            box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4dabf7 0%, #2196f3 100%);
+            border: none;
+            padding: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .verification-code {
+            display: flex;
+            gap: 8px;
+        }
+
+        .verification-code input {
+            flex: 1;
+        }
+
+        .verification-code button {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+        }
+
+        .password-strength {
+            height: 3px;
+            margin-top: 3px;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .password-weak {
+            width: 25%;
+            background-color: #ff4d4f;
+        }
+
+        .password-medium {
+            width: 50%;
+            background-color: #faad14;
+        }
+
+        .password-strong {
+            width: 100%;
+            background-color: #52c41a;
+        }
+
+        .form-text {
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .login-link a {
+            color: #2196f3;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem !important;
+        }
+
+        .alert {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="register-card">
+    <h4 class="text-center mb-3">用户注册</h4>
+    <form id="registerForm">
+        <div class="mb-3">
+            <label class="form-label">用户名</label>
+            <input type="text" class="form-control" id="username" name="username" placeholder="3-20个字符" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">邮箱地址</label>
+            <input type="email" class="form-control" id="email" name="email" placeholder="用于接收验证码" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">密码</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="至少8位" required>
+            <div class="password-strength" id="passwordStrength"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">确认密码</label>
+            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                   placeholder="再次输入密码" required>
+            <div class="form-text" id="passwordMatchText"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">验证码</label>
+            <div class="verification-code">
+                <input type="text" class="form-control" id="code" name="code" placeholder="请输入验证码" required>
+                <button type="button" class="btn btn-outline-primary" id="sendCodeBtn">发送验证码</button>
+            </div>
+            <div class="form-text" id="codeCountdown"></div>
+        </div>
+        <div id="errorMsg" class="alert alert-danger" style="display:none;"></div>
+        <button type="submit" class="btn btn-primary w-100 mb-2" id="registerBtn">注册</button>
+    </form>
+    <div class="login-link">
+        已有账号？<a href="/auth/login">立即登录</a>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const code = document.getElementById('code').value.trim();
+
+        // 验证表单
+        if (!username || !email || !password || !confirmPassword || !code) {
+            showError('请填写所有必填字段');
+            return;
+        }
+
+        if (username.length < 3 || username.length > 20) {
+            showError('用户名长度应在3-20个字符之间');
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showError('请输入有效的邮箱地址');
+            return;
+        }
+
+        if (password.length < 8) {
+            showError('密码长度至少8位');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showError('两次输入的密码不一致');
+            return;
+        }
+
+        const registerBtn = document.getElementById('registerBtn');
+        const originalBtnText = registerBtn.textContent;
+
+        // 显示加载状态
+        registerBtn.disabled = true;
+        registerBtn.textContent = '注册中...';
+
+        // 清空之前错误
+        hideError();
+
+        try {
+
+            const res = await fetch('/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: password,
+                    code: code  // 确保 code 有值
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                const token = data.access_token;
+                localStorage.setItem('access_token', token);
+                showSuccess('注册成功！正在跳转...');
+
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else {
+                showError(data.detail || '注册失败，请稍后重试');
+            }
+        } catch (err) {
+            showError('网络错误，请稍后重试');
+            console.error('注册请求失败:', err);
+        } finally {
+            registerBtn.disabled = false;
+            registerBtn.textContent = originalBtnText;
+        }
+    });
+
+    // 发送验证码
+    document.getElementById('sendCodeBtn').addEventListener('click', async () => {
+        const email = document.getElementById('email').value.trim();
+        const sendCodeBtn = document.getElementById('sendCodeBtn');
+
+        if (!email || !isValidEmail(email)) {
+            showError('请输入有效的邮箱地址');
+            return;
+        }
+
+        sendCodeBtn.disabled = true;
+        let countdown = 60;
+
+        const countdownInterval = setInterval(() => {
+            sendCodeBtn.textContent = `${countdown}秒`;
+            document.getElementById('codeCountdown').textContent = `${countdown}秒后可重新发送`;
+
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.textContent = '发送验证码';
+                document.getElementById('codeCountdown').textContent = '';
+            }
+            countdown--;
+        }, 1000);
+
+        try {
+            const res = await fetch('/auth/send-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({email: email})
+            });
+
+            if (res.ok) {
+                showSuccess('验证码已发送到您的邮箱');
+            } else {
+                const data = await res.json();
+                showError(data.detail || '验证码发送失败');
+                clearInterval(countdownInterval);
+                sendCodeBtn.disabled = false;
+                sendCodeBtn.textContent = '发送验证码';
+                document.getElementById('codeCountdown').textContent = '';
+            }
+        } catch (err) {
+            showError('验证码发送失败，请稍后重试');
+            clearInterval(countdownInterval);
+            sendCodeBtn.disabled = false;
+            sendCodeBtn.textContent = '发送验证码';
+            document.getElementById('codeCountdown').textContent = '';
+        }
+    });
+
+    // 密码强度检测
+    document.getElementById('password').addEventListener('input', function () {
+        const password = this.value;
+        const strengthBar = document.getElementById('passwordStrength');
+
+        if (password.length === 0) {
+            strengthBar.className = 'password-strength';
+            return;
+        }
+
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        if (strength <= 2) {
+            strengthBar.className = 'password-strength password-weak';
+        } else if (strength <= 4) {
+            strengthBar.className = 'password-strength password-medium';
+        } else {
+            strengthBar.className = 'password-strength password-strong';
+        }
+    });
+
+    // 确认密码匹配检测
+    document.getElementById('confirmPassword').addEventListener('input', function () {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        const matchText = document.getElementById('passwordMatchText');
+
+        if (confirmPassword.length === 0) {
+            matchText.textContent = '';
+            return;
+        }
+
+        if (password === confirmPassword) {
+            matchText.textContent = '密码匹配';
+            matchText.className = 'form-text text-success';
+        } else {
+            matchText.textContent = '密码不匹配';
+            matchText.className = 'form-text text-danger';
+        }
+    });
+
+    // 辅助函数
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    function showError(message) {
+        const msgEl = document.getElementById('errorMsg');
+        msgEl.textContent = message;
+        msgEl.style.display = 'block';
+        msgEl.className = 'alert alert-danger';
+    }
+
+    function showSuccess(message) {
+        const msgEl = document.getElementById('errorMsg');
+        msgEl.textContent = message;
+        msgEl.style.display = 'block';
+        msgEl.className = 'alert alert-success';
+    }
+
+    function hideError() {
+        const msgEl = document.getElementById('errorMsg');
+        msgEl.style.display = 'none';
+    }
+</script>
+</body>
+</html>

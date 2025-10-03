@@ -417,6 +417,23 @@
         width: 11%;
     }
 
+    /* 排序表头优化 */
+    th.sortable {
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+    }
+
+    th.sortable i {
+        vertical-align: middle;
+        margin-left: 0.3rem;
+        transition: opacity 0.2s;
+    }
+
+    th.sortable:hover i {
+        opacity: 0.8;
+    }
+
     /* 其他 */
 </style>
 {% endblock %}
@@ -455,6 +472,18 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="zt-tab" data-bs-toggle="tab" data-bs-target="#zt" type="button" role="tab">
                 涨停股池
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="hotup-tab" data-bs-toggle="tab" data-bs-target="#hotup" type="button"
+                    role="tab">
+                飙升榜
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="hotsearch-tab" data-bs-toggle="tab" data-bs-target="#hotsearch" type="button"
+                    role="tab">
+                热搜榜
             </button>
         </li>
     </ul>
@@ -530,6 +559,26 @@
             </div>
             <div class="zt-content">加载中...</div>
         </div>
+
+        <!-- 飙升榜 -->
+        <div class="tab-pane fade" id="hotup" role="tabpanel">
+            <div class="hotup-content">加载中...</div>
+        </div>
+
+        <!-- 热搜榜 -->
+        <div class="tab-pane fade" id="hotsearch" role="tabpanel">
+            <div class="d-flex gap-2 mb-3">
+                {% for market in ['ag', 'hk', 'us'] %}
+                <button class="btn btn-outline-secondary btn-sm market-btn {% if market=='ag' %}active{% endif %}"
+                        data-market="{{ market }}">
+                    {{
+                    market|replace('ag','A股')|replace('hk','港股')|replace('us','美股')
+                    }}
+                </button>
+                {% endfor %}
+            </div>
+            <div class="hotsearch-content">加载中...</div>
+        </div>
     </div>
 </div>
 
@@ -538,15 +587,34 @@
         const tabs = document.querySelectorAll('#rankingTabs button[data-bs-toggle="tab"]');
         const periodBtns = document.querySelectorAll('.period-btn');
         const ztPoolBtns = document.querySelectorAll('.zt-pool-btn');
+        const marketBtns = document.querySelectorAll('.market-btn');
 
-        // 行业/个股/概念：点击周期按钮加载
+        // 存储当前排序状态
+        let currentSort = {
+            field: null,
+            direction: 'asc' // 'asc' 或 'desc'
+        };
+
+        // 存储当前数据
+        let currentData = null;
+        let currentType = null;
+
+        marketBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const market = this.dataset.market;
+                const tabPane = document.getElementById('hotsearch');
+                tabPane.querySelectorAll('.market-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                loadBoardData('hotsearch', market, tabPane.querySelector('.hotsearch-content'));
+            });
+        });
+
         periodBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const period = this.dataset.period;
                 const tabPane = this.closest('.tab-pane');
-                const type = tabPane.id; // 'industry', 'stock', 'concept'
+                const type = tabPane.id;
 
-                // 更新 active 状态
                 tabPane.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
@@ -554,7 +622,6 @@
             });
         });
 
-        // 涨停股池：点击子类型
         ztPoolBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 const pool = this.dataset.pool;
@@ -569,18 +636,15 @@
             const allPanes = document.querySelectorAll('.tab-pane');
             const targetPane = document.querySelector(targetTab);
 
-            // 先隐藏所有pane
             allPanes.forEach(pane => {
                 pane.classList.remove('active', 'show');
             });
 
-            // 然后显示目标pane
             setTimeout(() => {
                 targetPane.classList.add('active', 'show');
             }, 50);
         }
 
-// 修改你的tab切换事件监听器
         tabs.forEach(tab => {
             tab.addEventListener('shown.bs.tab', function (e) {
                 const target = e.target.getAttribute('data-bs-target');
@@ -589,7 +653,6 @@
                 const type = target.replace('#', '');
                 const contentEl = document.querySelector(`${target} .${type}-content`);
 
-                // 原有的数据加载逻辑保持不变
                 if (contentEl && (contentEl.innerText.includes('加载中') || contentEl.innerText.includes('点击加载'))) {
                     let period = null;
 
@@ -599,6 +662,9 @@
                     } else if (type === 'zt') {
                         const activePoolBtn = document.querySelector(`${target} .zt-pool-btn.active`);
                         period = activePoolBtn ? activePoolBtn.dataset.pool : 'today';
+                    } else if (type === 'hotsearch') {
+                        const activeMarketBtn = document.querySelector(`${target} .market-btn.active`);
+                        period = activeMarketBtn ? activeMarketBtn.dataset.market : 'ag';
                     }
 
                     loadBoardData(type, period, contentEl);
@@ -606,45 +672,18 @@
             });
         });
 
-        // Tab切换事件
-        // tabs.forEach(tab => {
-        //     tab.addEventListener('shown.bs.tab', function (e) {
-        //         const target = e.target.getAttribute('data-bs-target');
-        //         const type = target.replace('#', '');
-        //         const contentEl = document.querySelector(`${target} .${type}-content`);
-        //
-        //         // 如果内容还没加载过
-        //         if (contentEl && (contentEl.innerText.includes('加载中') || contentEl.innerText.includes('点击加载'))) {
-        //             let period = null;
-        //
-        //             if (type === 'industry' || type === 'stock' || type === 'concept') {
-        //                 // 获取当前激活的周期按钮
-        //                 const activePeriodBtn = document.querySelector(`${target} .period-btn.active`);
-        //                 period = activePeriodBtn ? activePeriodBtn.dataset.period : 'latest';
-        //             } else if (type === 'zt') {
-        //                 // 获取当前激活的涨停池按钮
-        //                 const activePoolBtn = document.querySelector(`${target} .zt-pool-btn.active`);
-        //                 period = activePoolBtn ? activePoolBtn.dataset.pool : 'today';
-        //             }
-        //
-        //             loadBoardData(type, period, contentEl);
-        //         }
-        //     });
-        // });
-
         // 首次加载行业最新数据
         loadBoardData('industry', 'latest', document.querySelector('.industry-content'));
 
         function loadBoardData(type, period, container) {
             container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> 加载中...</div>';
 
-            // 构建URL：/api/board/{type}/{period}/
             let url = `/api/board/${type}/`;
             if (period) {
                 url += `${period}/`;
             }
 
-            console.log('Loading data from:', url); // 调试信息
+            console.log('Loading data from:', url);
 
             fetch(url)
                 .then(response => {
@@ -654,12 +693,58 @@
                     return response.json();
                 })
                 .then(data => {
+                    currentData = data;
+                    currentType = type;
+                    currentSort = {field: null, direction: 'asc'};
                     container.innerHTML = renderRankingTable(type, data);
                 })
                 .catch(err => {
                     console.error('加载失败:', err);
                     container.innerHTML = `<div class="alert alert-warning">加载失败：${err.message}</div>`;
                 });
+        }
+
+        // 排序函数
+        function sortData(data, field, direction) {
+            return [...data].sort((a, b) => {
+                let aValue = a[field];
+                let bValue = b[field];
+
+                // 处理空值
+                if (aValue === null || aValue === undefined) aValue = direction === 'asc' ? Infinity : -Infinity;
+                if (bValue === null || bValue === undefined) bValue = direction === 'asc' ? Infinity : -Infinity;
+
+                // 处理字符串和数字
+                if (typeof aValue === 'string') {
+                    aValue = aValue.toLowerCase();
+                    bValue = bValue.toLowerCase();
+                }
+
+                if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // 表头点击排序事件
+        function handleHeaderClick(field, container, type) {
+            return function () {
+                if (!currentData) return;
+
+                // 切换排序方向
+                if (currentSort.field === field) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.field = field;
+                    currentSort.direction = 'asc';
+                }
+
+                // 排序数据
+                const sortedData = sortData(currentData, field, currentSort.direction);
+
+                // 重新渲染表格
+                container.innerHTML = renderRankingTable(type, sortedData);
+            };
         }
 
         function renderRankingTable(type, data) {
@@ -669,17 +754,16 @@
 
             let html = `<div class="table-responsive"><table class="table table-hover table-sm align-middle mb-0">`;
 
-            // 表头根据类型动态生成
+            // 表头根据类型动态生成，添加排序功能
             if (type === 'industry') {
                 html += `<thead><tr>
-            <th>排名</th>
-            <th>行业名称</th>
-            <th>行业指数</th>
-            <th>涨跌幅</th>
-            <th>净额(亿)</th>
-            <th>流入资金</th>
-            <th>流出资金</th>
-            <th>公司数量</th>
+            <th class="sortable" data-field="industry_name">行业名称 ${getSortIcon('industry_name')}</th>
+            <th class="sortable" data-field="industry_index">行业指数 ${getSortIcon('industry_index')}</th>
+            <th class="sortable" data-field="industry_index_change_rate">涨跌幅 ${getSortIcon('industry_index_change_rate')}</th>
+            <th class="sortable" data-field="net_amount">净额(亿) ${getSortIcon('net_amount')}</th>
+            <th class="sortable" data-field="inflow_volume">流入资金 ${getSortIcon('inflow_volume')}</th>
+            <th class="sortable" data-field="outflow_volume">流出资金 ${getSortIcon('outflow_volume')}</th>
+            <th class="sortable" data-field="company_num">公司数量 ${getSortIcon('company_num')}</th>
             <th>龙头股</th>
         </tr></thead>`;
                 html += '<tbody>';
@@ -687,7 +771,6 @@
                     const changeClass = item.industry_index_change_rate > 0 ? 'text-danger' : 'text-success';
                     const net = (item.net_amount / 1e8).toFixed(2);
                     html += `<tr>
-                <td>${index + 1}</td>
                 <td>${item.industry_name}</td>
                 <td>${item.industry_index?.toFixed(2) || '--'}</td>
                 <td class="${changeClass}">${(item.industry_index_change_rate || 0).toFixed(2)}%</td>
@@ -706,14 +789,15 @@
                 );
 
                 html += `<thead><tr>
-            <th>排名</th>
-            <th>代码</th>
-            <th>名称</th>
-            <th>最新价</th>
-            <th>涨跌幅</th>
-            ${isLatest ? '<th>流入资金(亿)</th><th>流出资金(亿)</th>' : ''}
-            <th>净额(亿)</th>
-            <th>换手率</th>
+            <th class="sortable" data-field="stock_code">代码 ${getSortIcon('stock_code')}</th>
+            <th class="sortable" data-field="stock_name">名称 ${getSortIcon('stock_name')}</th>
+            <th class="sortable" data-field="current_price">最新价 ${getSortIcon('current_price')}</th>
+            <th class="sortable" data-field="change_rate">涨跌幅 ${getSortIcon('change_rate')}</th>
+            ${isLatest ?
+                    `<th class="sortable" data-field="inflow_volume">流入资金(亿) ${getSortIcon('inflow_volume')}</th>
+                 <th class="sortable" data-field="outflow_volume">流出资金(亿) ${getSortIcon('outflow_volume')}</th>` : ''}
+            <th class="sortable" data-field="net_amount">净额(亿) ${getSortIcon('net_amount')}</th>
+            <th class="sortable" data-field="turnover_rate">换手率 ${getSortIcon('turnover_rate')}</th>
         </tr></thead>`;
                 html += '<tbody>';
                 data.forEach((item, index) => {
@@ -729,7 +813,6 @@
                     const outflow = formatAmount(item.outflow_volume);
 
                     html += `<tr>
-                <td>${index + 1}</td>
                 <td>${item.stock_code}</td>
                 <td>${item.stock_name}</td>
                 <td>${item.current_price?.toFixed(2) || '--'}</td>
@@ -741,22 +824,19 @@
                 });
             } else if (type === 'concept') {
                 html += `<thead><tr>
-            <th>排名</th>
-            <th>概念名称</th>
-            <th>概念指数</th>
-            <th>涨跌幅</th>
-            <th>净额(亿)</th>
-            <th>流入资金</th>
-            <th>流出资金</th>
-            <th>公司数量</th>
+            <th class="sortable" data-field="concept_name">概念名称 ${getSortIcon('concept_name')}</th>
+            <th class="sortable" data-field="concept_index">概念指数 ${getSortIcon('concept_index')}</th>
+            <th class="sortable" data-field="concept_index_change_rate">涨跌幅 ${getSortIcon('concept_index_change_rate')}</th>
+            <th class="sortable" data-field="net_amount">净额(亿) ${getSortIcon('net_amount')}</th>
+            <th class="sortable" data-field="inflow_volume">流入资金 ${getSortIcon('inflow_volume')}</th>
+            <th class="sortable" data-field="outflow_volume">流出资金 ${getSortIcon('outflow_volume')}</th>
+            <th class="sortable" data-field="company_num">公司数量 ${getSortIcon('company_num')}</th>
             <th>领涨股</th>
         </tr></thead>`;
                 html += '<tbody>';
                 data.forEach((item, index) => {
                     const changeClass = (item.concept_index_change_rate || item.change_rate) > 0 ? 'text-danger' : 'text-success';
-                    // const net = (item.net_amount / 1e8).toFixed(2);
                     html += `<tr>
-                <td>${index + 1}</td>
                 <td>${item.concept_name}</td>
                 <td>${item.concept_index ? item.concept_index.toFixed(2) : '--'}</td>
                 <td class="${changeClass}">${(item.concept_index_change_rate || item.change_rate || 0).toFixed(2)}%</td>
@@ -769,11 +849,10 @@
                 });
             } else if (type === 'lhb') {
                 html += `<thead><tr>
-            <th>序号</th>
-            <th>代码</th>
-            <th>名称</th>
-            <th>涨跌幅</th>
-            <th>净买额(亿)</th>
+            <th class="sortable" data-field="stock_code">代码 ${getSortIcon('stock_code')}</th>
+            <th class="sortable" data-field="stock_name">名称 ${getSortIcon('stock_name')}</th>
+            <th class="sortable" data-field="change_rate">涨跌幅 ${getSortIcon('change_rate')}</th>
+            <th class="sortable" data-field="lhb_net_buy_amount">净买额(亿) ${getSortIcon('lhb_net_buy_amount')}</th>
             <th>上榜原因</th>
         </tr></thead>`;
                 html += '<tbody>';
@@ -781,7 +860,6 @@
                     const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
                     const net = (item.lhb_net_buy_amount / 1e8).toFixed(2);
                     html += `<tr>
-                <td>${index + 1}</td>
                 <td>${item.stock_code}</td>
                 <td>${item.stock_name}</td>
                 <td class="${changeClass}">${(item.change_rate || 0).toFixed(2)}%</td>
@@ -791,17 +869,15 @@
                 });
             } else if (type === 'hot') {
                 html += `<thead><tr>
-            <th>排名</th>
-            <th>代码</th>
-            <th>名称</th>
-            <th>最新价</th>
-            <th>涨跌幅</th>
+            <th class="sortable" data-field="stock_code">代码 ${getSortIcon('stock_code')}</th>
+            <th class="sortable" data-field="stock_name">名称 ${getSortIcon('stock_name')}</th>
+            <th class="sortable" data-field="latest_price">最新价 ${getSortIcon('latest_price')}</th>
+            <th class="sortable" data-field="change_rate">涨跌幅 ${getSortIcon('change_rate')}</th>
         </tr></thead>`;
                 html += '<tbody>';
                 data.forEach((item, index) => {
                     const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
                     html += `<tr>
-                <td>${index + 1}</td>
                 <td>${item.stock_code}</td>
                 <td>${item.stock_name}</td>
                 <td>${item.latest_price?.toFixed(2) || '--'}</td>
@@ -810,19 +886,17 @@
                 });
             } else if (type === 'zt') {
                 html += `<thead><tr>
-            <th>排名</th>
-            <th>代码</th>
-            <th>名称</th>
-            <th>涨跌幅</th>
-            <th>最新价</th>
-            <th>连板数</th>
-            <th>所属行业</th>
+            <th class="sortable" data-field="stock_code">代码 ${getSortIcon('stock_code')}</th>
+            <th class="sortable" data-field="stock_name">名称 ${getSortIcon('stock_name')}</th>
+            <th class="sortable" data-field="change_rate">涨跌幅 ${getSortIcon('change_rate')}</th>
+            <th class="sortable" data-field="latest_price">最新价 ${getSortIcon('latest_price')}</th>
+            <th class="sortable" data-field="consecutive_boards">连板数 ${getSortIcon('consecutive_boards')}</th>
+            <th class="sortable" data-field="industry">所属行业 ${getSortIcon('industry')}</th>
         </tr></thead>`;
                 html += '<tbody>';
                 data.forEach((item, index) => {
                     const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
                     html += `<tr>
-                <td>${index + 1}</td>
                 <td>${item.stock_code}</td>
                 <td>${item.stock_name}</td>
                 <td class="${changeClass}">${(item.change_rate || 0).toFixed(2)}%</td>
@@ -831,11 +905,91 @@
                 <td>${item.industry || '--'}</td>
             </tr>`;
                 });
+            } else if (type === 'hotup') {
+                html += `<thead><tr>
+            <th class="sortable" data-field="stock_code">代码 ${getSortIcon('stock_code')}</th>
+            <th class="sortable" data-field="stock_name">名称 ${getSortIcon('stock_name')}</th>
+            <th class="sortable" data-field="latest_price">最新价 ${getSortIcon('latest_price')}</th>
+            <th class="sortable" data-field="change_rate">涨跌幅 ${getSortIcon('change_rate')}</th>
+            <th class="sortable" data-field="change_amount">涨跌额 ${getSortIcon('change_amount')}</th>
+            <th class="sortable" data-field="rank_change">排名变化 ${getSortIcon('rank_change')}</th>
+            <th class="sortable" data-field="update_time">更新时间 ${getSortIcon('update_time')}</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const changeClass = item.change_rate > 0 ? 'text-danger' : 'text-success';
+                    const rankChange = item.rank_change > 0 ?
+                        `<span class="text-danger">↑${item.rank_change}</span>` :
+                        item.rank_change < 0 ?
+                            `<span class="text-success">↓${Math.abs(item.rank_change)}</span>` :
+                            '<span class="text-muted">-</span>';
+
+                    html += `<tr>
+                <td>${item.stock_code}</td>
+                <td>${item.stock_name}</td>
+                <td>${item.latest_price?.toFixed(2) || '--'}</td>
+                <td class="${changeClass}">${(item.change_rate || 0).toFixed(2)}%</td>
+                <td>${item.change_amount?.toFixed(2) || '--'}</td>
+                <td>${rankChange}</td>
+                <td class="small text-muted">${item.update_time ? new Date(item.update_time).toLocaleString() : '--'}</td>
+            </tr>`;
+                });
+            } else if (type === 'hotsearch') {
+                html += `<thead><tr>
+            <th class="sortable" data-field="stock_name_code">名称 ${getSortIcon('stock_name_code')}</th>
+            <th class="sortable" data-field="comprehensive_heat">综合热度 ${getSortIcon('comprehensive_heat')}</th>
+            <th class="sortable" data-field="change_rate">涨跌幅 ${getSortIcon('change_rate')}</th>
+            <th class="sortable" data-field="update_time">更新时间 ${getSortIcon('update_time')}</th>
+        </tr></thead>`;
+                html += '<tbody>';
+                data.forEach((item, index) => {
+                    const change_rate_class = item.change_rate > 0 ? 'text-danger' : 'text-success';
+                    html += `<tr>
+                <td>${item.stock_name_code || '--'}</td>
+                <td class="text-danger"><i class="bi bi-caret-up-fill"></i>${item.comprehensive_heat || '--'}</td>
+                <td class="${change_rate_class}">${item.change_rate || '--'}</td>
+                <td class="small text-muted">${item.update_time ? new Date(item.update_time).toLocaleString() : '--'}</td>
+            </tr>`;
+                });
             }
 
             html += '</tbody></table></div>';
+
+            // 添加排序事件监听
+            setTimeout(() => {
+                const container = document.querySelector(`.${type}-content`);
+                const sortableHeaders = container.querySelectorAll('th.sortable');
+                sortableHeaders.forEach(header => {
+                    header.addEventListener('click', handleHeaderClick(
+                        header.dataset.field,
+                        container,
+                        type
+                    ));
+                });
+            }, 0);
+
             return html;
+        }
+
+        // 获取排序图标
+        // function getSortIcon(field) {
+        //     if (currentSort.field === field) {
+        //         return currentSort.direction === 'asc' ? '↑' : '↓';
+        //     }
+        //     return '↕';
+        // }
+        function getSortIcon(field) {
+            if (currentSort.field === field) {
+                if (currentSort.direction === 'asc') {
+                    return '<i class="bi bi-arrow-up-short text-muted"></i>';
+                } else {
+                    return '<i class="bi bi-arrow-down-short text-muted"></i>';
+                }
+            }
+            // 未排序时显示中性图标（可选）
+            return '<i class="bi bi-arrow-down-up text-secondary" style="font-size:0.8em; opacity:0.4;"></i>';
         }
     });
 </script>
+
 {% endblock %}

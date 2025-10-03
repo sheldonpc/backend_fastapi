@@ -199,6 +199,7 @@
             background: linear-gradient(135deg, #334155 0%, #475569 100%);
             color: #cbd5e1;
         }
+
     </style>
 
     <!-- 自定义 CSS（可选） -->
@@ -231,7 +232,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if '/board' in request.url.path %}active{% endif %}" href="/board">
-                        <i class="bi bi-graph-up"></i> A股榜单
+                        <i class="bi bi-graph-up"></i> 行业板块
                     </a>
                 </li>
                 <li class="nav-item">
@@ -250,7 +251,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if '/analysis' in request.url.path %}active{% endif %}" href="/analysis">
+                    <a class="nav-link {% if '/article' in request.url.path %}active{% endif %}" href="/article">
                         <i class="bi bi-bar-chart"></i> 深度解读
                     </a>
                 </li>
@@ -276,11 +277,11 @@
             <!--                </div>-->
 
             <ul class="navbar-nav">
-                {% if user %}
+                {% if current_user and current_user.username %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                        data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i> {{ user.username }}
+                        <i class="bi bi-person-circle"></i> {{ current_user.username }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/profile"><i class="bi bi-person"></i> 个人中心</a></li>
@@ -294,7 +295,7 @@
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right"></i> 登录</a>
+                    <a class="nav-link" href="/auth/login"><i class="bi bi-box-arrow-in-right"></i> 登录</a>
                 </li>
                 {% endif %}
             </ul>
@@ -358,9 +359,19 @@
 <!-- 全局 JS -->
 <script>
     // 登出逻辑
+    // function logout() {
+    //     if (confirm('确定要退出登录吗？')) {
+    //         window.location.href = '/auth/logout';
+    //     }
+    // }
     function logout() {
         if (confirm('确定要退出登录吗？')) {
-            window.location.href = '/logout';
+            // 清理前端存储
+            localStorage.removeItem("access_token");
+            document.cookie = "access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+            // 跳转到退出接口，并添加参数强制刷新
+            window.location.href = '/auth/logout?t=' + Date.now();
         }
     }
 

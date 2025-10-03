@@ -1,6 +1,6 @@
 # app/routers/board.py
 from fastapi import APIRouter, HTTPException
-from .internal import industry_service, stock_service, concept_service, lhb_service, hot_service, zt_service
+from .internal import industry_service, stock_service, concept_service, lhb_service, hot_service, zt_service, hotup_service, hotsearch_service
 
 router = APIRouter(prefix="/api/board", tags=["Board"])
 
@@ -16,6 +16,8 @@ async def get_board_data(board_type: str, period: str = None):
         "lhb": lhb_service.get_lhb_ranking,
         "hot": hot_service.get_hot_ranking,
         "zt": zt_service.get_zt_ranking,
+        "hotup": hotup_service.get_hot_up,
+        "hotsearch": hotsearch_service.get_hot_search,
     }
 
     if board_type not in service_map:
@@ -23,7 +25,7 @@ async def get_board_data(board_type: str, period: str = None):
 
     try:
         # 修复：传递 period 参数
-        if board_type in ["lhb", "hot"]:
+        if board_type in ["lhb", "hot", "hotup"]:
             # 这些函数不需要 period 参数
             return await service_map[board_type]()
         else:

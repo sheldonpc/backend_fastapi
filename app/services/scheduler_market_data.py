@@ -7,15 +7,19 @@ from zoneinfo import ZoneInfo
 import chinese_calendar as cn_calendar
 from app.services.market_data_service import (
     fetch_realtime_market_data,
-    fetch_fx_market_data, fetch_stock_hot_follow_market_data,
-    fetch_minute_cn_market_data, fetch_minute_usa_market_data, fetch_minute_hk_market_data,
+    fetch_fx_market_data,
+    fetch_minute_cn_market_data, fetch_minute_hk_market_data,
     fetch_vix_index, fetch_rise_down_index, fetch_daily_market_data,
     fetch_cn_us_bond_market_data, fetch_hurun_rank_market_data,
     fetch_global_market_data, fetch_global_market_data2,
     fetch_global_market_data3, fetch_global_market_data4,
     fetch_fx_market_history_data,
-    fetch_oil_data, fetch_gold_data, fetch_silver_data, fetch_eastmoney_history_market_data, crawl_llm_insight,
-    brief_rise_down_data, news_ai_summary
+    fetch_eastmoney_history_market_data, crawl_llm_insight,
+    brief_rise_down_data, news_ai_summary, get_forex_data_async, get_industry_data, get_stock_data, get_concept_data,
+    get_and_save_stock_lhb_detail, get_and_save_stock_hot_rank,
+    get_and_save_stock_hot_search_baidu, get_and_save_stock_zt_pool, get_and_save_stock_zt_pool_previous,
+    get_and_save_stock_zt_pool_strong, get_and_save_stock_zt_pool_down, fetch_foreign_commodity_data,
+    get_and_save_all_stock_hot_search_baidu
 )
 
 logger = logging.getLogger(__name__)
@@ -27,6 +31,7 @@ US_SESSIONS = [(time(9, 30), time(17, 0))]
 
 def log_task(name: str):
     """通用任务装饰器：自动打日志"""
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -36,7 +41,9 @@ def log_task(name: str):
                 logger.info(f"✅ {name} 更新成功")
             except Exception:
                 logger.exception(f"❌ {name} 更新失败")
+
         return wrapper
+
     return decorator
 
 
@@ -81,30 +88,17 @@ class NewMarketScheduler:
     async def update_fx_market_data(self):
         await fetch_fx_market_data()
 
+    @log_task("期货数据")
+    async def update_foreign_commodity_data(self):
+        await fetch_foreign_commodity_data()
+
     @log_task("中国分时数据")
     async def update_minute_level_cn_data(self):
         await fetch_minute_cn_market_data()
 
-    # 数据很大 获取很慢
-    @log_task("美国分时数据")
-    async def update_minute_level_usa_data(self):
-        await fetch_minute_usa_market_data()
-
     @log_task("香港分时数据")
     async def update_minute_level_hk_data(self):
         await fetch_minute_hk_market_data()
-
-    @log_task("石油数据")
-    async def update_oil_data(self):
-        await fetch_oil_data()
-
-    @log_task("黄金数据")
-    async def update_gold_data(self):
-        await fetch_gold_data()
-
-    @log_task("白银数据")
-    async def update_silver_data(self):
-        await fetch_silver_data()
 
     @log_task("VIX指数")
     async def update_vix_index(self):
@@ -117,6 +111,54 @@ class NewMarketScheduler:
     @log_task("历史市场数据")
     async def update_index_history_data(self):
         await fetch_daily_market_data()
+
+    @log_task("全球经济日历")
+    async def update_global_calendar(self):
+        await get_forex_data_async()
+
+    @log_task("行业数据")
+    async def update_industry_data(self):
+        await get_industry_data()
+
+    @log_task("个股数据")
+    async def update_stock_data(self):
+        await get_stock_data()
+
+    @log_task("概念股")
+    async def update_concept_data(self):
+        await get_concept_data()
+
+    @log_task("龙虎榜单")
+    async def update_lhb_data(self):
+        await get_and_save_stock_lhb_detail()
+
+    @log_task("人气榜单")
+    async def update_hot_rank_data(self):
+        await get_and_save_stock_hot_rank()
+
+    @log_task("飙升榜")
+    async def update_hot_up_data(self):
+        await get_and_save_all_stock_hot_search_baidu()
+
+    @log_task("百度热搜")
+    async def update_hot_search_baidu(self):
+        await get_and_save_stock_hot_search_baidu()
+
+    @log_task("涨停股池")
+    async def update_zt_pool(self):
+        await get_and_save_stock_zt_pool()
+
+    @log_task("昨日涨停股池")
+    async def update_zt_pool_previous(self):
+        await get_and_save_stock_zt_pool_previous()
+
+    @log_task("强势股池")
+    async def update_zt_pool_strong(self):
+        await get_and_save_stock_zt_pool_strong()
+
+    @log_task("跌停股池")
+    async def update_zt_pool_down(self):
+        await get_and_save_stock_zt_pool_down()
 
     @log_task("外汇历史数据")
     async def update_fx_history_data(self):
@@ -193,7 +235,18 @@ class NewMarketScheduler:
             self.update_index_history_data(),
             self.update_fx_history_data(),
             self.update_bond_data(),
-            self.update_eastmoney_news(),
+            self.update_industry_data(),
+            self.update_stock_data(),
+            self.update_concept_data(),
+            self.update_lhb_data(),
+            self.update_hot_rank_data(),
+            self.update_hot_up_data(),
+            self.update_hot_search_baidu(),
+            self.update_zt_pool(),
+            self.update_zt_pool_previous(),
+            self.update_zt_pool_strong(),
+            self.update_zt_pool_down(),
+            self.update_foreign_commodity_data()
         ]
 
         for task in tasks:
@@ -268,7 +321,7 @@ class NewMarketScheduler:
             await self._safe_sleep(300)
 
     async def _scheduler_loop_daily_cn(self):
-        daily_times = [time(7, 0), time(10, 0),time(14, 0), time(18, 0)]
+        daily_times = [time(7, 0), time(10, 0), time(14, 0), time(18, 0)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
@@ -290,7 +343,7 @@ class NewMarketScheduler:
                     break
 
     async def _scheduler_second_loop_daily_ai_summary(self):
-        daily_times = [time(10, 30)]
+        daily_times = [time(8, 0)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
@@ -312,7 +365,7 @@ class NewMarketScheduler:
                     break
 
     async def _scheduler_first_loop_daily_ai_summary(self):
-        daily_times = [time(10, 20)]
+        daily_times = [time(7, 40)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
@@ -376,6 +429,27 @@ class NewMarketScheduler:
             if self._shutdown_after_force_once():
                 break
 
+    async def _scheduler_daily_eastmoney_news(self):
+        daily_times = [time(7, 0)]
+        while self.running:
+            now = datetime.now(ZoneInfo("Asia/Shanghai"))
+            today = now.date()
+            next_run = min(
+                (datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai"))
+                 for t in daily_times
+                 if datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai")) > now),
+                default=datetime.combine(today + timedelta(days=1), daily_times[0], tzinfo=ZoneInfo("Asia/Shanghai"))
+            )
+            sleep_sec = (next_run - now).total_seconds()
+            logger.info(f"Eastmoney mews任务将在 {sleep_sec:.0f} 秒后执行")
+            await self._safe_sleep(sleep_sec)
+
+            if not self.running:
+                break
+            await self.update_eastmoney_news()
+            if self._shutdown_after_force_once():
+                break
+
     async def _safe_sleep(self, seconds: float):
         """安全 sleep，支持取消"""
         try:
@@ -401,6 +475,7 @@ class NewMarketScheduler:
             asyncio.create_task(self._scheduler_first_loop_daily_ai_summary()),
             asyncio.create_task(self._scheduler_second_loop_daily_ai_summary()),
             asyncio.create_task(self._scheduler_news_loop_real_hourly()),
+            asyncio.create_task(self._scheduler_daily_eastmoney_news()),
         ]
 
     async def stop_scheduler(self):
@@ -413,6 +488,7 @@ class NewMarketScheduler:
             task.cancel()
         await asyncio.gather(*self.tasks, return_exceptions=True)
         logger.info("✅ 调度器已停止")
+
 
 if __name__ == "__main__":
     scheduler = NewMarketScheduler()

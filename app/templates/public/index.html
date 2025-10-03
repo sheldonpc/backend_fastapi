@@ -609,37 +609,47 @@
         animation-play-state: paused;
     }
 
+
+    /* 修复公告栏遮挡下拉菜单问题 - 强力方案 */
+    .alert.alert-info {
+        position: relative;
+        z-index: 1 !important;
+        overflow: hidden !important;
+    }
+
+    /* 确保导航栏和下拉菜单有最高优先级 */
+    .navbar {
+        z-index: 1030 !important;
+        position: relative;
+    }
+
+    .navbar .dropdown-menu {
+        z-index: 9999 !important; /* 使用极高的值 */
+        position: absolute !important;
+    }
+
+    /* 滚动公告栏容器 */
+    .scrolling-notice-wrapper {
+        position: relative;
+        z-index: 1 !important;
+    }
+
+    .scrolling-notice-content {
+        position: relative;
+        z-index: 1 !important;
+    }
+
+    /* 确保公告栏不会创建新的堆叠上下文 */
+    .alert.alert-info {
+        transform: none !important;
+        opacity: 1 !important;
+    }
+
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="fade-in">
-    <!-- 欢迎信息 -->
-    <!--    <div class="row mb-4">-->
-    <!--        <div class="col-12">-->
-    <!--            <div class="alert alert-info alert-dismissible fade show border-0" role="alert" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">-->
-    <!--                <i class="bi bi-graph-up-arrow me-2"></i>-->
-    <!--                <strong>欢迎访问五市信息平台！</strong> 实时掌握全球市场动态-->
-    <!--                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-    <!-- 滚动欢迎信息 -->
-    <!--    <div class="row mb-4">-->
-    <!--        <div class="col-12">-->
-    <!--            <div class="alert alert-info alert-dismissible fade show border-0 p-0 m-0" role="alert"-->
-    <!--                 style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); overflow: hidden;">-->
-    <!--                <div class="scrolling-welcome-text">-->
-    <!--                    <i class="bi bi-graph-up-arrow me-2"></i>-->
-    <!--                    <strong>欢迎访问五市信息平台！</strong> 实时掌握全球市场动态-->
-    <!--                </div>-->
-    <!--                <div class="scrolling-welcome-text">-->
-    <!--                    <i class="bi bi-graph-up-arrow me-2"></i>-->
-    <!--                    测试信息-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
     <div class="row mb-4">
         <div class="col-12">
             <div class="alert alert-info alert-dismissible fade show border-0 p-0 m-0" role="alert"
@@ -653,10 +663,6 @@
                         </span>
                     </div>
                 </div>
-
-                <!-- 关闭按钮 -->
-                <!--                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"-->
-                <!--                        style="position: absolute; top: 8px; right: 8px; z-index: 10;"></button>-->
             </div>
         </div>
     </div>
@@ -873,10 +879,10 @@
                                 {% endfor %}
                             </div>
                         </div>
-<!--                        <div class="col-6">-->
-<!--                            <div class="small opacity-75">支撑位</div>-->
-<!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
-<!--                        </div>-->
+                        <!--                        <div class="col-6">-->
+                        <!--                            <div class="small opacity-75">支撑位</div>-->
+                        <!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
+                        <!--                        </div>-->
                     </div>
                 </div>
                 {% endif %}
@@ -921,10 +927,10 @@
                                 {% endfor %}
                             </div>
                         </div>
-<!--                        <div class="col-6">-->
-<!--                            <div class="small opacity-75">支撑位</div>-->
-<!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
-<!--                        </div>-->
+                        <!--                        <div class="col-6">-->
+                        <!--                            <div class="small opacity-75">支撑位</div>-->
+                        <!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
+                        <!--                        </div>-->
                     </div>
                 </div>
                 {% endif %}
@@ -969,10 +975,10 @@
                                 {% endfor %}
                             </div>
                         </div>
-<!--                        <div class="col-6">-->
-<!--                            <div class="small opacity-75">支撑位</div>-->
-<!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
-<!--                        </div>-->
+                        <!--                        <div class="col-6">-->
+                        <!--                            <div class="small opacity-75">支撑位</div>-->
+                        <!--                            <div class="text-info fw-bold mt-1">3150点</div>-->
+                        <!--                        </div>-->
                     </div>
                 </div>
                 {% endif %}

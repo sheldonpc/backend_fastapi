@@ -1,0 +1,512 @@
+{% extends "public/base.html" %}
+{% block title %}{% if article %}{{ article.title }} - 五市信息平台{% else %}五市信息平台 - 发现优质内容{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --card-radius: 16px;
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    /* 通用样式 */
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid var(--accent-color);
+        position: relative;
+    }
+
+    /*.section-title::after {*/
+    /*    content: '';*/
+    /*    position: absolute;*/
+    /*    bottom: -3px;*/
+    /*    left: 0;*/
+    /*    width: 60px;*/
+    /*    height: 3px;*/
+    /*    background: var(--accent-color);*/
+    /*}*/
+
+    /* 卡片样式优化 */
+    .card {
+        border: none;
+        border-radius: var(--card-radius);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+    }
+
+    .card-shadow {
+        box-shadow: var(--shadow-soft);
+    }
+
+    .card-shadow:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-3px);
+    }
+
+    /* 特色推荐卡片 */
+    .featured-card {
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        transition: all 0.4s ease;
+        text-decoration: none;
+        color: inherit;
+        background: white;
+        box-shadow: var(--shadow-soft);
+        height: 100%;
+    }
+
+    .featured-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .featured-img-container {
+        height: 220px;
+        background: linear-gradient(135deg, var(--primary-gradient));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .featured-img-container img {
+        transition: transform 0.6s ease;
+    }
+
+    .featured-card:hover .featured-img-container img {
+        transform: scale(1.05);
+    }
+
+    .featured-content {
+        padding: 1.5rem;
+    }
+
+    .featured-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        line-height: 1.4;
+        color: var(--primary-color);
+        margin-bottom: 0.8rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* 文章列表项优化 */
+    .article-item {
+        padding: 1.5rem 1rem;
+        border-bottom: 1px solid #f1f3f4;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        margin: 0.25rem 0;
+    }
+
+    .article-item:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transform: translateX(5px);
+        border-bottom-color: transparent;
+    }
+
+    .article-title {
+        font-weight: 700;
+        font-size: 1.15rem;
+        line-height: 1.4;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+    }
+
+    .article-title:hover {
+        color: var(--accent-color);
+    }
+
+    .article-excerpt {
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .article-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+
+    .article-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    /* 标签样式优化 */
+    .tag-badge {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #475569;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .tag-badge:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        text-decoration: none;
+    }
+
+    /* 侧边栏优化 */
+    .sidebar-card {
+        border-radius: var(--card-radius);
+        border: none;
+        box-shadow: var(--shadow-soft);
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-card:hover {
+        box-shadow: var(--shadow-hover);
+    }
+
+    .recommended-item {
+        display: block;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+
+    .recommended-item:hover {
+        background: white;
+        border-color: var(--primary-color);
+        transform: translateX(8px);
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .recommended-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.3rem;
+        line-height: 1.4;
+        font-size: 0.95rem;
+    }
+
+    /* 分页样式优化 */
+    .pagination-custom .page-link {
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        margin: 0 0.2rem;
+        color: #64748b;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .pagination-custom .page-link:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .pagination-custom .page-item.active .page-link {
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    /* 无图占位符 */
+    .no-image-placeholder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .featured-img-container {
+            height: 180px;
+        }
+
+        .article-item {
+            padding: 1.25rem 0.75rem;
+        }
+
+        .article-meta {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .featured-img-container {
+            height: 160px;
+        }
+
+        .article-item:hover {
+            transform: none;
+        }
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .tag_count {
+        background-color: #4F78BD;
+    !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 热门推荐区域 -->
+<div class="featured-section mb-5">
+    <h2 class="section-title">🔥 热门推荐</h2>
+    <div class="row g-4">
+        {% for featured in featured_articles %}
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <a href="/article/{{ featured.id }}" class="featured-card">
+                <div class="featured-img-container">
+                    {% if featured.feature_image %}
+                    <img src="{{ featured.feature_image }}" alt="{{ featured.title }}"
+                         class="w-100 h-100 object-fit-cover">
+                    {% else %}
+                    <div class="w-100 h-100 no-image-placeholder">
+                        <i class="bi bi-file-text"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="featured-content">
+                    <h3 class="featured-title">{{ featured.title }}</h3>
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span class="fw-medium">{{ featured.author }}</span>
+                        <span>{{ featured.publish_time }}</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 主内容区域 -->
+<div class="row g-4 mb-5">
+    <!-- 左侧文章列表 -->
+    <div class="col-lg-8">
+        <div class="card card-shadow">
+            <div class="card-body p-4">
+                <h2 class="section-title mb-4">📝 最新文章</h2>
+
+                {% for article in articles %}
+                <div class="article-item">
+                    <div class="row g-3 align-items-start">
+                        <!-- 文字内容 -->
+                        <div class="col-md-9 order-2 order-md-1">
+                            <!-- 标题区域 -->
+                            <a href="/article/{{ article.id }}" class="article-title d-block mb-3">
+                                {{ article.title }}
+                            </a>
+
+                            <!-- 摘要区域 -->
+                            {% if article.excerpt %}
+                            <p class="article-excerpt mb-4 text-muted lh-base">
+                                {{ article.excerpt }}
+                            </p>
+                            {% endif %}
+
+                            <!-- 元信息区域 -->
+                            <div class="article-meta d-flex flex-column align-items-start gap-3">
+                                <!-- 基础信息行 -->
+                                <div class="d-flex flex-wrap align-items-center gap-3">
+                                    <span class="article-meta-item d-flex align-items-center gap-1">
+                                        <i class="bi bi-person fs-6 text-primary"></i>
+                                        <span class="fw-medium">{{ article.author }}</span>
+                                    </span>
+                                    <span class="article-meta-item d-flex align-items-center gap-1">
+                                        <i class="bi bi-clock fs-6 text-primary"></i>
+                                        <span>{{ article.publish_time }}</span>
+                                    </span>
+                                    <span class="article-meta-item d-flex align-items-center gap-1">
+                                        <i class="bi bi-eye fs-6 text-primary"></i>
+                                        <span>{{ article.views }}</span>
+                                    </span>
+                                </div>
+
+                                <!-- 标签行 -->
+                                {% if article.tags %}
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <i class="bi bi-tags text-muted fs-6"></i>
+                                    {% for tag in article.tags[:3] %}
+                                    <a href="/tag/{{ tag }}" class="tag-badge d-inline-flex align-items-center">
+                                        {{ tag }}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- 图片 -->
+                        {% if article.feature_image %}
+                        <div class="col-md-3 order-1 order-md-2">
+                            <img src="{{ article.feature_image }}" alt="{{ article.title }}"
+                                 class="img-fluid rounded-3 w-100 object-fit-cover"
+                                 style="height: 120px;">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- 分页 -->
+                {% if pagination %}
+                <nav class="mt-4">
+                    <ul class="pagination pagination-custom justify-content-center">
+                        {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pagination.prev_num }}">
+                                <i class="bi bi-chevron-left me-1"></i>上一页
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                        <li class="page-item {% if page == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pagination.next_num }}">
+                                下一页<i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧边栏 -->
+    <div class="col-lg-4">
+        <!-- 相关推荐 -->
+        <div class="sidebar-card mb-4">
+            <div class="card-body">
+                <h5 class="section-title mb-3">📚 相关推荐</h5>
+                {% for rec in recommended_articles %}
+                <a href="/article/{{ rec.id }}" class="recommended-item">
+                    <div class="recommended-title">{{ rec.title }}</div>
+                    <small class="text-muted">{{ rec.publish_time }}</small>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 热门文章 -->
+        <div class="sidebar-card mb-4">
+            <div class="card-body">
+                <h5 class="section-title mb-3">🔥 热门文章</h5>
+                {% for hot in hot_articles %}
+                <a href="/article/{{ hot.id }}" class="recommended-item">
+                    <div class="recommended-title">{{ hot.title }}</div>
+                    <small class="text-muted">
+                        <i class="bi bi-eye me-1"></i>{{ hot.views }} 阅读
+                    </small>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 标签云 -->
+        <div class="sidebar-card">
+            <div class="card-body">
+                <h5 class="section-title mb-3">🏷️ 热门标签</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for tag in popular_tags %}
+                    <a href="/tag/{{ tag.name }}" class="tag-badge">
+                        {{ tag.name }} <span class="badge rounded-pill ms-1 tag_count">{{ tag.count }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 添加滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // 为卡片添加动画
+        document.querySelectorAll('.featured-card, .article-item, .sidebar-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // 标签悬停效果
+        document.querySelectorAll('.tag-badge').forEach(tag => {
+            tag.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-2px)';
+            });
+            tag.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

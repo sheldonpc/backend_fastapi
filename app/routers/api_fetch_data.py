@@ -2,8 +2,7 @@ import logging
 from fastapi import APIRouter, BackgroundTasks
 from app.services.market_data_service import fetch_realtime_market_data, fetch_fx_market_data, \
     fetch_fx_market_history_data, fetch_minute_cn_market_data, fetch_minute_hk_market_data, \
-    fetch_foreign_commodity_data, fetch_vix_index, fetch_rise_down_index, fetch_daily_market_data, \
-    fetch_global_index_history, fetch_sge_history, fetch_index_history, fetch_cn_us_bond_market_data, \
+    fetch_foreign_commodity_data, fetch_vix_index, fetch_rise_down_index, fetch_daily_market_data, fetch_cn_us_bond_market_data, \
     fetch_hurun_rank_market_data, fetch_global_market_data, fetch_global_market_data2, fetch_global_market_data3, \
     fetch_global_market_data4, fetch_eastmoney_history_market_data
 
