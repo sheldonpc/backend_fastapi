@@ -132,6 +132,14 @@ async def list_articles(skip: int = 0, limit: int = 20):
     articles = await Article.all().offset(skip).limit(limit)
     return [await Article_Pydantic.from_tortoise_orm(a) for a in articles]
 
+
+@router.get("/articles/new")
+async def new_article(request: Request):
+    return templates.TemplateResponse(
+        "admin/article_edit.html",
+        {"request": request, "title": "新建文章"}
+    )
+
 @router.post("/articles/{article_id}/publish")
 async def publish_article(article_id: int):
     article = await Article.get_or_none(id=article_id)

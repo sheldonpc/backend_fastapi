@@ -3,50 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户登录</title>
+    <title>用户登录 - 五市信息平台</title>
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.css">
     <style>
+        :root {
+            --gradient-1: #2d3748; /* 炭灰 */
+            --gradient-2: #65718b; /* 石板灰 */
+            --gradient-3: #718096; /* 灰蓝 */
+            --gradient-4: #c0d3e2; /* 浅灰蓝 */
+        }
+
         body {
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(-45deg, var(--gradient-1), var(--gradient-2), var(--gradient-3), var(--gradient-4));
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 添加一些浮动粒子效果 */
+        /*body::before {*/
+        /*    content: '';*/
+        /*    position: absolute;*/
+        /*    top: 0;*/
+        /*    left: 0;*/
+        /*    right: 0;*/
+        /*    bottom: 0;*/
+        /*    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 2%, transparent 5%),*/
+        /*    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 2%, transparent 5%),*/
+        /*    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 3%, transparent 8%);*/
+        /*    animation: float 20s ease-in-out infinite;*/
+        /*    pointer-events: none;*/
+        /*}*/
+
+        .login-container {
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .login-card {
             width: 380px;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /*.login-card::before {*/
+        /*    content: '';*/
+        /*    position: absolute;*/
+        /*    top: 0;*/
+        /*    left: 0;*/
+        /*    right: 0;*/
+        /*    height: 4px;*/
+        /*    background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2), var(--gradient-3), var(--gradient-4));*/
+        /*    background-size: 400% 400%;*/
+        /*    animation: gradient 15s ease infinite;*/
+        /*}*/
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .login-header h4 {
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--gradient-2), var(--gradient-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-header p {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 0;
         }
 
         .form-control {
             font-size: 0.9rem;
-            padding: 8px 12px;
+            padding: 12px 16px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
         }
 
         .form-control:focus {
-            border-color: #4dabf7;
-            box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.15);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #4dabf7 0%, #2196f3 100%);
-            border: none;
-            padding: 8px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:hover {
+            border-color: var(--gradient-3);
+            box-shadow: 0 0 0 0.2rem rgba(34, 166, 213, 0.15);
             transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--gradient-3), var(--gradient-4));
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34, 166, 213, 0.3);
+        }
+
+        .btn-login:hover::before {
+            left: 100%;
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
         }
 
         .form-text {
@@ -56,37 +162,46 @@
 
         .register-link {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 0.85rem;
         }
 
         .register-link a {
-            color: #2196f3;
+            color: var(--gradient-3);
             text-decoration: none;
             font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .register-link a:hover {
+            color: var(--gradient-2);
         }
 
         .form-label {
             font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 4px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #495057;
         }
 
         .mb-3 {
-            margin-bottom: 1rem !important;
+            margin-bottom: 1.2rem !important;
         }
 
         .alert {
-            padding: 8px 12px;
+            padding: 10px 14px;
             font-size: 0.85rem;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: none;
+            animation: slideIn 0.3s ease;
         }
 
         .extra-options {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-size: 0.85rem;
         }
 
@@ -94,49 +209,148 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            cursor: pointer;
         }
 
         .remember-me input {
             margin: 0;
+            cursor: pointer;
+        }
+
+        .remember-me span {
+            color: #495057;
         }
 
         .forgot-password {
-            color: #666;
+            color: #6c757d;
             text-decoration: none;
+            transition: color 0.3s ease;
         }
 
         .forgot-password:hover {
-            color: #2196f3;
+            color: var(--gradient-2);
+        }
+
+        /* 动画定义 */
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-20px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(20px) rotate(240deg);
+            }
+        }
+
+        /* 加载状态 */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .login-card {
+                width: 100%;
+                max-width: 350px;
+                padding: 25px 20px;
+            }
+
+            body {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="login-card">
-    <h4 class="text-center mb-3">用户登录</h4>
-    <form id="loginForm">
-        <div class="mb-3">
-            <label class="form-label">用户名或邮箱</label>
-            <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名或邮箱"
-                   required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">密码</label>
-            <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码" required>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h4>欢迎回来</h4>
+            <p>登录您的五市信息平台账户</p>
         </div>
 
-        <div class="extra-options">
-            <label class="remember-me">
-                <input type="checkbox" id="rememberMe">
-                <span>记住我</span>
-            </label>
-            <a href="/auth/forgot-password" class="forgot-password">忘记密码？</a>
-        </div>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label class="form-label">用户名或邮箱</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="请输入用户名或邮箱"
+                       required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">密码</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="请输入密码"
+                       required>
+            </div>
 
-        <div id="errorMsg" class="alert alert-danger" style="display:none;"></div>
-        <button type="submit" class="btn btn-primary w-100 mb-2" id="loginBtn">登录</button>
-    </form>
-    <div class="register-link">
-        还没有账号？<a href="/auth/register">立即注册</a>
+            <div class="extra-options">
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <span>记住我</span>
+                </label>
+                <a href="/auth/forgot-password" class="forgot-password">忘记密码？</a>
+            </div>
+
+            <div id="errorMsg" class="alert alert-danger" style="display:none;"></div>
+
+            <button type="submit" class="btn btn-login w-100 mb-2" id="loginBtn">
+                <span id="loginText">登录</span>
+            </button>
+        </form>
+
+        <div class="register-link">
+            还没有账号？<a href="/auth/register">立即注册</a>
+        </div>
     </div>
 </div>
 
@@ -157,11 +371,11 @@
         }
 
         const loginBtn = document.getElementById("loginBtn");
-        const originalBtnText = loginBtn.textContent;
+        const loginText = document.getElementById("loginText");
 
         // 显示加载状态
         loginBtn.disabled = true;
-        loginBtn.textContent = "登录中...";
+        loginText.innerHTML = '<span class="loading-spinner"></span>登录中...';
 
         // 清空之前错误
         hideError();
@@ -189,6 +403,9 @@
                 // 显示成功消息
                 showSuccess("登录成功！正在跳转...");
 
+                // 添加成功动画
+                loginBtn.style.background = 'linear-gradient(135deg, #23d5ab, #23a6d5)';
+
                 // 跳转
                 setTimeout(() => {
                     window.location.href = next;
@@ -202,7 +419,7 @@
         } finally {
             // 恢复按钮状态
             loginBtn.disabled = false;
-            loginBtn.textContent = originalBtnText;
+            loginText.textContent = "登录";
         }
     });
 
@@ -242,6 +459,17 @@
         } else {
             localStorage.removeItem('saved_username');
         }
+    });
+
+    // 输入框动画效果
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', function () {
+            this.parentElement.style.transform = 'translateY(-2px)';
+        });
+
+        input.addEventListener('blur', function () {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
     });
 </script>
 </body>

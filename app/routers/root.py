@@ -1,17 +1,20 @@
 from datetime import datetime, timedelta
 from math import ceil
-
-from fastapi import APIRouter, Query
+from tortoise.expressions import Q
+from fastapi import APIRouter, Query, HTTPException, Depends
 from fastapi import Request
+
+from app.deps import optional_auth_cookie
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
     StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData
 from app.core.templates import templates
 import markdown
 from app.utils.redis_client import cache_get, cache_set
+from app.utils.status_decorator import template_route
 
 CACHE_KEY = "homepage_data"
 CACHE_TTL = 30  # 秒
-router = APIRouter(prefix="")
+router = APIRouter(prefix="", tags=["index"])
 
 
 async def _build_homepage_data():
@@ -129,13 +132,17 @@ async def _build_homepage_data():
 
 
 @router.get("/")
-async def index(request: Request):
+async def index(
+        request: Request,
+        current_user=Depends(optional_auth_cookie),
+):
     # 尝试从缓存读取
     cached = await cache_get(CACHE_KEY)
     if cached is not None:
         return templates.TemplateResponse("public/index.html", {
             "request": request,
             "data": cached,
+            "current_user": current_user,
         })
 
     # 缓存未命中，构建数据
@@ -147,6 +154,7 @@ async def index(request: Request):
     return templates.TemplateResponse("public/index.html", {
         "request": request,
         "data": response_data,
+        "current_user": current_user,
     })
 
 
@@ -192,7 +200,8 @@ def generate_page_range(current_page, total_pages, left_edge=2, left_current=2, 
 async def news(
         request: Request,
         page: int = Query(1, ge=1),
-        per_page: int = Query(15, ge=10, le=50, description="每页数量")
+        per_page: int = Query(15, ge=10, le=50, description="每页数量"),
+        current_user=Depends(optional_auth_cookie),
 ):
     offset = (page - 1) * per_page
     total_news = await News2.all().count()
@@ -236,25 +245,11 @@ async def news(
          "news2_list": news_data,
          "global_news_list": global_news_list,
          "market_summary": market_summary,
-         "pagination": pagination_info
+         "pagination": pagination_info,
+         "current_user": current_user
          }
     )
 
-# class GlobalIndexLatest(models.Model):
-#     """全球指数最新数据（主表）"""
-#     id = fields.IntField(pk=True)
-#     code = fields.CharField(max_length=20, unique=True)  # 唯一约束
-#     name = fields.CharField(max_length=50)
-#     price = fields.DecimalField(max_digits=15, decimal_places=4)
-#     change = fields.DecimalField(max_digits=15, decimal_places=4)
-#     change_percent = fields.DecimalField(max_digits=15, decimal_places=4)
-#     open_today = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
-#     highest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
-#     lowest = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
-#     close_yesterday = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
-#     amplitude = fields.DecimalField(max_digits=15, decimal_places=4, null=True)
-#     timestamp = fields.DatetimeField()   # 行情时间
-#     updated_at = fields.DatetimeField(auto_now=True)
 
 async def get_latest_bond_data():
     """
@@ -284,8 +279,12 @@ async def get_latest_bond_data():
     except Exception as e:
         return None, None
 
+
 @router.get("/overview")
-async def overview(request: Request):
+async def overview(
+        request: Request,
+        current_user=Depends(optional_auth_cookie),
+):
     all_indexes = await GlobalIndexLatest.all()
 
     # 定义地区的显示顺序
@@ -344,106 +343,14 @@ async def overview(request: Request):
         'symbol', 'name', 'rmb_price', 'change_amount', 'change_percent'
     ).order_by('symbol')
 
-    return templates.TemplateResponse("public/overview.html", {"request": request, "ordered_result": ordered_result, "cn_bond": cn_bond, "us_bond": us_bond, "commodities": commodities})
+    return templates.TemplateResponse("public/overview.html",
+                                      {"request": request, "ordered_result": ordered_result, "cn_bond": cn_bond,
+                                       "us_bond": us_bond, "commodities": commodities, "current_user": current_user})
 
 
 @router.get("/board")
-async def board(request: Request):
-    return templates.TemplateResponse("public/board.html", {"request": request})
-# @router.get("/calendar")
-# async def calendar_page(
-#         request: Request,
-#         date: str = Query(None, description="查询日期，格式: YYYY-MM-DD"),
-#         region: str = Query(None, description="地区筛选"),
-#         importance: str = Query(None, description="重要性筛选"),
-#         search: str = Query(None, description="搜索关键词")
-# ):
-#     """财经日历页面"""
-#     # 默认显示今天的数据
-#     if not date:
-#         date = datetime.now().strftime("%Y-%m-%d")
-#
-#     # 构建查询条件
-#     query_filters = {}
-#
-#     # 日期范围查询 (当天的00:00:00到23:59:59)
-#     start_date = datetime.strptime(date, "%Y-%m-%d")
-#     end_date = start_date + timedelta(days=8) - timedelta(seconds=1)
-#
-#     query_filters["datetime__gte"] = start_date
-#     query_filters["datetime__lte"] = end_date
-#
-#     if region:
-#         query_filters["region"] = region
-#     if importance:
-#         query_filters["importance"] = importance
-#
-#     # 查询事件数据
-#     events = await EventData.filter(**query_filters).order_by("datetime")
-#
-#     # 如果有搜索关键词，进行筛选
-#     if search:
-#         events = [event for event in events if search.lower() in event.name.lower()]
-#
-#     # 获取最新数据更新时间
-#     latest_event = await EventData.all().order_by("-scraped_at").first()
-#     last_updated = latest_event.scraped_at if latest_event else None
-#
-#     return templates.TemplateResponse("public/eco_calendar.html", {
-#         "request": request,
-#         "events": events,
-#         "current_date": date,
-#         "selected_region": region,
-#         "selected_importance": importance,
-#         "search_keyword": search or "",
-#         "last_updated": last_updated
-#     })
-#
-#
-# @router.get("/api/calendar/events")
-# async def get_calendar_events_api(
-#         date: str = Query(..., description="查询日期，格式: YYYY-MM-DD"),
-#         region: str = Query(None, description="地区筛选"),
-#         importance: str = Query(None, description="重要性筛选"),
-#         search: str = Query(None, description="搜索关键词")
-# ):
-#     """财经日历API接口，供AJAX调用"""
-#     # 日期范围查询
-#     start_date = datetime.strptime(date, "%Y-%m-%d")
-#     end_date = start_date + timedelta(days=8) - timedelta(seconds=1)
-#
-#     query_filters = {
-#         "datetime__gte": start_date,
-#         "datetime__lte": end_date
-#     }
-#
-#     if region:
-#         query_filters["region"] = region
-#     if importance:
-#         query_filters["importance"] = importance
-#
-#     events = await EventData.filter(**query_filters).order_by("datetime")
-#
-#     # 搜索筛选
-#     if search:
-#         events = [event for event in events if search.lower() in event.name.lower()]
-#
-#     # 序列化事件数据
-#     events_data = []
-#     for event in events:
-#         events_data.append({
-#             "id": event.id,
-#             "region": event.region,
-#             "name": event.name,
-#             "previous_value": event.previous_value,
-#             "importance": event.importance,
-#             "datetime": event.datetime.isoformat(),
-#             "scraped_at": event.scraped_at.isoformat() if event.scraped_at else None
-#         })
-#
-#     return events_data
-
-from tortoise.expressions import Q
+async def board(request: Request, current_user=Depends(optional_auth_cookie), ):
+    return templates.TemplateResponse("public/board.html", {"request": request, "current_user": current_user})
 
 
 @router.get("/calendar")
@@ -452,7 +359,8 @@ async def calendar_page(
         date: str = Query(None, description="查询日期，格式: YYYY-MM-DD"),
         region: str = Query(None, description="地区筛选"),
         importance: str = Query(None, description="重要性筛选"),
-        search: str = Query(None, description="搜索关键词")
+        search: str = Query(None, description="搜索关键词"),
+        current_user=Depends(optional_auth_cookie),
 ):
     """财经日历页面"""
     # 默认显示今天的数据
@@ -494,7 +402,8 @@ async def calendar_page(
         "selected_region": region,
         "selected_importance": importance,
         "search_keyword": search or "",
-        "last_updated": last_updated
+        "last_updated": last_updated,
+        "current_user": current_user,
     })
 
 
@@ -503,7 +412,8 @@ async def get_calendar_events_api(
         date: str = Query(..., description="查询日期，格式: YYYY-MM-DD"),
         region: str = Query(None, description="地区筛选"),
         importance: str = Query(None, description="重要性筛选"),
-        search: str = Query(None, description="搜索关键词")
+        search: str = Query(None, description="搜索关键词"),
+        current_user=Depends(optional_auth_cookie),
 ):
     """财经日历API接口，供AJAX调用"""
     # 构建查询条件 - 使用 Q 对象
@@ -540,16 +450,388 @@ async def get_calendar_events_api(
             "previous_value": event.previous_value,
             "importance": event.importance,
             "datetime": event.datetime.isoformat(),
-            "scraped_at": event.scraped_at.isoformat() if event.scraped_at else None
+            "scraped_at": event.scraped_at.isoformat() if event.scraped_at else None,
         })
 
     return events_data
 
-@router.get("/login")
-async def login_page(request: Request):
-    return templates.TemplateResponse("admin/login.html", {"request": request})
+
+@router.get("/article")
+async def home_page(request: Request, current_user=Depends(optional_auth_cookie)):
+    """首页"""
+    # 模拟热门推荐文章（顶部2-3篇）
+    featured_articles = [
+        {
+            "id": 1,
+            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
+            "author": "张明分析师",
+            "publish_time": "2024-01-15",
+            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+        },
+        {
+            "id": 2,
+            "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会",
+            "author": "李强研究员",
+            "publish_time": "2024-01-10",
+            "feature_image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+        },
+        {
+            "id": 3,
+            "title": "2024年美联储政策展望及对科技股影响",
+            "author": "王伟顾问",
+            "publish_time": "2024-01-08",
+            "feature_image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+        }
+    ]
+
+    # 模拟文章列表
+    articles = [
+        {
+            "id": 1,
+            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
+            "excerpt": "深度分析AI技术革命对全球资本市场的影响及未来投资策略，从技术趋势、行业影响和投资策略三个维度进行剖析...",
+            "author": "张明分析师",
+            "publish_time": "2024-01-15 10:30:00",
+            "views": 2847,
+            "tags": ["人工智能", "股市", "投资策略"],
+            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+        },
+        {
+            "id": 2,
+            "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会",
+            "excerpt": "随着AI算力需求激增，半导体行业迎来新一轮增长周期。本文分析AI芯片产业链及各环节投资机会...",
+            "author": "李强研究员",
+            "publish_time": "2024-01-10 14:20:00",
+            "views": 1956,
+            "tags": ["半导体", "AI芯片", "科技"],
+            "feature_image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+        },
+        {
+            "id": 3,
+            "title": "2024年美联储政策展望及对科技股影响",
+            "excerpt": "美联储货币政策转向在即，本文分析利率政策变化对科技股估值的影响及投资策略调整...",
+            "author": "王伟顾问",
+            "publish_time": "2024-01-08 09:15:00",
+            "views": 1678,
+            "tags": ["美联储", "货币政策", "科技股"],
+            "feature_image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+        },
+        {
+            "id": 4,
+            "title": "生成式AI商业化路径分析：从技术到营收",
+            "excerpt": "探讨生成式AI技术的商业化模式，分析各应用场景的盈利能力和市场空间...",
+            "author": "赵欣分析师",
+            "publish_time": "2024-01-05 16:45:00",
+            "views": 1423,
+            "tags": ["生成式AI", "商业化", "技术创新"],
+            "feature_image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+        },
+        {
+            "id": 5,
+            "title": "巴菲特最新持仓分析：为何重仓科技股？",
+            "excerpt": "分析巴菲特近期持仓变化，解读价值投资大师为何开始青睐科技板块...",
+            "author": "陈琳研究员",
+            "publish_time": "2024-01-03 11:30:00",
+            "views": 3562,
+            "tags": ["巴菲特", "价值投资", "持仓分析"],
+            "feature_image": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+        }
+    ]
+
+    # 模拟相关推荐
+    recommended_articles = [
+        {
+            "id": 6,
+            "title": "中国制造业转型升级的投资逻辑",
+            "publish_time": "2024-01-02"
+        },
+        {
+            "id": 7,
+            "title": "新能源车行业2024年投资策略",
+            "publish_time": "2023-12-28"
+        },
+        {
+            "id": 8,
+            "title": "云计算基础设施投资机会分析",
+            "publish_time": "2023-12-25"
+        }
+    ]
+
+    # 模拟热门文章
+    hot_articles = [
+        {
+            "id": 5,
+            "title": "巴菲特最新持仓分析：为何重仓科技股？",
+            "views": 3562
+        },
+        {
+            "id": 1,
+            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
+            "views": 2847
+        },
+        {
+            "id": 6,
+            "title": "中国制造业转型升级的投资逻辑",
+            "views": 2987
+        }
+    ]
+
+    # 模拟最新评论
+    recent_comments = [
+        {
+            "user": "投资新手",
+            "content": "这篇文章分析得很透彻，特别是对半导体行业的展望很有启发！",
+            "time": "2小时前"
+        },
+        {
+            "user": "老股民",
+            "content": "AI确实是未来方向，但估值是否过高需要谨慎判断",
+            "time": "5小时前"
+        },
+        {
+            "user": "机构分析师",
+            "content": "数据翔实，逻辑清晰，对投资决策有重要参考价值",
+            "time": "1天前"
+        }
+    ]
+
+    # 模拟热门标签
+    popular_tags = [
+        {"name": "人工智能", "count": 156},
+        {"name": "投资策略", "count": 142},
+        {"name": "科技股", "count": 128},
+        {"name": "半导体", "count": 115},
+        {"name": "宏观经济", "count": 98},
+        {"name": "美联储", "count": 87}
+    ]
+
+    # 模拟分页数据
+    pagination = {
+        "page": 1,
+        "per_page": 10,
+        "total": 45,
+        "pages": 5,
+        "has_prev": False,
+        "has_next": True,
+        "prev_num": None,
+        "next_num": 2,
+        "iter_pages": lambda: [1, 2, 3, 4, 5]
+    }
+
+    return templates.TemplateResponse("public/article.html", {
+        "request": request,
+        "article": None,  # 首页没有具体文章
+        "featured_articles": featured_articles,
+        "articles": articles,
+        "recommended_articles": recommended_articles,
+        "hot_articles": hot_articles,
+        "recent_comments": recent_comments,
+        "popular_tags": popular_tags,
+        "pagination": pagination,
+        "current_user": current_user
+    })
 
 
-@router.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+@router.get("/article/{article_id}")
+async def article_detail_page(request: Request, article_id: int, current_user=Depends(optional_auth_cookie),):
+    """文章详情页"""
+    # 模拟根据article_id获取文章数据
+    article_data = {
+        1: {
+            "id": 1,
+            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
+            "subtitle": "深度分析AI技术革命对全球资本市场的影响及未来投资策略",
+            "author": "张明分析师",
+            "publish_time": "2024-01-15 10:30:00",
+            "views": 2847,
+            "tags": ["人工智能", "股市", "投资策略", "科技股", "全球市场"],
+            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+            "content": """
+                <div class="lead">
+                    随着人工智能技术的快速发展，全球股市正迎来新一轮的结构性变革。本文将从技术趋势、行业影响和投资策略三个维度，深度剖析AI浪潮下的投资机遇。
+                </div>
+                <!-- 保持原有的文章内容 -->
+            """,
+            "author_bio": "10年证券分析经验，专注于科技行业研究和投资策略，多次准确预测科技股行情转折点。",
+            "read_time": 8,  # 添加阅读时间字段
+        },
+        2: {
+            "id": 2,
+            "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会",
+            "subtitle": "全面解析AI算力需求激增背景下的半导体产业链投资逻辑",
+            "author": "李强研究员",
+            "publish_time": "2024-01-10 14:20:00",
+            "views": 1956,
+            "tags": ["半导体", "AI芯片", "科技", "集成电路", "算力"],
+            "feature_image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+            "content": "<p>半导体行业在AI浪潮中迎来新的发展机遇...</p>",
+            "author_bio": "8年半导体行业研究经验，专注于芯片产业链分析"
+        },
+        3: {
+            "id": 3,
+            "title": "2024年美联储政策展望及对科技股影响",
+            "subtitle": "分析美联储货币政策转向对科技股估值的影响机制",
+            "author": "王伟顾问",
+            "publish_time": "2024-01-08 09:15:00",
+            "views": 1678,
+            "tags": ["美联储", "货币政策", "科技股", "利率", "宏观经济"],
+            "feature_image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+            "content": "<p>美联储政策变化对科技股估值产生重要影响...</p>",
+            "author_bio": "12年宏观策略研究，擅长政策分析与市场预判"
+        }
+    }
+
+    article = article_data.get(article_id)
+
+    if not article:
+        raise HTTPException(status_code=404, detail="文章不存在")
+
+    # 模拟相关推荐文章
+    recommended_articles = [
+        {
+            "id": 2,
+            "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会",
+            "publish_time": "2024-01-10"
+        },
+        {
+            "id": 3,
+            "title": "2024年美联储政策展望及对科技股影响",
+            "publish_time": "2024-01-08"
+        },
+        {
+            "id": 4,
+            "title": "生成式AI商业化路径分析：从技术到营收",
+            "publish_time": "2024-01-05"
+        }
+    ]
+
+    # 模拟热门文章
+    hot_articles = [
+        {
+            "id": 5,
+            "title": "巴菲特最新持仓分析：为何重仓科技股？",
+            "views": 3562
+        },
+        {
+            "id": 6,
+            "title": "中国制造业转型升级的投资逻辑",
+            "views": 2987
+        },
+        {
+            "id": 7,
+            "title": "新能源车行业2024年投资策略",
+            "views": 2743
+        }
+    ]
+
+    # 模拟最新评论（侧边栏用）
+    recent_comments = [
+        {
+            "user": "投资新手",
+            "content": "这篇文章分析得很透彻，特别是对半导体行业的展望很有启发！",
+            "time": "2小时前"
+        },
+        {
+            "user": "老股民",
+            "content": "AI确实是未来方向，但估值是否过高需要谨慎判断",
+            "time": "5小时前"
+        },
+        {
+            "user": "机构分析师",
+            "content": "数据翔实，逻辑清晰，对投资决策有重要参考价值",
+            "time": "1天前"
+        }
+    ]
+
+    # 模拟评论数据（评论区用）
+    comments = [
+        {
+            "user": "价值投资者",
+            "time": "2024-01-16 14:30",
+            "content": "从长期来看，AI确实会改变很多行业，但短期要注意估值风险。作者的分析比较客观，既看到了机遇也提示了风险。",
+            "likes": 24
+        },
+        {
+            "user": "科技爱好者",
+            "time": "2024-01-16 12:15",
+            "content": "表格数据很有参考价值，特别是对各板块的预期分析。希望后续能看到更详细的个股推荐。",
+            "likes": 18
+        },
+        {
+            "user": "量化交易员",
+            "time": "2024-01-16 09:45",
+            "content": "AI在量化投资中的应用也是重要方向，期待作者后续能专门写一篇相关文章。",
+            "likes": 15
+        },
+        {
+            "user": "行业研究员",
+            "time": "2024-01-15 16:20",
+            "content": "对AI产业链的分析很到位，特别是上游算力需求的判断很有前瞻性。",
+            "likes": 12
+        },
+        {
+            "user": "个人投资者",
+            "time": "2024-01-15 11:10",
+            "content": "文章提到的核心-卫星策略很实用，已经在实际投资中应用了，效果不错。",
+            "likes": 8
+        }
+    ]
+
+    # 模拟上一篇下一篇
+    prev_next_data = {
+        1: {
+            "prev": {
+                "id": 3,
+                "title": "2024年美联储政策展望及对科技股影响"
+            },
+            "next": {
+                "id": 2,
+                "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会"
+            }
+        },
+        2: {
+            "prev": {
+                "id": 1,
+                "title": "2024年全球股市展望：人工智能浪潮下的投资机遇"
+            },
+            "next": {
+                "id": 3,
+                "title": "2024年美联储政策展望及对科技股影响"
+            }
+        },
+        3: {
+            "prev": {
+                "id": 2,
+                "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会"
+            },
+            "next": {
+                "id": 1,
+                "title": "2024年全球股市展望：人工智能浪潮下的投资机遇"
+            }
+        }
+    }
+
+    popular_tags = [
+        {"name": "人工智能", "count": 156},
+        {"name": "投资策略", "count": 142},
+        {"name": "科技股", "count": 128},
+        {"name": "半导体", "count": 115},
+        {"name": "宏观经济", "count": 98},
+        {"name": "美联储", "count": 87}
+    ]
+
+    prev_next = prev_next_data.get(article_id, {"prev": None, "next": None})
+
+    return templates.TemplateResponse("public/article_detail.html", {
+        "request": request,
+        "article": article,
+        "recommended_articles": recommended_articles,
+        "hot_articles": hot_articles,
+        "recent_comments": recent_comments,
+        "comments": comments,
+        "comment_count": len(comments),
+        "prev_article": prev_next["prev"],
+        "next_article": prev_next["next"],
+        "popular_tags": popular_tags,
+        "current_user": current_user
+    })
