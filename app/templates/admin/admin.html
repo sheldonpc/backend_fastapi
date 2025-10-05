@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>后台管理 - 五市信息平台</title>
-    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -293,8 +294,19 @@
             overflow: hidden;
         }
 
-        .table th {
-            background: var(--primary-gradient);
+        /*.table th {*/
+        /*    !*background: var(--primary-gradient);*!*/
+        /*    background-color: #1e2f47;*/
+        /*!important;*/
+        /*    color: white;*/
+        /*    border: none;*/
+        /*    padding: 15px;*/
+        /*    font-weight: 600;*/
+        /*}*/
+
+        /* 方案2：使用更长的类链 */
+        .container-fluid .card .table th {
+            background: #6784ac !important;
             color: white;
             border: none;
             padding: 15px;
@@ -424,6 +436,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="#" data-target="strategy">
+                    <i class="bi bi-file-text me-2"></i>
+                    <span>策略管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="#" data-target="config">
                     <i class="bi bi-gear me-2"></i>
                     <span>系统设置</span>
@@ -470,6 +488,12 @@
                 <div class="content-card">
                     <h4>内容管理</h4>
                     {% include "admin/articles.html" %}
+                </div>
+            </div>
+            <div id="strategy" class="content-page d-none">
+                <div class="content-card">
+                    <h4>策略管理</h4>
+                    {% include "admin/strategy.html" %}
                 </div>
             </div>
             <div id="config" class="content-page d-none">
@@ -530,9 +554,6 @@
 
 <!-- 引入Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/js/bootstrap.bundle.min.js"
-        integrity="sha512-HvOjJrdwNpDbkGJIG2ZNqDlVqMo77qbs4Me4cah0HoDrfhrbA+8SBlZn1KrvAQw7cILLPFJvdwIgphzQmMm+Pw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
     // 获取 Token
     const token = localStorage.getItem("access_token");
@@ -548,11 +569,23 @@
             // 模拟加载延迟
             await new Promise(resolve => setTimeout(resolve, 1500));
 
-            const res = await fetch("/admin/verify", {
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            });
+            let res;
+
+            // 优先尝试 Bearer Token 认证
+            if (token) {
+                res = await fetch("/admin/verify", {
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+            }
+
+            // 如果 Bearer Token 认证失败，尝试 Cookie 认证
+            if (!res || !res.ok) {
+                res = await fetch("/admin/verify-cookie", {
+                    credentials: 'include' // 包含 Cookie
+                });
+            }
 
             if (res.ok) {
                 // 校验通过，显示主界面
@@ -584,9 +617,9 @@
         alert.className = `alert alert-${type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
         alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
         alert.innerHTML = `
-                <strong>${type === 'error' ? '错误' : '提示'}</strong> ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+<strong>${type === 'error' ? '错误' : '提示'}</strong> ${message}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+`;
         document.body.appendChild(alert);
     }
 
@@ -601,10 +634,15 @@
         btn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>退出中...';
         btn.disabled = true;
 
-        setTimeout(() => {
+// 调用后端退出接口清除 httpOnly Cookie
+        fetch('/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        }).finally(() => {
+// 清除 localStorage Token
             localStorage.removeItem("access_token");
             window.location.href = "/auth/login";
-        }, 1000);
+        });
     }
 
     // 导航切换逻辑
@@ -616,7 +654,7 @@
             link.addEventListener('click', function (e) {
                 e.preventDefault();
 
-                // 添加点击动画
+// 添加点击动画
                 this.style.transform = 'scale(0.95)';
                 setTimeout(() => {
                     this.style.transform = '';
@@ -629,7 +667,7 @@
                 pages.forEach(page => {
                     if (page.id === target) {
                         page.classList.remove('d-none');
-                        // 添加页面切换动画
+// 添加页面切换动画
                         page.style.animation = 'fadeInUp 0.6s ease-out';
                     } else {
                         page.classList.add('d-none');
@@ -638,7 +676,7 @@
             });
         });
 
-        // 卡片悬停效果
+// 卡片悬停效果
         document.querySelectorAll('.stat-card').forEach(card => {
             card.addEventListener('mouseenter', function () {
                 this.style.transform = 'translateY(-5px)';

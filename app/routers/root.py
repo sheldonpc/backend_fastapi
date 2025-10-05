@@ -1,14 +1,19 @@
+import re
 from datetime import datetime, timedelta
 from math import ceil
+
+from flask import url_for, request
 from tortoise.expressions import Q
 from fastapi import APIRouter, Query, HTTPException, Depends
 from fastapi import Request
 
 from app.deps import optional_auth_cookie
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
-    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData
+    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData, Article2
 from app.core.templates import templates
 import markdown
+
+from app.utils.markdown_process import process_markdown
 from app.utils.redis_client import cache_get, cache_set
 from app.utils.status_decorator import template_route
 
@@ -50,7 +55,7 @@ async def _build_homepage_data():
         commodity_data[item.symbol] = {
             "name": item.name,
             "symbol": item.symbol,
-            "price": item.rmb_price,
+            "price": item.current_price,
             "change_percent": item.change_percent,
             "change": item.change_amount,
         }
@@ -484,60 +489,6 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
         }
     ]
 
-    # 模拟文章列表
-    articles = [
-        {
-            "id": 1,
-            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
-            "excerpt": "深度分析AI技术革命对全球资本市场的影响及未来投资策略，从技术趋势、行业影响和投资策略三个维度进行剖析...",
-            "author": "张明分析师",
-            "publish_time": "2024-01-15 10:30:00",
-            "views": 2847,
-            "tags": ["人工智能", "股市", "投资策略"],
-            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
-        },
-        {
-            "id": 2,
-            "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会",
-            "excerpt": "随着AI算力需求激增，半导体行业迎来新一轮增长周期。本文分析AI芯片产业链及各环节投资机会...",
-            "author": "李强研究员",
-            "publish_time": "2024-01-10 14:20:00",
-            "views": 1956,
-            "tags": ["半导体", "AI芯片", "科技"],
-            "feature_image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
-        },
-        {
-            "id": 3,
-            "title": "2024年美联储政策展望及对科技股影响",
-            "excerpt": "美联储货币政策转向在即，本文分析利率政策变化对科技股估值的影响及投资策略调整...",
-            "author": "王伟顾问",
-            "publish_time": "2024-01-08 09:15:00",
-            "views": 1678,
-            "tags": ["美联储", "货币政策", "科技股"],
-            "feature_image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
-        },
-        {
-            "id": 4,
-            "title": "生成式AI商业化路径分析：从技术到营收",
-            "excerpt": "探讨生成式AI技术的商业化模式，分析各应用场景的盈利能力和市场空间...",
-            "author": "赵欣分析师",
-            "publish_time": "2024-01-05 16:45:00",
-            "views": 1423,
-            "tags": ["生成式AI", "商业化", "技术创新"],
-            "feature_image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
-        },
-        {
-            "id": 5,
-            "title": "巴菲特最新持仓分析：为何重仓科技股？",
-            "excerpt": "分析巴菲特近期持仓变化，解读价值投资大师为何开始青睐科技板块...",
-            "author": "陈琳研究员",
-            "publish_time": "2024-01-03 11:30:00",
-            "views": 3562,
-            "tags": ["巴菲特", "价值投资", "持仓分析"],
-            "feature_image": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
-        }
-    ]
-
     # 模拟相关推荐
     recommended_articles = [
         {
@@ -618,6 +569,25 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
         "iter_pages": lambda: [1, 2, 3, 4, 5]
     }
 
+    articles = []
+    response = await Article2.all().order_by("-published_at").limit(10).prefetch_related("tags", "author")
+    for article in response:
+        if article.author:
+            author = article.author.username
+            print(author)
+        else:
+            author = "未知作者"
+        articles.append({
+            "id": article.id,
+            "title": article.title,
+            "excerpt": article.summary,
+            "author": author,
+            "publish_time": article.published_at.strftime("%Y-%m-%d %H:%M:%S"),
+            "views": article.views,
+            "tags": [tag.name for tag in article.tags],
+            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+        })
+
     return templates.TemplateResponse("public/article.html", {
         "request": request,
         "article": None,  # 首页没有具体文章
@@ -632,59 +602,44 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
     })
 
 
+def process_image_urls(html_content):
+    """处理图片URL，将相对路径转换为绝对路径"""
+    from urllib.parse import urljoin
+
+    def replace_image_url(match):
+        alt_text = match.group(1)
+        img_url = match.group(2)
+
+        # 如果是相对路径，转换为绝对路径
+        if img_url.startswith('/'):
+            img_url = urljoin(request.host_url, img_url)
+        elif not img_url.startswith(('http://', 'https://')):
+            # 假设图片存储在 /static/uploads/ 目录
+            img_url = url_for('static', filename=f'uploads/{img_url}')
+
+        return f'<img src="{img_url}" alt="{alt_text}">'
+
+    # 使用正则表达式替换img标签
+    pattern = r'<img src="([^"]*)" alt="([^"]*)">'
+    return re.sub(pattern, replace_image_url, html_content)
+
+
 @router.get("/article/{article_id}")
-async def article_detail_page(request: Request, article_id: int, current_user=Depends(optional_auth_cookie),):
+async def article_detail_page(request: Request, article_id: int, current_user=Depends(optional_auth_cookie), ):
     """文章详情页"""
     # 模拟根据article_id获取文章数据
-    article_data = {
-        1: {
-            "id": 1,
-            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
-            "subtitle": "深度分析AI技术革命对全球资本市场的影响及未来投资策略",
-            "author": "张明分析师",
-            "publish_time": "2024-01-15 10:30:00",
-            "views": 2847,
-            "tags": ["人工智能", "股市", "投资策略", "科技股", "全球市场"],
-            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            "content": """
-                <div class="lead">
-                    随着人工智能技术的快速发展，全球股市正迎来新一轮的结构性变革。本文将从技术趋势、行业影响和投资策略三个维度，深度剖析AI浪潮下的投资机遇。
-                </div>
-                <!-- 保持原有的文章内容 -->
-            """,
-            "author_bio": "10年证券分析经验，专注于科技行业研究和投资策略，多次准确预测科技股行情转折点。",
-            "read_time": 8,  # 添加阅读时间字段
-        },
-        2: {
-            "id": 2,
-            "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会",
-            "subtitle": "全面解析AI算力需求激增背景下的半导体产业链投资逻辑",
-            "author": "李强研究员",
-            "publish_time": "2024-01-10 14:20:00",
-            "views": 1956,
-            "tags": ["半导体", "AI芯片", "科技", "集成电路", "算力"],
-            "feature_image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            "content": "<p>半导体行业在AI浪潮中迎来新的发展机遇...</p>",
-            "author_bio": "8年半导体行业研究经验，专注于芯片产业链分析"
-        },
-        3: {
-            "id": 3,
-            "title": "2024年美联储政策展望及对科技股影响",
-            "subtitle": "分析美联储货币政策转向对科技股估值的影响机制",
-            "author": "王伟顾问",
-            "publish_time": "2024-01-08 09:15:00",
-            "views": 1678,
-            "tags": ["美联储", "货币政策", "科技股", "利率", "宏观经济"],
-            "feature_image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-            "content": "<p>美联储政策变化对科技股估值产生重要影响...</p>",
-            "author_bio": "12年宏观策略研究，擅长政策分析与市场预判"
-        }
-    }
-
-    article = article_data.get(article_id)
+    article = await Article2.filter(id=article_id).first().prefetch_related("tags", "author")
 
     if not article:
         raise HTTPException(status_code=404, detail="文章不存在")
+
+    if article.content_type == "markdown":
+        # article.content = markdown.markdown(
+        #     article.content,
+        #     extensions=['extra', 'codehilite', 'toc']
+        # )
+        article.content = process_markdown(article.content)
+        article.content = process_image_urls(article.content)
 
     # 模拟相关推荐文章
     recommended_articles = [
@@ -835,3 +790,10 @@ async def article_detail_page(request: Request, article_id: int, current_user=De
         "popular_tags": popular_tags,
         "current_user": current_user
     })
+
+@router.get("/strategy")
+async def strategy(request: Request):
+    """
+    策略页面
+    """
+    return templates.TemplateResponse("public/strategy.html", {"request": request})

@@ -1,61 +1,3 @@
-# import functools
-# from typing import Optional
-#
-# from fastapi import HTTPException, status, Request, Depends
-# from fastapi.security import OAuth2PasswordBearer
-#
-# from app.utils.redis_client import redis_client
-# from app.utils.security import decode_access_token
-# from app import models
-#
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-#
-# # 用户身份验证和获取当前登录用户信息，实现了基于 OAuth2 令牌的身份验证流程
-# async def get_current_user(token: str = Depends(oauth2_scheme)):
-#     user_id = decode_access_token(token)
-#     if not user_id:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-#     user = await models.User.get_or_none(id=user_id)
-#     if not user:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-#     return user
-#
-# # 角色验证
-# async def get_current_admin(current_user = Depends(get_current_user)):
-#     if current_user.role != "admin":
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
-#     return current_user
-#
-# async def get_current_user_from_cookie(request: Request):
-#     """从Cookie中获取当前用户"""
-#     token = request.cookies.get("access_token")
-#     if not token:
-#         return None
-#
-#     try:
-#         user_id = decode_access_token(token)
-#         if not user_id:
-#             return None
-#
-#         user = await models.User.get_or_none(id=user_id)
-#         return user
-#     except Exception:
-#         return None
-#
-#
-# async def require_auth_cookie(current_user=Depends(get_current_user_from_cookie)):
-#     """Cookie认证的必须登录依赖"""
-#     if not current_user:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="需要登录"
-#         )
-#     return current_user
-#
-#
-# async def optional_auth_cookie(current_user=Depends(get_current_user_from_cookie)):
-#     """Cookie认证的可选登录依赖"""
-#     return current_user
 import functools
 
 # app/deps/auth.py
@@ -74,10 +16,18 @@ async def _get_user_by_token(token: str):
         return None
 
     try:
-        user_id = decode_access_token(token)
-        if not user_id:
+        user_id_str = decode_access_token(token)  # 明确变量名，表示它是字符串
+        if not user_id_str:
             return None
 
+        # 关键修复：将字符串ID转换为整数
+        try:
+            user_id = int(user_id_str)
+        except (ValueError, TypeError):
+            # 如果转换失败（比如token被篡改，sub不是数字），则视为无效
+            return None
+
+        # 使用整数ID进行查询
         user = await models.User.get_or_none(id=user_id)
         return user
     except Exception:
@@ -117,7 +67,6 @@ async def optional_auth_cookie(current_user=Depends(get_current_user_from_cookie
     """页面使用的可选认证依赖"""
     return current_user
 
-
 # 角色验证 (兼容两种认证方式)
 async def get_current_admin(current_user=Depends(get_current_user)):
     """API管理员验证"""
@@ -128,7 +77,6 @@ async def get_current_admin(current_user=Depends(get_current_user)):
         )
     return current_user
 
-
 async def require_admin_cookie(current_user=Depends(require_auth_cookie)):
     """页面管理员验证"""
     if current_user.role != "admin":
@@ -137,7 +85,6 @@ async def require_admin_cookie(current_user=Depends(require_auth_cookie)):
             detail="权限不足"
         )
     return current_user
-
 
 def rate_limiter(key_prefix: str, limit: int = 5, ttl: int = 60):
     """

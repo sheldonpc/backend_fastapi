@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章编辑 - 五市信息平台</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <!--    <link rel="stylesheet" href="/static/css/all.min.css">-->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.css">
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/quill/2.0.2/quill.snow.min.css" rel="stylesheet">
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/marked/5.1.2/marked.min.js"></script>
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <!--    <script src="https://cdn.bootcdn.net/ajax/libs/quill/2.0.2/quill.js"></script>-->
+    <script src="/static/js/quill.js"></script>
+    <script src="/static/js/jquery-3.7.1.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, rgba(59, 130, 246, 0.8) 90%);
+            --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --border-color: #e2e8f0;
+            --light-gray: #f8f9fa;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 顶部表单区域优化 */
+        .strategy-header {
+            background: white;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 25px;
+            position: relative;
+            padding-left: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        }
+
+        /* 分组样式 */
+        .form-section {
+            background-color: var(--light-gray);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+
+        /* 编辑区域优化 */
+        .editor-area {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-height: 600px; /* 增加最小高度 */
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .editor-panel, .preview-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-panel {
+            flex: 1;
+        }
+
+        .preview-panel {
+            flex: 1;
+        }
+
+        .panel-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            min-height: 500px; /* 增加最小高度 */
+        }
+
+        /* Markdown编辑器样式优化 */
+        .markdown-editor {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: none;
+            background: #fafbfc;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 500px; /* 增加最小高度 */
+        }
+
+        /* 预览区域样式 */
+        .preview-content {
+            padding: 20px;
+            background: white;
+            min-height: 400px;
+        }
+
+        .preview-content.markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-btn {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .draft-btn {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .draft-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tag {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* 图片上传区域 */
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* 结果数据输入区域 */
+        .result-data-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .result-data-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toast样式 */
+        .toast {
+            animation: slideInTop 0.3s ease-out;
+        }
+
+        .toast.hide {
+            animation: slideOutTop 0.3s ease-out forwards;
+        }
+
+        @keyframes slideInTop {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutTop {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+        }
+
+        /* EasyMDE 自定义样式 */
+        .EasyMDEContainer {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .EasyMDEContainer .CodeMirror {
+            height: 500px; /* 增加编辑器高度 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+            flex: 1;
+        }
+
+        .editor-statusbar {
+            padding: 8px 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: #6c757d;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .editor-area {
+                flex-direction: column;
+            }
+
+            .strategy-header {
+                padding: 20px;
+            }
+
+            .action-buttons {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        /* 标签输入样式 */
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            min-height: 45px;
+            align-items: center;
+            background-color: white; /* 添加这行，设置背景为白色 */
+        }
+
+        .tag-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            background-color: transparent; /* 添加这行，确保输入框背景透明 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="editor-container">
+    <!-- 策略头部信息 -->
+    <div class="container-fluid mt-4">
+        <div class="strategy-header">
+            <h2 class="header-title">
+                <i class="fas fa-chart-line me-2"></i>添加策略
+            </h2>
+
+            <!-- 基本信息 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-info-circle"></i>基本信息
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">策略名称 *</label>
+                        <input type="text" class="form-control" id="strategy-name" placeholder="请输入策略名称..."
+                               maxlength="100">
+                        <div class="form-text">建议名称长度在10-50个字符之间</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">策略组别 *</label>
+                        <select class="form-select" id="strategy-group">
+                            <option value="">请选择组别</option>
+                            <option value="趋势类策略">趋势类策略</option>
+                            <option value="价值类策略">价值类策略</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">策略图标</label>
+                        <select class="form-select" id="strategy-icon">
+                            <option value="bi-speedometer2">动量策略</option>
+                            <option value="bi-arrow-left-right">均值回归</option>
+                            <option value="bi-bar-chart-line">技术分析</option>
+                            <option value="bi-piggy-bank">价值投资</option>
+                            <option value="bi-graph-up-arrow">成长投资</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">策略简介</label>
+                        <textarea class="form-control" id="strategy-introduction" rows="3"
+                                  placeholder="请输入策略简介，建议150字以内..." maxlength="200"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 策略属性 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-sliders-h"></i>策略属性
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">策略难度</label>
+                        <select class="form-select" id="strategy-difficulty">
+                            <option value="初级">初级</option>
+                            <option value="中级">中级</option>
+                            <option value="高级">高级</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">风险等级</label>
+                        <select class="form-select" id="strategy-risk">
+                            <option value="低">低</option>
+                            <option value="中">中</option>
+                            <option value="高">高</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">持仓周期</label>
+                        <select class="form-select" id="strategy-holding-period">
+                            <option value="短期">短期</option>
+                            <option value="中期">中期</option>
+                            <option value="长期">长期</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">胜率 (%)</label>
+                        <input type="number" class="form-control" id="strategy-win-rate"
+                               placeholder="例如: 65" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 策略指标 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-chart-bar"></i>策略指标
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">预期收益率 (%)</label>
+                        <input type="number" class="form-control" id="strategy-expected-return"
+                               placeholder="例如: 15.5" step="0.1">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">最大回撤 (%)</label>
+                        <input type="number" class="form-control" id="strategy-max-drawdown"
+                               placeholder="例如: 20.5" step="0.1">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">夏普比率</label>
+                        <input type="number" class="form-control" id="strategy-sharpe-ratio"
+                               placeholder="例如: 1.5" step="0.01">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 策略标签 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-tags"></i>策略标签
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">适用市场条件</label>
+                        <div class="tags-input" id="market-conditions-input">
+                            <input type="text" class="tag-input" placeholder="输入后按Enter添加">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">所需技术指标</label>
+                        <div class="tags-input" id="indicators-input">
+                            <input type="text" class="tag-input" placeholder="输入后按Enter添加">
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">策略标签</label>
+                        <div class="tags-input" id="tags-input">
+                            <input type="text" class="tag-input" placeholder="输入后按Enter添加">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果数据 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-chart-pie"></i>结果数据
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">结果图片</label>
+                        <div class="upload-area" id="result-pics-upload">
+                            <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-1">点击或拖拽上传结果图片</p>
+                            <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 2MB</small>
+                            <input type="file" id="result-pics-file" accept="image/*" multiple style="display: none;">
+                        </div>
+                        <div id="uploaded-pics" class="mt-2 d-flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">结果数据</label>
+                        <div class="result-data-container">
+                            <div class="result-data-item">
+                                <label class="form-label">数据项名称</label>
+                                <input type="text" class="form-control result-data-key" placeholder="例如: 年化收益率">
+                            </div>
+                            <div class="result-data-item">
+                                <label class="form-label">数据值</label>
+                                <input type="text" class="form-control result-data-value" placeholder="例如: 18.7%">
+                            </div>
+                            <div class="result-data-item d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-primary" id="add-result-data">
+                                    <i class="fas fa-plus me-1"></i>添加数据项
+                                </button>
+                            </div>
+                        </div>
+                        <div id="result-data-list" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编辑区域 -->
+        <div class="editor-area">
+            <!-- 编辑器面板 -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <i class="fas fa-code"></i>
+                    <span>策略代码</span>
+                    <span class="ms-auto text-muted" id="char-count">字数：0</span>
+                </div>
+                <div class="panel-body">
+                    <textarea id="code-editor"></textarea>
+                </div>
+            </div>
+
+            <!-- 详细说明面板 -->
+            <div class="editor-panel">
+                <div class="panel-header">
+                    <i class="fas fa-file-alt"></i>
+                    <span>策略详细说明</span>
+                </div>
+                <div class="panel-body">
+                    <textarea id="detail-editor"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 操作按钮 -->
+<div class="action-buttons">
+    <button class="action-btn draft-btn" id="save-draft" onclick="saveDraft()">
+        <i class="fas fa-save"></i>
+        保存草稿
+    </button>
+    <button class="action-btn save-btn" id="publish-strategy" onclick="publishStrategy()">
+        <i class="fas fa-paper-plane"></i>
+        发布策略
+    </button>
+</div>
+
+
+<script>
+    // 初始化变量
+    let marketConditions = [];
+    let requiredIndicators = [];
+    let tags = [];
+    let resultPics = [];
+    let resultData = {};
+    let strategyData = {
+        name: '',
+        group_name: '',
+        icon: '',
+        introduction: '',
+        code: '',
+        detail: '',
+        result_pic: [],
+        result_text: {},
+        difficulty: '初级',
+        risk_level: '低',
+        expected_return: 0,
+        max_drawdown: 0,
+        sharpe_ratio: 0,
+        win_rate: 0,
+        holding_period: '短期',
+        market_conditions: [],
+        required_indicators: [],
+        tags: [],
+        publish: false,
+        review: false
+    };
+
+    // 初始化EasyMDE编辑器
+    let codeEditor, detailEditor;
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function () {
+        initTagInputs();
+        initImageUpload();
+        initResultData();
+        initEditors();
+
+        // 初始化字数统计
+        updateCharCount();
+    });
+
+    // 初始化编辑器
+    function initEditors() {
+        // 策略代码编辑器
+        codeEditor = new EasyMDE({
+            element: document.getElementById('code-editor'),
+            placeholder: '请输入策略的Python代码...',
+            autoDownloadFontAwesome: false, // 禁用自动下载 Font Awesome
+            autofocus: false,
+            autosave: {
+                enabled: true,
+                uniqueId: 'strategy-code',
+                delay: 1000,
+            },
+            toolbar: [
+                "bold", "italic", "heading", "|",
+                "quote", "unordered-list", "ordered-list", "|",
+                "link", "image", "code", "|",
+                "preview", "side-by-side", "fullscreen"
+            ],
+            status: ['lines', 'words', 'cursor'],
+            minHeight: '500px',
+            spellChecker: false,
+            renderingConfig: {
+                singleLineBreaks: false,
+                codeSyntaxHighlighting: true,
+            },
+            insertTexts: {
+                horizontalRule: ['', '\n\n-----\n\n'],
+                image: ['![', '](/image-url)'],
+                link: ['[', '](/url)'],
+            },
+        });
+
+        // 策略详细说明编辑器
+        detailEditor = new EasyMDE({
+            element: document.getElementById('detail-editor'),
+            placeholder: '请输入策略的详细说明，支持Markdown语法...',
+            autofocus: false,
+            autosave: {
+                enabled: true,
+                uniqueId: 'strategy-detail',
+                delay: 1000,
+            },
+            toolbar: [
+                'bold', 'italic', 'heading', '|',
+                'quote', 'unordered-list', 'ordered-list', '|',
+                'link', 'image', 'code', '|',
+                'preview', 'side-by-side', 'fullscreen', '|',
+                'guide'
+            ],
+            status: ['lines', 'words', 'cursor'],
+            minHeight: '500px',
+            spellChecker: false,
+            renderingConfig: {
+                singleLineBreaks: false,
+                codeSyntaxHighlighting: true,
+            },
+            insertTexts: {
+                horizontalRule: ['', '\n\n-----\n\n'],
+                image: ['![', '](/image-url)'],
+                link: ['[', '](/url)'],
+            },
+        });
+
+        // 监听内容变化
+        codeEditor.codemirror.on('change', updateCharCount);
+        detailEditor.codemirror.on('change', updateCharCount);
+    }
+
+    // 初始化标签输入
+    function initTagInputs() {
+        // 市场条件输入
+        const marketInput = document.querySelector('#market-conditions-input .tag-input');
+        marketInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag(this.value, marketConditions, 'market-conditions-input');
+                this.value = '';
+            }
+        });
+
+        // 技术指标输入
+        const indicatorsInput = document.querySelector('#indicators-input .tag-input');
+        indicatorsInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag(this.value, requiredIndicators, 'indicators-input');
+                this.value = '';
+            }
+        });
+
+        // 标签输入
+        const tagsInput = document.querySelector('#tags-input .tag-input');
+        tagsInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag(this.value, tags, 'tags-input');
+                this.value = '';
+            }
+        });
+    }
+
+    // 添加标签
+    function addTag(value, array, containerId) {
+        value = value.trim();
+        if (value && !array.includes(value)) {
+            array.push(value);
+            renderTags(array, containerId);
+        }
+    }
+
+    // 渲染标签
+    function renderTags(array, containerId) {
+        const container = document.getElementById(containerId);
+        const inputField = container.querySelector('.tag-input');
+
+        // 清除现有标签
+        container.querySelectorAll('.tag').forEach(tag => tag.remove());
+
+        // 添加新标签
+        array.forEach(tag => {
+            const tagElement = document.createElement('div');
+            tagElement.className = 'tag';
+            tagElement.innerHTML = `
+                ${tag}
+                <i class="fas fa-times tag-remove" onclick="removeTag('${tag}', '${containerId}')"></i>
+            `;
+            container.insertBefore(tagElement, inputField);
+        });
+    }
+
+    // 移除标签
+    function removeTag(value, containerId) {
+        const container = document.getElementById(containerId);
+        let array;
+
+        if (containerId === 'market-conditions-input') {
+            array = marketConditions;
+        } else if (containerId === 'indicators-input') {
+            array = requiredIndicators;
+        } else if (containerId === 'tags-input') {
+            array = tags;
+        }
+
+        const index = array.indexOf(value);
+        if (index > -1) {
+            array.splice(index, 1);
+            renderTags(array, containerId);
+        }
+    }
+
+    // 初始化图片上传
+    function initImageUpload() {
+        const uploadArea = document.getElementById('result-pics-upload');
+        const fileInput = document.getElementById('result-pics-file');
+
+        uploadArea.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function () {
+            this.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            handleImageUpload(files);
+        });
+
+        fileInput.addEventListener('change', function () {
+            if (this.files.length > 0) {
+                handleImageUpload(this.files);
+            }
+        });
+    }
+
+    // 处理图片上传
+    function handleImageUpload(files) {
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith('image/')) {
+                showToast(`${file.name} 不是图片文件`, 'error');
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                showToast(`${file.name} 超过2MB限制`, 'error');
+                return;
+            }
+
+            // 模拟上传到服务器
+            setTimeout(() => {
+                // 模拟服务器返回的URL
+                const imageUrl = `https://picsum.photos/seed/${Date.now()}_${Math.random().toString(36).substring(2, 9)}/800/600.jpg`;
+
+                // 添加到结果图片列表
+                resultPics.push(imageUrl);
+                renderUploadedPics();
+
+                showToast(`${file.name} 上传成功`, 'success');
+            }, 1000);
+        });
+    }
+
+    // 渲染已上传的图片
+    function renderUploadedPics() {
+        const container = document.getElementById('uploaded-pics');
+        container.innerHTML = '';
+
+        resultPics.forEach((url, index) => {
+            const picElement = document.createElement('div');
+            picElement.className = 'position-relative';
+            picElement.innerHTML = `
+                <img src="${url}" alt="结果图片" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                        onclick="removePic(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(picElement);
+        });
+    }
+
+    // 移除图片
+    function removePic(index) {
+        resultPics.splice(index, 1);
+        renderUploadedPics();
+    }
+
+    // 初始化结果数据
+    function initResultData() {
+        document.getElementById('add-result-data').addEventListener('click', function () {
+            const key = document.querySelector('.result-data-key').value.trim();
+            const value = document.querySelector('.result-data-value').value.trim();
+
+            if (key && value) {
+                resultData[key] = value;
+                renderResultData();
+
+                // 清空输入框
+                document.querySelector('.result-data-key').value = '';
+                document.querySelector('.result-data-value').value = '';
+            }
+        });
+    }
+
+    // 渲染结果数据
+    function renderResultData() {
+        const container = document.getElementById('result-data-list');
+        container.innerHTML = '';
+
+        Object.entries(resultData).forEach(([key, value]) => {
+            const dataElement = document.createElement('div');
+            dataElement.className = 'd-flex justify-content-between align-items-center p-2 border rounded mb-2';
+            dataElement.innerHTML = `
+                <div>
+                    <strong>${key}:</strong> ${value}
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        onclick="removeResultData('${key}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(dataElement);
+        });
+    }
+
+    // 移除结果数据
+    function removeResultData(key) {
+        delete resultData[key];
+        renderResultData();
+    }
+
+    // 更新字数统计
+    function updateCharCount() {
+        const codeContent = codeEditor.value();
+        const detailContent = detailEditor.value();
+        const charCount = codeContent.length + detailContent.length;
+        document.getElementById('char-count').textContent = `字数：${charCount}`;
+    }
+
+    // 保存草稿
+    function saveDraft() {
+        collectStrategyData();
+        strategyData.publish = false;
+
+        // 模拟保存到服务器
+        setTimeout(() => {
+            showToast('草稿已保存', 'success');
+        }, 500);
+    }
+
+    // 发布策略
+    function publishStrategy() {
+        collectStrategyData();
+        strategyData.publish = true;
+
+        // 验证必填字段
+        if (!strategyData.name) {
+            showToast('请输入策略名称', 'error');
+            return;
+        }
+
+        if (!strategyData.group_name) {
+            showToast('请选择策略组别', 'error');
+            return;
+        }
+
+        if (!strategyData.code || strategyData.code.trim() === '') {
+            showToast('请输入策略代码', 'error');
+            return;
+        }
+
+        if (!strategyData.detail || strategyData.detail.trim() === '') {
+            showToast('请输入策略详细说明', 'error');
+            return;
+        }
+
+        // 延迟显示成功提示，确保加载提示至少显示一段时间
+        showToast('正在发布策略，请稍候...', 'info');
+
+        // 禁用发布按钮，防止重复提交
+        const publishBtn = document.getElementById('publish-strategy');
+        const originalBtnText = publishBtn.innerHTML;
+        publishBtn.disabled = true;
+        publishBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>发布中...';
+
+        // 发送AJAX请求
+        const token = localStorage.getItem("access_token");
+
+        $.ajax({
+            type: "POST",
+            url: "/admin/api/strategies",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify(strategyData),
+            success: function (response) {
+                console.log("策略发布成功:", response);
+                showToast('策略发布成功', 'success');
+
+                // 可以在这里添加成功后的操作，如跳转到策略列表页
+                setTimeout(() => {
+                    window.location.href = '/ai-strategy';
+                }, 2000);
+            },
+            error: function (xhr, status, error) {
+                console.error("发布失败:", error);
+
+                // 根据状态码显示不同的错误信息
+                let errorMessage = '策略发布失败';
+
+                if (xhr.status === 400) {
+                    errorMessage = '请求数据格式错误';
+                } else if (xhr.status === 401) {
+                    errorMessage = '您没有权限发布策略';
+                } else if (xhr.status === 500) {
+                    errorMessage = '服务器内部错误，请稍后再试';
+                }
+
+                // 如果服务器返回了具体的错误信息，使用服务器返回的信息
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                showToast(errorMessage, 'error');
+            },
+            complete: function () {
+                // 请求完成后恢复按钮状态
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = originalBtnText;
+            }
+        });
+    }
+
+    // 收集策略数据
+    function collectStrategyData() {
+        strategyData.name = document.getElementById('strategy-name').value;
+        strategyData.group_name = document.getElementById('strategy-group').value;
+        strategyData.icon = document.getElementById('strategy-icon').value;
+        strategyData.introduction = document.getElementById('strategy-introduction').value;
+        strategyData.code = codeEditor.value();
+        strategyData.detail = detailEditor.value();
+        strategyData.difficulty = document.getElementById('strategy-difficulty').value;
+        strategyData.risk_level = document.getElementById('strategy-risk').value;
+        strategyData.expected_return = parseFloat(document.getElementById('strategy-expected-return').value) || 0;
+        strategyData.max_drawdown = parseFloat(document.getElementById('strategy-max-drawdown').value) || 0;
+        strategyData.sharpe_ratio = parseFloat(document.getElementById('strategy-sharpe-ratio').value) || 0;
+        strategyData.win_rate = parseFloat(document.getElementById('strategy-win-rate').value) || 0;
+        strategyData.holding_period = document.getElementById('strategy-holding-period').value;
+        strategyData.market_conditions = marketConditions;
+        strategyData.required_indicators = requiredIndicators;
+        strategyData.tags = tags;
+        strategyData.result_pic = resultPics;
+        strategyData.result_text = resultData;
+
+        console.log('收集的策略数据:', strategyData);
+    }
+
+    // 显示提示
+    function showToast(message, type = 'info', duration = 3000) {
+        // 获取或创建Toast容器
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 start-50 translate-middle-x p-3';
+            toastContainer.id = 'toast-container';
+            toastContainer.style.zIndex = '1050';
+            document.body.appendChild(toastContainer);
+        }
+
+        // 移除所有现有的Toast
+        const existingToasts = toastContainer.querySelectorAll('.toast');
+        existingToasts.forEach(toast => {
+            toast.classList.add('hide');
+            toast.addEventListener('animationend', function () {
+                toast.remove();
+            }, {once: true});
+        });
+
+        // 创建唯一的Toast ID
+        const toastId = 'toast-' + Date.now();
+
+        // 创建Toast元素
+        const toastElement = document.createElement('div');
+        toastElement.className = 'toast';
+        toastElement.id = toastId;
+        toastElement.setAttribute('role', 'alert');
+        toastElement.setAttribute('aria-live', 'assertive');
+        toastElement.setAttribute('aria-atomic', 'true');
+
+        // 根据类型设置背景色
+        let headerClass = '';
+        let icon = '';
+
+        if (type === 'success') {
+            headerClass = 'bg-success text-white';
+            icon = '<i class="fas fa-check-circle me-2"></i>';
+        } else if (type === 'error') {
+            headerClass = 'bg-danger text-white';
+            icon = '<i class="fas fa-times-circle me-2"></i>';
+        } else {
+            headerClass = 'bg-primary text-white';
+            icon = '<i class="fas fa-info-circle me-2"></i>';
+        }
+
+        // 设置Toast内容
+        toastElement.innerHTML = `
+            <div class="toast-header ${headerClass}">
+                ${icon}
+                <strong class="me-auto">系统提示</strong>
+                <small>刚刚</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        `;
+
+        // 添加到容器
+        toastContainer.appendChild(toastElement);
+
+        // 初始化Bootstrap Toast
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: duration
+        });
+
+        // 显示Toast
+        toast.show();
+
+        // 监听隐藏事件
+        toastElement.addEventListener('hide.bs.toast', function () {
+            toastElement.classList.add('hide');
+        });
+
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+        });
+    }
+</script>
+</body>
+</html>

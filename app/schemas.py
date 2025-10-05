@@ -2,6 +2,8 @@ from typing import Optional, Annotated
 
 from pydantic import BaseModel, EmailStr, constr, Field
 from tortoise.contrib.pydantic import pydantic_model_creator
+from datetime import datetime
+from typing import List, Optional
 
 from app.models import Comment, ArticleLike, CommentLike, ArticleFavorite, FinancialNews, SentimentAnalysis, IndexData, \
     IndustryLatest, StockLast3Days, StockLast5Days, StockLast10Days, StockLast20Days, StockLatest, StockLHBDetail, \
@@ -9,8 +11,10 @@ from app.models import Comment, ArticleLike, CommentLike, ArticleFavorite, Finan
     StockHKHotRank, IndustryLast3Days, IndustryLast5Days, IndustryLast10Days, IndustryLast20Days, ConceptLatest, \
     ConceptLast3Days, ConceptLast5Days, ConceptLast10Days, ConceptLast20Days
 
+
 class SendCodeRequest(BaseModel):
     email: str
+
 
 class UserCreate(BaseModel):
     username: str
@@ -18,13 +22,16 @@ class UserCreate(BaseModel):
     password: str
     code: str
 
+
 class UserLogin(BaseModel):
     identifier: str
     password: str
 
+
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     avatar_url: Optional[str] = None
+
 
 class UserOut(BaseModel):
     id: int
@@ -34,51 +41,38 @@ class UserOut(BaseModel):
     role: str
     created_at: str
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
 
 PasswordStr = Annotated[
     str,
     Field(min_length=8, max_length=20, pattern="^[a-zA-Z0-9!@#$_]+$")
 ]
 
+
 class PasswordChangeRequest(BaseModel):
     old_password: str
     new_password: PasswordStr
 
+
 class PasswordChangeConfirm(BaseModel):
     code: str
     new_password: PasswordStr
+
 
 class PasswordResetRequest(BaseModel):
     email: str
     code: str
     new_password: PasswordStr
 
+
 TitleStr = Annotated[
     str,
     Field(min_length=1, max_length=255)
 ]
-
-class ArticleCreate(BaseModel):
-    title: TitleStr
-    content: str
-    is_published: Optional[bool] = True
-
-class ArticleUpdate(BaseModel):
-    title: Optional[constr(min_length=1, max_length=255)]
-    content: Optional[str]
-    is_published: Optional[bool]
-
-class ArticleOut(BaseModel):
-    id: int
-    title: str
-    content: str
-    author_id: int
-    is_published: bool
-    created_at: str
-    updated_at: str
 
 # 用于返回给前端的完整评论信息
 Comment_Pydantic = pydantic_model_creator(Comment, name="Comment")
@@ -125,3 +119,180 @@ StockZTPoolPrevious_Pydantic = pydantic_model_creator(StockZTPoolPrevious, name=
 StockZTPoolStrong_Pydantic = pydantic_model_creator(StockZTPoolStrong, name="StockZTPoolStrong")
 StockZTPoolDown_Pydantic = pydantic_model_creator(StockZTPoolDown, name="StockZTPoolDown")
 StockHKHotRank_Pydantic = pydantic_model_creator(StockHKHotRank, name="StockHKHotRank")
+
+
+class CategoryBase(BaseModel):
+    name: str = Field(..., max_length=100, description="分类名称")
+
+
+class CategoryCreate(CategoryBase):
+    pass
+
+
+class CategoryUpdate(BaseModel):
+    name: Optional[str] = Field(None, max_length=100, description="分类名称")
+
+
+class Category(CategoryBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TagBase(BaseModel):
+    name: str = Field(..., max_length=100, description="标签名称")
+
+
+class TagCreate(TagBase):
+    pass
+
+
+class TagUpdate(BaseModel):
+    name: Optional[str] = Field(None, max_length=100, description="标签名称")
+
+
+class Tag(TagBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CommentBase(BaseModel):
+    content: str = Field(..., description="评论内容")
+    parent_id: Optional[int] = Field(None, description="父评论ID，用于回复功能")
+    is_approved: bool = Field(True, description="是否已审核通过")
+
+
+class CommentCreate(CommentBase):
+    article_id: int = Field(..., description="所属文章ID")
+
+
+class CommentUpdate(BaseModel):
+    content: Optional[str] = Field(None, description="评论内容")
+    is_approved: Optional[bool] = Field(None, description="是否已审核通过")
+
+
+class Comment(CommentBase):
+    id: int
+    author_id: Optional[int] = Field(None, description="评论作者ID")
+    article_id: int = Field(..., description="所属文章ID")
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CommentWithReplies(Comment):
+    replies: List["CommentWithReplies"] = Field(default_factory=list, description="回复评论列表")
+
+
+# 解决前向引用问题
+CommentWithReplies.model_rebuild()
+
+
+class ArticleBase(BaseModel):
+    title: str = Field(..., max_length=100, description="标题")
+    slug: str = Field(..., max_length=100, description="文章标识")
+    content: str = Field(..., description="内容")
+    content_type: str = Field("markdown", max_length=10, description="内容类型")
+    summary: Optional[str] = Field(None, description="摘要")
+    status: str = Field("draft", max_length=10, description="状态")
+    is_top: bool = Field(False, description="是否置顶")
+    is_featured: bool = Field(False, description="是否精选")
+    cover: Optional[str] = Field(None, max_length=500, description="封面")
+    published_at: Optional[datetime] = Field(None, description="发布时间")
+    category_id: Optional[int] = Field(None, description="分类ID")
+    tag_ids: List[int] = Field(default_factory=list, description="标签ID列表")
+
+
+class ArticleCreate(ArticleBase):
+    pass
+
+
+class ArticleUpdate(BaseModel):
+    title: Optional[str] = Field(None, max_length=100, description="标题")
+    slug: Optional[str] = Field(None, max_length=100, description="文章标识")
+    content: Optional[str] = Field(None, description="内容")
+    content_type: Optional[str] = Field(None, max_length=10, description="内容类型")
+    summary: Optional[str] = Field(None, description="摘要")
+    status: Optional[str] = Field(None, max_length=10, description="状态")
+    is_top: Optional[bool] = Field(None, description="是否置顶")
+    is_featured: Optional[bool] = Field(None, description="是否精选")
+    cover: Optional[str] = Field(None, max_length=500, description="封面")
+    published_at: Optional[datetime] = Field(None, description="发布时间")
+    category_id: Optional[int] = Field(None, description="分类ID")
+    tag_ids: Optional[List[int]] = Field(None, description="标签ID列表")
+
+
+class Article(ArticleBase):
+    id: int
+    views: int = Field(0, description="浏览量")
+    likes: int = Field(0, description="点赞数")
+    comment_count: int = Field(0, description="评论数量")
+    author_id: Optional[int] = Field(None, description="作者ID")
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ArticleDetail(Article):
+    category: Optional[Category] = Field(None, description="分类")
+    tags: List[Tag] = Field(default_factory=list, description="标签列表")
+    comments: List[Comment] = Field(default_factory=list, description="评论列表")
+
+
+class ArticleList(BaseModel):
+    articles: List[Article] = Field(default_factory=list, description="文章列表")
+    total: int = Field(0, description="总数")
+    page: int = Field(1, description="当前页码")
+    size: int = Field(10, description="每页数量")
+
+
+class ArticleIn(ArticleBase):
+    """用于创建文章的输入模型"""
+    pass
+
+
+class ArticleOut(Article):
+    """用于返回文章的输出模型"""
+    pass
+
+
+class Article2In(BaseModel):
+    """Article2的输入模型，与ArticleIn相同，但保持命名一致性"""
+    title: str = Field(..., max_length=100, description="标题")
+    category: str = Field(..., max_length=100, description="分类")
+    summary: Optional[str] = Field(None, description="摘要")
+    cover: Optional[str] = Field(None, max_length=500, description="封面")
+    tags: List[str] = Field(default_factory=list, description="标签")
+    content: str = Field(..., description="内容")
+    contentType: str = Field("markdown", max_length=10, description="内容类型")
+    status: str = Field("draft", max_length=10, description="状态")
+    author: str = Field(..., max_length=100, description="作者")
+
+class Article2Out(Article):
+    """Article2的输出模型，与ArticleOut相同，但保持命名一致性"""
+    pass
+
+
+class Article2Update(ArticleUpdate):
+    """Article2的更新模型，与ArticleUpdate相同，但保持命名一致性"""
+    pass
+
+
+class Article2Detail(ArticleDetail):
+    """Article2的详情模型，与ArticleDetail相同，但保持命名一致性"""
+    pass
+
+
+class Article2List(ArticleList):
+    """Article2的列表模型，与ArticleList相同，但保持命名一致性"""
+    pass

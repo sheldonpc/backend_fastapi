@@ -15,7 +15,7 @@ from app.services.scheduler_market_data import NewMarketScheduler
 from app.utils.logger import init_logger, logger
 from app.database import init_db, close_db
 from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
-    financial, market, api_fetch_data, api_index, root, board
+    financial, market, api_fetch_data, api_index, root, board, strategy
 from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler
 from app.utils.redis_client import cache_set
 from app.utils.warm_up_tasks import start_cache_warmup, stop_cache_warmup
@@ -105,6 +105,7 @@ app.include_router(api_config.router)
 app.include_router(api_fetch_data.router)
 app.include_router(api_index.router)
 app.include_router(board.router)
+app.include_router(strategy.router)
 # deprecated
 # @app.on_event("startup")
 # async def startup():

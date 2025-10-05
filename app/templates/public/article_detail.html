@@ -7,6 +7,9 @@
         --card-radius: 12px;
         --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
         --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.1);
+        --primary-color: #4F78BD;
+        --secondary-color: #6366f1;
+        --accent-color: #363380;
     }
 
     /* 紧凑布局基础 */
@@ -16,9 +19,10 @@
 
     /* 文章头部样式优化 */
     .article-hero {
-        height: 240px;
+        height: 280px;
         position: relative;
         overflow: hidden;
+        border-radius: 0 0 20px 20px;
     }
 
     .hero-overlay {
@@ -26,181 +30,316 @@
     }
 
     .article-title {
-        font-size: 1.75rem;
+        font-size: 2rem;
         font-weight: 700;
         line-height: 1.3;
         margin-bottom: 0.75rem;
+    }
+
+    /* 无头图时的样式 */
+    .no-hero-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        padding: 2.5rem 2rem;
+        border-radius: 0 0 20px 20px;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .no-hero-header .article-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .no-hero-header .article-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+
+    .no-hero-header .meta-compact {
+        font-size: 0.9rem;
     }
 
     /* 紧凑卡片样式 */
     .content-card {
         border-radius: var(--card-radius);
         box-shadow: var(--shadow-soft);
-        transition: all 0.2s ease;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: none;
     }
 
     .content-card:hover {
         box-shadow: var(--shadow-hover);
-        transform: translateY(-1px);
+        transform: translateY(-2px);
     }
 
     /* 紧凑标签样式 */
     .tag-badge {
         background: #f8fafc;
         color: #475569;
-        padding: 0.3rem 0.6rem;
-        border-radius: 16px;
-        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
         font-weight: 500;
         text-decoration: none;
         border: 1px solid #e2e8f0;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
 
     .tag-badge:hover {
         background: var(--primary-color);
         color: white;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(79, 120, 189, 0.3);
     }
 
     /* 文章内容样式优化 */
     .article-body-enhanced {
-        line-height: 1.6;
+        line-height: 1.7;
         color: #374151;
-        font-size: 0.95rem;
+        font-size: 1rem;
     }
 
     .article-body-enhanced h2 {
         color: var(--primary-color);
         padding-bottom: 0.5rem;
         border-bottom: 2px solid var(--accent-color);
-        margin: 1.5rem 0 1rem 0;
-        font-size: 1.3rem;
+        margin: 1.8rem 0 1rem 0;
+        font-size: 1.4rem;
     }
 
     .article-body-enhanced h3 {
         color: var(--secondary-color);
-        margin: 1.2rem 0 0.8rem 0;
-        font-size: 1.1rem;
+        margin: 1.5rem 0 1rem 0;
+        font-size: 1.2rem;
+    }
+
+    .article-body-enhanced p {
+        margin-bottom: 1.2rem;
     }
 
     .article-body-enhanced .lead {
         border-left: 4px solid var(--accent-color);
         background: #f8fafc;
-        padding: 1rem;
+        padding: 1.2rem;
         border-radius: 8px;
-        margin: 1rem 0;
-        font-size: 0.9rem;
+        margin: 1.5rem 0;
+        font-size: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    /* 紧凑作者卡片 */
+    /* 作者卡片优化 */
     .author-card {
-        background: #f8fafc;
-        border-radius: 10px;
-        transition: all 0.2s ease;
-        padding: 1rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .author-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .avatar-large {
-        width: 60px;
-        height: 60px;
+        width: 70px;
+        height: 70px;
         font-weight: 600;
-        font-size: 1.1rem;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    !important;
     }
 
-    /* 紧凑互动按钮 */
+    /* 互动按钮优化 */
     .reaction-btn, .action-btn {
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         border: 1px solid #e2e8f0;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 20px;
     }
 
     .reaction-btn:hover, .action-btn:hover {
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    /* 紧凑评论卡片 */
+    .reaction-btn.active {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* 评论卡片优化 */
     .comment-card {
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         border: 1px solid #f1f5f9;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .comment-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
     }
 
     .avatar-small {
-        width: 32px;
-        height: 32px;
-        font-size: 0.8rem;
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
     }
 
-    /* 紧凑侧边栏 */
-    .sidebar-widget {
-        border-radius: 10px;
-        box-shadow: var(--shadow-soft);
-        transition: all 0.2s ease;
-        padding: 1rem;
-        margin-bottom: 1rem;
+    /* 评论表单优化 */
+    .comment-form-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 12px;
+        padding: 1.2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    .recommended-card {
-        background: transparent;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        color: inherit;
-        padding: 0.5rem;
-        margin-bottom: 0.5rem;
+    .comment-form-card textarea {
+        border-radius: 8px;
+        padding: 0.8rem;
+        font-size: 0.9rem;
+        resize: none;
     }
 
-    .recommended-card:hover {
-        background: #f8fafc;
-        transform: translateX(2px);
+    .comment-form-card textarea:focus {
+        box-shadow: 0 0 0 3px rgba(79, 120, 189, 0.2);
     }
 
-    /* 紧凑分享按钮 */
+    /* 分享按钮优化 */
     .share-btn {
-        border-radius: 16px;
-        transition: all 0.2s ease;
+        border-radius: 20px;
+        transition: all 0.3s ease;
         text-decoration: none;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    /* 阅读进度条 */
+    .share-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 阅读进度条优化 */
     .reading-progress {
-        height: 2px;
+        height: 3px;
         background: var(--primary-color);
-        transition: width 0.2s;
+        transition: width 0.3s ease;
+        box-shadow: 0 0 5px rgba(79, 120, 189, 0.5);
     }
 
     /* 元信息紧凑布局 */
     .meta-compact {
+        font-size: 0.85rem;
+        gap: 1.2rem;
+    }
+
+    /* 上一篇/下一篇链接优化 */
+    .recommended-card {
+        background: #f8fafc;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .recommended-card:hover {
+        background: white;
+        transform: translateX(5px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* 关注按钮优化 */
+    .follow-btn {
+        border-radius: 20px;
+        padding: 0.4rem 1rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+    .follow-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(79, 120, 189, 0.3);
+    }
+
+    /* 排序按钮优化 */
+    .sort-btn {
+        border-radius: 15px;
         font-size: 0.8rem;
-        gap: 1rem;
+        padding: 0.3rem 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .sort-btn.active {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* 回复按钮优化 */
+    .reply-btn {
+        border-radius: 15px;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .reply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 评论点赞按钮优化 */
+    .comment-like-btn {
+        border-radius: 15px;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .comment-like-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     /* 响应式调整 */
     @media (max-width: 768px) {
         .article-hero {
-            height: 200px;
+            height: 220px;
         }
 
         .article-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
+        }
+
+        .no-hero-header {
+            padding: 2rem 0;
+        }
+
+        .no-hero-header .article-title {
+            font-size: 1.6rem;
         }
 
         .content-card {
-            padding: 1rem;
-            margin-bottom: 0.75rem;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
         }
 
         .avatar-large {
-            width: 50px;
-            height: 50px;
-            font-size: 1rem;
+            width: 60px;
+            height: 60px;
+            font-size: 1.1rem;
         }
     }
 
@@ -210,16 +349,34 @@
         }
 
         .article-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
+        }
+
+        .no-hero-header {
+            padding: 1.5rem 0;
+        }
+
+        .no-hero-header .article-title {
+            font-size: 1.4rem;
         }
 
         .content-card {
-            padding: 0.75rem;
+            padding: 1rem;
             border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .meta-compact {
+            flex-wrap: wrap;
+            gap: 0.8rem;
         }
     }
 
-    /* 侧边栏优化 */
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* 侧边栏优化 - 保持不变 */
     .sidebar-card {
         border-radius: var(--card-radius);
         border: none;
@@ -261,82 +418,90 @@
         font-size: 0.95rem;
     }
 
-    /* 分页样式优化 */
-    .pagination-custom .page-link {
-        border: none;
-        border-radius: 10px;
-        padding: 0.6rem 1rem;
-        margin: 0 0.2rem;
-        color: #64748b;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        background: #f8fafc;
+    .section-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
     }
 
-    .pagination-custom .page-link:hover {
-        background: var(--primary-color);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    .pagination-custom .page-item.active .page-link {
-        background: var(--primary-color);
-        color: white;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-    }
-
-    /* 无图占位符 */
-    .no-image-placeholder {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 2rem;
-    }
-
-    /* 响应式调整 */
-    @media (max-width: 768px) {
-        .featured-img-container {
-            height: 180px;
-        }
-
-        .article-item {
-            padding: 1.25rem 0.75rem;
-        }
-
-        .article-meta {
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .featured-img-container {
-            height: 160px;
-        }
-
-        .article-item:hover {
-            transform: none;
-        }
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
+    /* 标签数量样式 */
     .tag_count {
-        background-color: #4F78BD;
-    !important;
+        background-color: var(--primary-color);
+        color: white;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.4rem;
     }
 
     .text-dark {
-        color: #1a2b39;!important;
+        color: #1a2b39 !important;
+    }
+
+    /* 格式按钮优化 */
+    .format-btn {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    /* 评论提交按钮优化 */
+    .comment-submit-btn {
+        border-radius: 15px;
+        padding: 0.3rem 1rem;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+    .comment-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(79, 120, 189, 0.3);
+    }
+
+    .article-body-enhanced {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .article-body-enhanced.compact-section {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* 确保链接不会超出容器 */
+    .article-body-enhanced a {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+        display: inline-block;
+    }
+
+    /* 确保代码块不会超出容器 */
+    .article-body-enhanced pre {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    /* 确保表格不会超出容器 */
+    .article-body-enhanced table {
+        max-width: 100%;
+        overflow-x: auto;
+        display: block;
+        white-space: nowrap;
+    }
+
+    /* 确保图片不会超出容器 */
+    .article-body-enhanced img {
+        max-width: 100%;
+        height: auto;
     }
 </style>
 {% endblock %}
@@ -355,15 +520,6 @@
         <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
             <div class="container">
                 <div class="text-white" style="max-width: 800px;">
-                    <!-- 面包屑导航 -->
-                    <nav class="mb-2 small">
-                        <a href="/" class="text-white text-decoration-none opacity-75">首页</a>
-                        <span class="text-white opacity-75 mx-1">/</span>
-                        <a href="/articles" class="text-white text-decoration-none opacity-75">文章</a>
-                        <span class="text-white opacity-75 mx-1">/</span>
-                        <span class="text-accent">当前文章</span>
-                    </nav>
-
                     <h1 class="article-title">{{ article.title }}</h1>
                     {% if article.subtitle %}
                     <p class="article-subtitle fs-6 opacity-90 mb-3">{{ article.subtitle }}</p>
@@ -371,14 +527,31 @@
 
                     <!-- 文章元信息 -->
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                 style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
-                                {{ article.author[:1] }}
+
+
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="author-avatar-wrapper">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
+                                     style="width: 42px; height: 42px; font-weight: 600; font-size: 1rem; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">
+                                    {% if article.author.avatar_url %}
+                                    <img src="{{ article.author.avatar_url }}" alt="{{ article.author.username }}"
+                                         class="w-100 h-100 object-fit-cover">
+                                    {% else %}
+                                    <i class="bi bi-person fs-5"></i>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div>
-                                <div class="fw-bold text-white small">{{ article.author }}</div>
-                                <div class="text-white opacity-80 extra-small">{{ article.publish_time }}</div>
+                            <div class="author-info">
+                                <div class="fw-bold text-white author-name">
+                                    {% if article.author.pen_name %}
+                                    {{ article.author.pen_name }}
+                                    {% else %}
+                                    {{ article.author.username }}
+                                    {% endif %}
+                                </div>
+                                <div class="text-white opacity-80 small" style="margin-top: 0.2rem">{{
+                                    article.published_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                </div>
                             </div>
                         </div>
 
@@ -393,7 +566,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="bi bi-clock"></i>
-                                <span>{{ article.read_time }}分钟</span>
+                                <span>{{ article.read_time if article.read_time else '5' }}分钟</span>
                             </div>
                         </div>
                     </div>
@@ -402,33 +575,40 @@
         </div>
     </div>
     {% else %}
-    <!-- 如果没有头图 -->
-    <div class="bg-primary text-white py-3">
+    <!-- 如果没有头图 - 优化后的设计 -->
+    <div class="no-hero-header text-white">
         <div class="container">
-            <!-- 面包屑导航 -->
-            <nav class="mb-2 small">
-                <a href="/" class="text-white text-decoration-none opacity-75">首页</a>
-                <span class="text-white opacity-75 mx-1">/</span>
-                <a href="/articles" class="text-white text-decoration-none opacity-75">文章</a>
-                <span class="text-white opacity-75 mx-1">/</span>
-                <span class="text-white">当前文章</span>
-            </nav>
-
             <h1 class="article-title">{{ article.title }}</h1>
             {% if article.subtitle %}
-            <p class="article-subtitle fs-6 opacity-90 mb-3">{{ article.subtitle }}</p>
+            <p class="article-subtitle">{{ article.subtitle }}</p>
             {% endif %}
 
             <!-- 文章元信息 -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="avatar bg-white text-dark rounded-circle d-flex align-items-center justify-content-center"
-                         style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
-                        {{ article.author[:1] }}
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="author-avatar-wrapper">
+                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden"
+                             style="width: 42px; height: 42px; font-weight: 600; font-size: 1rem; box-shadow: 0 3px 8px rgba(0,0,0,0.15);">
+                            {% if article.author.avatar_url %}
+                            <img src="{{ article.author.avatar_url }}" alt="{{ article.author.pen_name }}"
+                                 class="w-100 h-100 object-fit-cover">
+                            {% else %}
+                            <i class="bi bi-person fs-5"></i>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div>
-                        <div class="fw-bold text-white small">{{ article.author }}</div>
-                        <div class="text-white opacity-80 extra-small">{{ article.publish_time }}</div>
+                    <div class="author-info">
+                        <div class="fw-bold text-white author-name">
+                            {% if article.author.pen_name %}
+                            {{ article.author.pen_name }}
+                            {% else %}
+                            {{ article.author.username }}
+                            {% endif %}
+                        </div>
+                        <div class="text-white opacity-80 small">{{ article.published_at.strftime('%Y-%m-%d %H:%M:%S')
+                            }}
+                        </div>
                     </div>
                 </div>
 
@@ -452,16 +632,16 @@
     {% endif %}
 
     <!-- 主体内容区域 -->
-    <div class="py-3">
+    <div class="py-4">
         <div class="container">
-            <div class="row g-3">
+            <div class="row g-4">
                 <!-- 左侧文章内容 -->
                 <div class="col-lg-8">
                     <!-- 文章内容卡片 -->
                     <div class="content-card bg-white">
                         <!-- 文章标签 -->
                         {% if article.tags %}
-                        <div class="d-flex flex-wrap gap-1 mb-3 pb-2 border-bottom">
+                        <div class="d-flex flex-wrap gap-2 mb-4 pb-3 border-bottom">
                             {% for tag in article.tags %}
                             <a href="/tag/{{ tag }}" class="tag-badge text-decoration-none">
                                 {{ tag }}
@@ -471,50 +651,62 @@
                         {% endif %}
 
                         <!-- 文章内容 -->
+                        {% if article.content_type == 'markdown' %}
                         <div class="article-body-enhanced compact-section">
                             {{ article.content|safe }}
                         </div>
+                        {% else %}
+                        <div class="article-body-enhanced">
+                            {{ article.content|safe }}
+                        </div>
+                        {% endif %}
 
                         <!-- 文章脚部 -->
-                        <div class="mt-3 pt-3 border-top">
+                        <div class="mt-4 pt-4 border-top">
                             <!-- 分享区域 -->
-                            <div class="mb-3">
-                                <span class="fw-medium text-muted small">分享：</span>
-                                <div class="d-flex flex-wrap gap-1 mt-1">
+                            <div class="mb-4">
+                                <span class="fw-medium text-muted">分享：</span>
+                                <div class="d-flex flex-wrap gap-2 mt-2">
                                     <a href="#"
                                        class="share-btn d-inline-flex align-items-center gap-1 text-white text-decoration-none bg-success">
                                         <i class="bi bi-wechat"></i>
-                                        <span class="small">微信</span>
+                                        <span>微信</span>
                                     </a>
                                     <a href="#"
                                        class="share-btn d-inline-flex align-items-center gap-1 text-white text-decoration-none bg-danger">
                                         <i class="bi bi-weibo"></i>
-                                        <span class="small">微博</span>
+                                        <span>微博</span>
                                     </a>
                                     <a href="#"
                                        class="share-btn d-inline-flex align-items-center gap-1 text-white text-decoration-none bg-info">
                                         <i class="bi bi-qq"></i>
-                                        <span class="small">QQ</span>
+                                        <span>QQ</span>
                                     </a>
                                 </div>
                             </div>
 
                             <!-- 作者信息卡片 -->
-                            <div class="author-card mb-3">
-                                <div class="row g-2 align-items-center">
+                            <div class="author-card mb-4">
+                                <div class="row g-3 align-items-center">
                                     <div class="col-auto">
                                         <div class="avatar-large bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
-                                            {{ article.author[:2] }}
+                                            {% if article.author.avatar_url %}
+                                            <img src="{{ article.author.avatar_url }}"
+                                                 alt="{{ article.author.username }}"
+                                                 class="w-100 h-100 object-fit-cover">
+                                            {% else %}
+                                            <i class="bi bi-person fs-5"></i>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     <div class="col">
                                         <h6 class="mb-1 text-dark">{{ article.author }}</h6>
-                                        <p class="text-muted mb-2 extra-small">{{ article.author_bio }}</p>
-                                        <div class="d-flex flex-wrap gap-2 mb-2">
-                                            <span class="text-muted extra-small">文章 · 128篇</span>
-                                            <span class="text-muted extra-small">粉丝 · 2.4万</span>
+                                        <p class="text-muted mb-2">资深内容创作者，专注于分享有价值的信息和见解</p>
+                                        <div class="d-flex flex-wrap gap-3 mb-3">
+                                            <span class="text-muted">文章 · 128篇</span>
+                                            <span class="text-muted">粉丝 · 2.4万</span>
                                         </div>
-                                        <button class="follow-btn btn btn-primary btn-sm rounded-pill px-2 py-1 extra-small">
+                                        <button class="follow-btn btn btn-primary">
                                             关注作者
                                         </button>
                                     </div>
@@ -522,13 +714,13 @@
                             </div>
 
                             <!-- 上一篇/下一篇 -->
-                            <div class="row g-2">
+                            <div class="row g-3">
                                 {% if prev_article %}
                                 <div class="col-md-6">
                                     <a href="/article/{{ prev_article.id }}"
-                                       class="recommended-card d-block text-decoration-none text-dark border">
-                                        <div class="text-muted extra-small mb-1">上一篇</div>
-                                        <div class="fw-semibold text-dark small">{{ prev_article.title }}</div>
+                                       class="recommended-card d-block text-decoration-none text-dark">
+                                        <div class="text-muted mb-1">上一篇</div>
+                                        <div class="fw-semibold text-dark">{{ prev_article.title }}</div>
                                     </a>
                                 </div>
                                 {% endif %}
@@ -536,9 +728,9 @@
                                 {% if next_article %}
                                 <div class="col-md-6">
                                     <a href="/article/{{ next_article.id }}"
-                                       class="recommended-card d-block text-decoration-none text-dark border">
-                                        <div class="text-muted extra-small mb-1">下一篇</div>
-                                        <div class="fw-semibold text-dark small">{{ next_article.title }}</div>
+                                       class="recommended-card d-block text-decoration-none text-dark">
+                                        <div class="text-muted mb-1">下一篇</div>
+                                        <div class="fw-semibold text-dark">{{ next_article.title }}</div>
                                     </a>
                                 </div>
                                 {% endif %}
@@ -549,22 +741,22 @@
                     <!-- 互动功能区 -->
                     <div class="content-card bg-white">
                         <div class="text-center">
-                            <h6 class="text-dark mb-2">这篇文章对您有帮助吗？</h6>
-                            <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+                            <h6 class="text-dark mb-3">这篇文章对您有帮助吗？</h6>
+                            <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
                                 <button class="reaction-btn btn btn-outline-primary rounded-pill d-flex align-items-center gap-1">
                                     <i class="bi bi-hand-thumbs-up"></i>
                                     <span>有用</span>
-                                    <span class="badge bg-light text-dark rounded-pill small">248</span>
+                                    <span class="badge bg-light text-dark rounded-pill">248</span>
                                 </button>
                                 <button class="reaction-btn btn btn-outline-primary rounded-pill d-flex align-items-center gap-1">
                                     <i class="bi bi-lightbulb"></i>
                                     <span>启发</span>
-                                    <span class="badge bg-light text-dark rounded-pill small">156</span>
+                                    <span class="badge bg-light text-dark rounded-pill">156</span>
                                 </button>
                                 <button class="reaction-btn btn btn-outline-primary rounded-pill d-flex align-items-center gap-1">
                                     <i class="bi bi-fire"></i>
                                     <span>精彩</span>
-                                    <span class="badge bg-light text-dark rounded-pill small">89</span>
+                                    <span class="badge bg-light text-dark rounded-pill">89</span>
                                 </button>
                             </div>
 
@@ -576,7 +768,7 @@
                                 <button class="action-btn btn btn-outline-secondary rounded-pill d-flex align-items-center gap-1">
                                     <i class="bi bi-heart"></i>
                                     <span>点赞</span>
-                                    <span class="badge bg-light text-dark rounded-pill small">324</span>
+                                    <span class="badge bg-light text-dark rounded-pill">324</span>
                                 </button>
                             </div>
                         </div>
@@ -584,41 +776,41 @@
 
                     <!-- 评论区 -->
                     <div class="content-card bg-white" id="comments">
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                             <h5 class="text-dark mb-0">评论 ({{ comment_count }})</h5>
-                            <div class="d-flex gap-1">
-                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill active extra-small">
+                            <div class="d-flex gap-2">
+                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill active">
                                     最新
                                 </button>
-                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill extra-small">
+                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill">
                                     最热
                                 </button>
                             </div>
                         </div>
 
                         <!-- 评论表单 -->
-                        <div class="comment-form-card bg-light rounded-2 p-2 mb-3">
-                            <div class="row g-2 align-items-start">
+                        <div class="comment-form-card mb-4">
+                            <div class="row g-3 align-items-start">
                                 <div class="col-auto">
                                     <div class="avatar-small bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center">
                                         访
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <textarea class="form-control border-0 bg-white rounded-2 extra-small"
-                                              placeholder="写下您的精彩评论..." rows="2"></textarea>
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <div class="d-flex gap-1">
+                                    <textarea class="form-control border-0 bg-white rounded"
+                                              placeholder="写下您的精彩评论..." rows="3"></textarea>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="d-flex gap-2">
                                             <button type="button"
-                                                    class="format-btn btn btn-sm btn-outline-secondary rounded extra-small">
+                                                    class="format-btn btn btn-sm btn-outline-secondary rounded">
                                                 B
                                             </button>
                                             <button type="button"
-                                                    class="format-btn btn btn-sm btn-outline-secondary rounded extra-small">
+                                                    class="format-btn btn btn-sm btn-outline-secondary rounded">
                                                 I
                                             </button>
                                         </div>
-                                        <button class="comment-submit-btn btn btn-primary rounded-pill px-3 extra-small">
+                                        <button class="comment-submit-btn btn btn-primary">
                                             发表评论
                                         </button>
                                     </div>
@@ -629,28 +821,28 @@
                         <!-- 评论列表 -->
                         <div class="comments-list">
                             {% for comment in comments %}
-                            <div class="comment-card rounded-2">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="comment-card">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="avatar-small bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
                                             {{ comment.user[:1] }}
                                         </div>
                                         <div>
-                                            <div class="fw-semibold text-dark small">{{ comment.user }}</div>
-                                            <div class="text-muted extra-small">{{ comment.time }}</div>
+                                            <div class="fw-semibold text-dark">{{ comment.user }}</div>
+                                            <div class="text-muted small">{{ comment.time }}</div>
                                         </div>
                                     </div>
-                                    <button class="comment-like-btn btn btn-sm btn-outline-danger rounded-pill d-flex align-items-center gap-1 extra-small">
+                                    <button class="comment-like-btn btn btn-sm btn-outline-danger rounded-pill d-flex align-items-center gap-1">
                                         <i class="bi bi-heart"></i>
                                         <span>{{ comment.likes }}</span>
                                     </button>
                                 </div>
 
-                                <div class="comment-content text-dark mb-2 small">
+                                <div class="comment-content text-dark mb-3">
                                     {{ comment.content|safe }}
                                 </div>
 
-                                <button class="reply-btn btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1 extra-small">
+                                <button class="reply-btn btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1">
                                     <i class="bi bi-reply"></i>
                                     <span>回复</span>
                                 </button>
@@ -660,8 +852,7 @@
                     </div>
                 </div>
 
-                <!-- 右侧边栏 -->
-                <!-- 右侧边栏 -->
+                <!-- 右侧边栏 - 保持不变 -->
                 <div class="col-lg-4">
                     <!-- 相关推荐 -->
                     <div class="sidebar-card mb-4">

@@ -1,0 +1,1011 @@
+<style>
+    :root {
+        --primary-color: #3b82f6;
+        --primary-gradient: linear-gradient(135deg, #3b82f6 0%, rgba(59, 130, 246, 0.8) 90%);
+        --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        --border-color: #e2e8f0;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .container-fluid {
+        padding: 2rem;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: black;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: var(--card-shadow);
+        border: none;
+        overflow: hidden;
+    }
+
+    .table-responsive {
+        border-radius: 15px;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #334155;
+        background-color: #f8fafc;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    .btn-success {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .badge.bg-success {
+        background-color: #10b981 !important;
+    }
+
+    .badge.bg-secondary {
+        background-color: #6b7280 !important;
+    }
+
+    .badge.bg-info {
+        background-color: #3b82f6 !important;
+    }
+
+    .badge.bg-warning {
+        background-color: #f59e0b !important;
+    }
+
+    .badge.bg-danger {
+        background-color: #ef4444 !important;
+    }
+
+    .strategy-icon {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--primary-color);
+        margin-right: 0.5rem;
+    }
+
+    .strategy-name {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .strategy-intro {
+        font-size: 0.85rem;
+        color: #6b7280;
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 15px 15px 0 0;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .tag {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--primary-color);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .result-data-item {
+        background-color: #f8fafc;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .result-data-key {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .result-data-value {
+        color: #6b7280;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #d1d5db;
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+    }
+
+    .loading-state i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .strategy-intro {
+            max-width: 200px;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="bi bi-graph-up"></i>
+            策略管理
+        </h1>
+        <button class="btn btn-success" onclick="createNewStrategy()">
+            <i class="bi bi-plus-circle me-2"></i>新增策略
+        </button>
+    </div>
+
+    <!-- 操作提示 -->
+    <div class="alert alert-info d-flex align-items-center" role="alert">
+        <i class="bi bi-info-circle me-2"></i>
+        <div>
+            💡 已发布的策略不可删除，但可以编辑。草稿状态的策略可以删除。
+        </div>
+    </div>
+
+    <!-- 策略表格 -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>策略名称</th>
+                        <th>组别</th>
+                        <th>状态</th>
+                        <th>难度</th>
+                        <th>风险等级</th>
+                        <th>创建时间</th>
+                        <th>浏览量</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="strategiesTableBody">
+                    <tr>
+                        <td colspan="8" class="loading-state">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            <div>加载中...</div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 策略详情模态框 -->
+<div class="modal fade" id="strategyDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="strategyDetailModalLabel">策略详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>基本信息</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td width="30%">策略名称</td>
+                                <td id="detail-name"></td>
+                            </tr>
+                            <tr>
+                                <td>策略组别</td>
+                                <td id="detail-group"></td>
+                            </tr>
+                            <tr>
+                                <td>策略简介</td>
+                                <td id="detail-intro"></td>
+                            </tr>
+                            <tr>
+                                <td>难度</td>
+                                <td id="detail-difficulty"></td>
+                            </tr>
+                            <tr>
+                                <td>风险等级</td>
+                                <td id="detail-risk"></td>
+                            </tr>
+                            <tr>
+                                <td>持仓周期</td>
+                                <td id="detail-period"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>策略指标</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td width="30%">预期收益率</td>
+                                <td id="detail-return"></td>
+                            </tr>
+                            <tr>
+                                <td>最大回撤</td>
+                                <td id="detail-drawdown"></td>
+                            </tr>
+                            <tr>
+                                <td>夏普比率</td>
+                                <td id="detail-sharpe"></td>
+                            </tr>
+                            <tr>
+                                <td>胜率</td>
+                                <td id="detail-winrate"></td>
+                            </tr>
+                            <tr>
+                                <td>浏览量</td>
+                                <td id="detail-views"></td>
+                            </tr>
+                            <tr>
+                                <td>点赞数</td>
+                                <td id="detail-likes"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>适用市场条件</h6>
+                        <div id="detail-conditions" class="tags-container"></div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>所需技术指标</h6>
+                        <div id="detail-indicators" class="tags-container"></div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>策略标签</h6>
+                        <div id="detail-tags" class="tags-container"></div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>结果数据</h6>
+                        <div id="detail-result-data"></div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h6>结果图片</h6>
+                        <div id="detail-result-pics" class="d-flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑策略模态框 -->
+<div class="modal fade" id="strategyModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="strategyModalLabel">新增策略</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="strategyId"/>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">策略名称 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="strategyName" placeholder="请输入策略名称"
+                                   required/>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">策略组别 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="strategyGroup" required>
+                                <option value="">请选择组别</option>
+                                <option value="趋势类策略">趋势类策略</option>
+                                <option value="价值类策略">价值类策略</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">策略图标</label>
+                            <select class="form-select" id="strategyIcon">
+                                <option value="bi-speedometer2">动量策略</option>
+                                <option value="bi-arrow-left-right">均值回归</option>
+                                <option value="bi-bar-chart-line">技术分析</option>
+                                <option value="bi-piggy-bank">价值投资</option>
+                                <option value="bi-graph-up-arrow">成长投资</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">状态 <span class="text-danger">*</span></label>
+                            <select class="form-select" id="strategyStatus" required>
+                                <option value="draft">草稿</option>
+                                <option value="published">已发布</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">策略简介</label>
+                    <textarea class="form-control" id="strategyIntroduction" rows="3"
+                              placeholder="请输入策略简介，建议150字以内..."></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">难度</label>
+                            <select class="form-select" id="strategyDifficulty">
+                                <option value="初级">初级</option>
+                                <option value="中级">中级</option>
+                                <option value="高级">高级</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">风险等级</label>
+                            <select class="form-select" id="strategyRisk">
+                                <option value="低">低</option>
+                                <option value="中">中</option>
+                                <option value="高">高</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">持仓周期</label>
+                            <select class="form-select" id="strategyHoldingPeriod">
+                                <option value="短期">短期</option>
+                                <option value="中期">中期</option>
+                                <option value="长期">长期</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">策略版本</label>
+                            <input type="text" class="form-control" id="strategyVersion" placeholder="例如: v1.0"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">预期收益率 (%)</label>
+                            <input type="number" class="form-control" id="strategyExpectedReturn"
+                                   placeholder="例如: 15.5" step="0.1"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">最大回撤 (%)</label>
+                            <input type="number" class="form-control" id="strategyMaxDrawdown"
+                                   placeholder="例如: 20.5" step="0.1"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">夏普比率</label>
+                            <input type="number" class="form-control" id="strategySharpeRatio"
+                                   placeholder="例如: 1.5" step="0.01"/>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">胜率 (%)</label>
+                            <input type="number" class="form-control" id="strategyWinRate"
+                                   placeholder="例如: 65" step="0.1"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">适用市场条件（用逗号分隔）</label>
+                    <input type="text" class="form-control" id="strategyMarketConditions"
+                           placeholder="例如: 牛市,震荡市"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">所需技术指标（用逗号分隔）</label>
+                    <input type="text" class="form-control" id="strategyRequiredIndicators"
+                           placeholder="例如: MACD,RSI,布林带"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">策略标签（用逗号分隔）</label>
+                    <input type="text" class="form-control" id="strategyTags"
+                           placeholder="例如: 趋势,量化,中高风险"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">策略代码 <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="strategyCode" rows="8"
+                              placeholder="请输入策略的Python代码..." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">策略详细说明 <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="strategyDetail" rows="8"
+                              placeholder="请输入策略的详细说明，支持Markdown..." required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">结果图片URL（每行一个）</label>
+                    <textarea class="form-control" id="strategyResultPics" rows="3"
+                              placeholder="请输入结果图片URL，每行一个..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">结果数据（JSON格式）</label>
+                    <textarea class="form-control" id="strategyResultText" rows="3"
+                              placeholder='例如: {"年化收益率": "18.7%", "夏普比率": "1.42"}'></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveStrategy()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>-->
+<script src="/static/js/jquery.min.js"></script>
+
+<script>
+    // 全局变量
+    let strategies = [];
+
+    function createNewStrategy() {
+        window.location.href = "/admin/strategy/new";
+    }
+
+    // 页面激活时加载数据
+    document.addEventListener('DOMContentLoaded', function () {
+        loadStrategies();
+    });
+
+    // 加载策略列表
+    async function loadStrategies() {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            alert("登录已过期，请重新登录");
+            window.location.href = "/login?next=/admin/strategy";
+            return;
+        }
+
+        try {
+            const res = await fetch("/admin/api/strategy", {
+                headers: {"Authorization": "Bearer " + token}
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            strategies = data.items || [];
+
+            renderStrategiesTable();
+
+        } catch (err) {
+            console.error("加载策略失败:", err);
+            document.getElementById("strategiesTableBody").innerHTML = `
+            <tr><td colspan="8" class="text-center text-danger">加载失败，请重试</td></tr>
+        `;
+        }
+    }
+
+    // 渲染策略表格
+    function renderStrategiesTable() {
+        const tbody = document.getElementById("strategiesTableBody");
+        if (strategies.length === 0) {
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <div>暂无策略数据</div>
+                    <button class="btn btn-primary mt-2" onclick="createNewStrategy()">
+                        <i class="bi bi-plus-circle me-2"></i>新增策略
+                    </button>
+                </td>
+            </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = strategies.map(strategy => {
+            const statusBadge = strategy.publish
+                ? '<span class="badge bg-success">已发布</span>'
+                : '<span class="badge bg-secondary">草稿</span>';
+
+            const difficultyBadge = getDifficultyBadge(strategy.difficulty);
+            const riskBadge = getRiskBadge(strategy.risk_level);
+
+            const deleteOnclick = strategy.publish ? '' : `deleteStrategy('${strategy.id}', '${escapeHtml(strategy.name)}')`;
+            const deleteAttrs = strategy.publish ? 'disabled title="已发布的策略不可删除"' : '';
+
+            return `
+        <tr>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="strategy-icon">
+                        <i class="bi ${strategy.icon || 'bi-graph-up'}"></i>
+                    </div>
+                    <div>
+                        <div class="strategy-name">${escapeHtml(strategy.name)}</div>
+                        <div class="strategy-intro">${escapeHtml(strategy.introduction || '-')}</div>
+                    </div>
+                </div>
+            </td>
+            <td><span class="badge bg-info">${escapeHtml(strategy.group_name || '-')}</span></td>
+            <td>${statusBadge}</td>
+            <td>${difficultyBadge}</td>
+            <td>${riskBadge}</td>
+            <td>${formatDate(strategy.created_at)}</td>
+            <td><span class="badge bg-primary">${strategy.view_count || 0} 次</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-info me-1"
+                        onclick="viewStrategy('${strategy.id}')">查看</button>
+                <button class="btn btn-sm btn-outline-primary me-1"
+                        onclick="editStrategy('${strategy.id}')">编辑</button>
+                <button class="btn btn-sm btn-outline-danger ${strategy.publish ? 'disabled' : ''}"
+                        onclick="${deleteOnclick}"
+                        ${deleteAttrs}>
+                    删除
+                </button>
+            </td>
+        </tr>
+    `;
+        }).join('');
+    }
+
+    // 获取难度徽章
+    function getDifficultyBadge(difficulty) {
+        switch (difficulty) {
+            case '初级':
+                return '<span class="badge bg-success">初级</span>';
+            case '中级':
+                return '<span class="badge bg-warning">中级</span>';
+            case '高级':
+                return '<span class="badge bg-danger">高级</span>';
+            default:
+                return '<span class="badge bg-secondary">-</span>';
+        }
+    }
+
+    // 获取风险等级徽章
+    function getRiskBadge(risk) {
+        switch (risk) {
+            case '低':
+                return '<span class="badge bg-success">低</span>';
+            case '中':
+                return '<span class="badge bg-warning">中</span>';
+            case '高':
+                return '<span class="badge bg-danger">高</span>';
+            default:
+                return '<span class="badge bg-secondary">-</span>';
+        }
+    }
+
+    // 查看策略详情
+    function viewStrategy(strategyId) {
+        const strategy = strategies.find(s => s.id === strategyId);
+        if (!strategy) return;
+
+        // 填充基本信息
+        document.getElementById("detail-name").textContent = strategy.name || '-';
+        document.getElementById("detail-group").textContent = strategy.group_name || '-';
+        document.getElementById("detail-intro").textContent = strategy.introduction || '-';
+        document.getElementById("detail-difficulty").textContent = strategy.difficulty || '-';
+        document.getElementById("detail-risk").textContent = strategy.risk_level || '-';
+        document.getElementById("detail-period").textContent = strategy.holding_period || '-';
+
+        // 填充指标信息
+        document.getElementById("detail-return").textContent = strategy.expected_return ? strategy.expected_return + '%' : '-';
+        document.getElementById("detail-drawdown").textContent = strategy.max_drawdown ? strategy.max_drawdown + '%' : '-';
+        document.getElementById("detail-sharpe").textContent = strategy.sharpe_ratio || '-';
+        document.getElementById("detail-winrate").textContent = strategy.win_rate ? strategy.win_rate + '%' : '-';
+        document.getElementById("detail-views").textContent = strategy.view_count || '0';
+        document.getElementById("detail-likes").textContent = strategy.like_count || '0';
+
+        // 填充标签信息
+        renderTags("detail-conditions", strategy.market_conditions);
+        renderTags("detail-indicators", strategy.required_indicators);
+        renderTags("detail-tags", strategy.tags);
+
+        // 填充结果数据
+        renderResultData("detail-result-data", strategy.result_text);
+
+        // 填充结果图片
+        renderResultPics("detail-result-pics", strategy.result_pic);
+
+        // 显示模态框
+        new bootstrap.Modal(document.getElementById("strategyDetailModal")).show();
+    }
+
+    // 渲染标签
+    function renderTags(containerId, tags) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (!tags || !Array.isArray(tags) || tags.length === 0) {
+            container.innerHTML = '<span class="text-muted">无</span>';
+            return;
+        }
+
+        tags.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'tag';
+            tagElement.textContent = tag;
+            container.appendChild(tagElement);
+        });
+    }
+
+    // 渲染结果数据
+    function renderResultData(containerId, resultData) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (!resultData || typeof resultData !== 'object' || Object.keys(resultData).length === 0) {
+            container.innerHTML = '<span class="text-muted">无</span>';
+            return;
+        }
+
+        Object.entries(resultData).forEach(([key, value]) => {
+            const dataElement = document.createElement('div');
+            dataElement.className = 'result-data-item';
+            dataElement.innerHTML = `
+                <span class="result-data-key">${key}:</span>
+                <span class="result-data-value">${value}</span>
+            `;
+            container.appendChild(dataElement);
+        });
+    }
+
+    // 渲染结果图片
+    function renderResultPics(containerId, pics) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (!pics || !Array.isArray(pics) || pics.length === 0) {
+            container.innerHTML = '<span class="text-muted">无</span>';
+            return;
+        }
+
+        pics.forEach(pic => {
+            const imgElement = document.createElement('img');
+            imgElement.src = pic;
+            imgElement.alt = '结果图片';
+            imgElement.className = 'img-thumbnail';
+            imgElement.style.width = '150px';
+            imgElement.style.height = '150px';
+            imgElement.style.objectFit = 'cover';
+            container.appendChild(imgElement);
+        });
+    }
+
+    // 编辑策略
+    function editStrategy(strategyId) {
+        const strategy = strategies.find(s => s.id === strategyId);
+        if (!strategy) return;
+
+        document.getElementById("strategyId").value = strategy.id;
+        document.getElementById("strategyName").value = strategy.name || "";
+        document.getElementById("strategyGroup").value = strategy.group_name || "";
+        document.getElementById("strategyIcon").value = strategy.icon || "";
+        document.getElementById("strategyStatus").value = strategy.publish ? "published" : "draft";
+        document.getElementById("strategyIntroduction").value = strategy.introduction || "";
+        document.getElementById("strategyDifficulty").value = strategy.difficulty || "初级";
+        document.getElementById("strategyRisk").value = strategy.risk_level || "低";
+        document.getElementById("strategyHoldingPeriod").value = strategy.holding_period || "短期";
+        document.getElementById("strategyVersion").value = strategy.version || "";
+        document.getElementById("strategyExpectedReturn").value = strategy.expected_return || "";
+        document.getElementById("strategyMaxDrawdown").value = strategy.max_drawdown || "";
+        document.getElementById("strategySharpeRatio").value = strategy.sharpe_ratio || "";
+        document.getElementById("strategyWinRate").value = strategy.win_rate || "";
+        document.getElementById("strategyMarketConditions").value =
+            (strategy.market_conditions && Array.isArray(strategy.market_conditions))
+                ? strategy.market_conditions.join(', ') : "";
+        document.getElementById("strategyRequiredIndicators").value =
+            (strategy.required_indicators && Array.isArray(strategy.required_indicators))
+                ? strategy.required_indicators.join(', ') : "";
+        document.getElementById("strategyTags").value =
+            (strategy.tags && Array.isArray(strategy.tags))
+                ? strategy.tags.join(', ') : "";
+        document.getElementById("strategyCode").value = strategy.code || "";
+        document.getElementById("strategyDetail").value = strategy.detail || "";
+        document.getElementById("strategyResultPics").value =
+            (strategy.result_pic && Array.isArray(strategy.result_pic))
+                ? strategy.result_pic.join('\n') : "";
+        document.getElementById("strategyResultText").value =
+            (strategy.result_text && typeof strategy.result_text === 'object')
+                ? JSON.stringify(strategy.result_text, null, 2) : "";
+
+        document.getElementById("strategyModalLabel").textContent = "编辑策略";
+        new bootstrap.Modal(document.getElementById("strategyModal")).show();
+    }
+
+    // 保存策略（新增或编辑）
+    async function saveStrategy() {
+        const token = localStorage.getItem("access_token");
+        const strategyId = document.getElementById("strategyId").value;
+
+        // 收集表单数据
+        const name = document.getElementById("strategyName").value.trim();
+        const group_name = document.getElementById("strategyGroup").value.trim();
+        const icon = document.getElementById("strategyIcon").value.trim();
+        const status = document.getElementById("strategyStatus").value;
+        const introduction = document.getElementById("strategyIntroduction").value.trim();
+        const difficulty = document.getElementById("strategyDifficulty").value;
+        const risk_level = document.getElementById("strategyRisk").value;
+        const holding_period = document.getElementById("strategyHoldingPeriod").value;
+        const version = document.getElementById("strategyVersion").value.trim();
+        const expected_return = parseFloat(document.getElementById("strategyExpectedReturn").value) || 0;
+        const max_drawdown = parseFloat(document.getElementById("strategyMaxDrawdown").value) || 0;
+        const sharpe_ratio = parseFloat(document.getElementById("strategySharpeRatio").value) || 0;
+        const win_rate = parseFloat(document.getElementById("strategyWinRate").value) || 0;
+
+        const marketConditionsInput = document.getElementById("strategyMarketConditions").value.trim();
+        const market_conditions = marketConditionsInput ? marketConditionsInput.split(',').map(c => c.trim()).filter(c => c) : [];
+
+        const indicatorsInput = document.getElementById("strategyRequiredIndicators").value.trim();
+        const required_indicators = indicatorsInput ? indicatorsInput.split(',').map(i => i.trim()).filter(i => i) : [];
+
+        const tagsInput = document.getElementById("strategyTags").value.trim();
+        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
+        const code = document.getElementById("strategyCode").value.trim();
+        const detail = document.getElementById("strategyDetail").value.trim();
+
+        const picsInput = document.getElementById("strategyResultPics").value.trim();
+        const result_pic = picsInput ? picsInput.split('\n').map(p => p.trim()).filter(p => p) : [];
+
+        let result_text = {};
+        try {
+            const resultTextInput = document.getElementById("strategyResultText").value.trim();
+            if (resultTextInput) {
+                result_text = JSON.parse(resultTextInput);
+            }
+        } catch (e) {
+            alert("结果数据格式不正确，请输入有效的JSON格式");
+            return;
+        }
+
+        // 验证必填字段
+        if (!name || !group_name || !code || !detail) {
+            alert("策略名称、组别、代码和详细说明不能为空");
+            return;
+        }
+
+        try {
+            let url = "/admin/api/strategy";
+            let method = "POST";
+            let body = {
+                name, group_name, icon, introduction, difficulty, risk_level,
+                holding_period, version, expected_return, max_drawdown, sharpe_ratio,
+                win_rate, market_conditions, required_indicators, tags, code, detail,
+                result_pic, result_text, publish: status === 'published'
+            };
+
+            if (strategyId) {
+                url += `/${strategyId}`;
+                method = "PUT";
+            }
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || `HTTP ${res.status}`);
+            }
+
+            alert(strategyId ? "策略更新成功" : "策略创建成功");
+            bootstrap.Modal.getInstance(document.getElementById("strategyModal")).hide();
+            loadStrategies(); // 刷新列表
+        } catch (err) {
+            console.error("保存策略失败:", err);
+            alert("操作失败：" + err.message);
+        }
+    }
+
+    // 删除策略
+    async function deleteStrategy(strategyId, strategyName) {
+        if (!confirm(`确定要删除策略「${strategyName}」吗？\n此操作不可恢复！`)) {
+            return;
+        }
+
+        const token = localStorage.getItem("access_token");
+
+        try {
+            const res = await fetch(`/admin/api/strategy/${strategyId}`, {
+                method: 'DELETE',
+                headers: {"Authorization": "Bearer " + token}
+            });
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.detail || `HTTP ${res.status}`);
+            }
+
+            alert("策略删除成功");
+            loadStrategies();
+        } catch (err) {
+            console.error(err);
+            alert("删除失败：" + err.message);
+        }
+    }
+
+    // 工具函数
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return isNaN(date) ? '' : date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(/\//g, '-');
+    }
+</script>

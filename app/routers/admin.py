@@ -8,7 +8,7 @@ from fastapi import Depends
 from datetime import datetime, timedelta
 import random
 from app import models
-from app.deps import get_current_admin
+from app.deps import get_current_admin, get_current_user, require_admin_cookie
 from app.models import User, Article, Category, Tag, Article_Pydantic, Category_Pydantic, Tag_Pydantic, Comment, \
     Comment_Pydantic, User_Pydantic
 from app.schemas import UserOut
@@ -24,11 +24,15 @@ router = APIRouter(
 async def verify_admin(current_admin = Depends(get_current_admin)):
     return {"message": "Authorized", "user_id": current_admin.id, "role": current_admin.role}
 
+
+@router.get("/verify-cookie")
+async def verify_admin_cookie(current_admin = Depends(require_admin_cookie)):
+    """基于Cookie的管理员权限验证接口"""
+    return {"message": "Authorized", "user_id": current_admin.id, "role": current_admin.role}
+
 @router.get("/")
-async def admin_page(request: Request):
-    # ✅ 不再校验权限，直接返回 HTML 页面
-    # 前端 JS 会在加载后自动校验 /admin/verify
-    return templates.TemplateResponse("admin/admin.html", {"request": request})
+async def admin_page(request: Request, current_user = Depends(require_admin_cookie)):
+    return templates.TemplateResponse("admin/admin.html", {"request": request, "current_user": current_user})
 
 # ———————————————— 模拟统计数据接口 ————————————————
 @router.get("/api/stats")

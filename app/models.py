@@ -1,6 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from scripts.regsetup import description
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 
@@ -13,6 +14,7 @@ class User(models.Model):
     is_active = fields.BooleanField(default=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     avatar_url = fields.CharField(max_length=255, null=True)
+    pen_name = fields.CharField(max_length=255, null=True)
 
     role = fields.CharField(max_length=50, default="user")  # 新增角色字段，默认普通用户
 
@@ -1601,6 +1603,7 @@ class ConceptLatest(models.Model):
     class Meta:
         table = "concept_latest"
 
+
 class ConceptLast3Days(models.Model):
     """概念股3日排行数据模型"""
     id = fields.IntField(pk=True)
@@ -1616,6 +1619,7 @@ class ConceptLast3Days(models.Model):
 
     class Meta:
         table = "concept_last_3_days"
+
 
 class ConceptLast5Days(models.Model):
     """概念股5日排行数据模型"""
@@ -1633,6 +1637,7 @@ class ConceptLast5Days(models.Model):
     class Meta:
         table = "concept_last_5_days"
 
+
 class ConceptLast10Days(models.Model):
     """概念股10日排行数据模型"""
     id = fields.IntField(pk=True)
@@ -1648,6 +1653,7 @@ class ConceptLast10Days(models.Model):
 
     class Meta:
         table = "concept_last_10_days"
+
 
 class ConceptLast20Days(models.Model):
     """概念股20日排行数据模型"""
@@ -1726,6 +1732,7 @@ class StockHotUp(models.Model):
     class Meta:
         table = "stock_hot_up"
 
+
 class StockHotSearchBaidu(models.Model):
     """百度热搜股票数据模型"""
     id = fields.IntField(pk=True)
@@ -1766,6 +1773,7 @@ class StockZTPool(models.Model):
     class Meta:
         table = "stock_zt_pool"
 
+
 class StockZTPoolPrevious(models.Model):
     """昨日涨停股池数据模型"""
     id = fields.IntField(pk=True)
@@ -1790,6 +1798,7 @@ class StockZTPoolPrevious(models.Model):
 
     class Meta:
         table = "stock_zt_pool_previous"
+
 
 class StockZTPoolStrong(models.Model):
     """强势股池数据模型"""
@@ -1816,6 +1825,7 @@ class StockZTPoolStrong(models.Model):
     class Meta:
         table = "stock_zt_pool_strong"
 
+
 class StockZTPoolDown(models.Model):
     """跌停股池数据模型"""
     id = fields.IntField(pk=True)
@@ -1841,6 +1851,7 @@ class StockZTPoolDown(models.Model):
     class Meta:
         table = "stock_zt_pool_down"
 
+
 class StockHKHotRank(models.Model):
     """港股人气榜数据模型"""
     id = fields.IntField(pk=True)
@@ -1853,3 +1864,130 @@ class StockHKHotRank(models.Model):
 
     class Meta:
         table = "stock_hk_hot_rank"
+
+
+class Category2(models.Model):
+    """分类模型"""
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=100, unique=True, description="分类名称")
+    cn_name = fields.CharField(max_length=100, description="中文名称")
+    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
+    updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
+
+    class Meta:
+        table = "category2"
+
+    def __str__(self):
+        return self.name
+
+
+class Tag2(models.Model):
+    """标签模型"""
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=100, unique=True, description="标签名称")
+    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
+
+    class Meta:
+        table = "tag2"
+
+    def __str__(self):
+        return self.name
+
+
+class Comment2(models.Model):
+    """评论模型"""
+    id = fields.IntField(pk=True)
+    content = fields.TextField(description="评论内容")
+    author = fields.ForeignKeyField("models.User", related_name="comment2", null=True, description="评论作者")
+    article = fields.ForeignKeyField("models.Article2", related_name="comment2", description="所属文章")
+    parent = fields.ForeignKeyField("models.Comment2", related_name="replies", null=True,
+                                    description="父评论，用于回复功能")
+    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
+    updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
+    is_approved = fields.BooleanField(description="是否已审核通过", default=True)
+
+    class Meta:
+        table = "comment2"
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.author}对文章{self.article.title}的评论"
+
+
+class Article2(models.Model):
+    """文章模型"""
+    id = fields.IntField(pk=True)
+    title = fields.CharField(max_length=100, description="标题")
+    slug = fields.CharField(max_length=100, unique=True, description="文章标识")
+    content = fields.TextField(description="内容")
+    content_type = fields.CharField(max_length=10, description="内容类型", default="markdown")
+    summary = fields.TextField(description="摘要", null=True)
+    status = fields.CharField(max_length=10, description="状态", default="draft")
+    views = fields.IntField(description="浏览量", default=0)
+    likes = fields.IntField(description="点赞数", default=0)
+    is_top = fields.BooleanField(description="是否置顶", default=False)
+    is_featured = fields.BooleanField(description="是否精选", default=False)
+    cover = fields.CharField(max_length=500, description="封面", null=True)
+    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
+    updated_at = fields.DatetimeField(auto_now=True, description="更新时间")
+    published_at = fields.DatetimeField(null=True, description="发布时间")
+    comment_count = fields.IntField(description="评论数量", default=0)
+
+    # 外键
+    author = fields.ForeignKeyField("models.User", related_name="article2", null=True, description="作者")
+    category = fields.ForeignKeyField("models.Category2", related_name="article2", null=True, description="分类")
+
+    # 多对多关系
+    tags = fields.ManyToManyField(
+        "models.Tag2",
+        related_name="article2",
+        description="标签",
+    )
+
+    class Meta:
+        table = "article2"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+
+class Strategy(models.Model):
+    """策略模型"""
+    id = fields.IntField(pk=True)
+    icon = fields.CharField(max_length=100, description="图标类名或图标URL")
+    name = fields.CharField(max_length=100, description="策略名称")
+    group_name = fields.CharField(max_length=100, description="策略组别名称")
+    introduction = fields.TextField(description="策略简介")
+    code = fields.TextField(description="Python代码")
+    detail = fields.TextField(description="详细说明，可以是Markdown格式")
+    result_pic = fields.JSONField(description="结果图片URL列表")
+    result_text = fields.JSONField(description="结果数据，如收益率、夏普比率等")
+    publish = fields.BooleanField(description="是否发布", default=False)
+    review = fields.BooleanField(description="是否已审核", default=False)
+    created_at = fields.DatetimeField(description="创建时间")
+    published_at = fields.DatetimeField(description="发布时间", null=True)
+    difficulty = fields.CharField(max_length=10, description="策略难度：初级/中级/高级")
+    risk_level = fields.CharField(max_length=10, description="风险等级：低/中/高")
+    expected_return = fields.FloatField(description="预期收益率")
+    max_drawdown = fields.FloatField(description="最大回撤")
+    sharpe_ratio = fields.FloatField(description="夏普比率")
+    win_rate = fields.FloatField(description="胜率")
+    holding_period = fields.CharField(max_length=10, description="建议持仓周期：短期/中期/长期")
+    market_conditions = fields.JSONField(description="适用市场条件：牛市/熊市/震荡市")
+    required_indicators = fields.JSONField(description="所需技术指标")
+    tags = fields.JSONField(description="标签列表，便于搜索和分类")
+    view_count = fields.IntField(description="浏览次数", default=0)
+    like_count = fields.IntField(description="点赞次数", default=0)
+    version = fields.CharField(max_length=10, description="策略版本")
+
+    author = fields.ForeignKeyField("models.User", related_name="strategy", null=True, description="作者")
+    comment = fields.ManyToManyField(
+        "models.Comment",
+        related_name="strategy",
+        description="评论",
+    )
+
+    class Meta:
+        table = "strategy"
+
+

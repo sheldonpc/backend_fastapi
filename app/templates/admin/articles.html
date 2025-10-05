@@ -87,14 +87,13 @@
     </div>
 </div>
 
-<!-- 在页面底部引入 Bootstrap JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
-
+<link rel="stylesheet" href="/static/css/bootstrap.css">
+<script src="/static/js/bootstrap.bundle.min.js"></script>
 <script>
     // 全局变量
     let articles = [];
 
-    function createNewArticle(){
+    function createNewArticle() {
         window.location.href = "/admin/articles/new";
     }
 

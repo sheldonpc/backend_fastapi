@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文章编辑 - 五市信息平台</title>
-    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.bootcdn.net/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css"
-          rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.css">
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/quill/2.0.2/quill.snow.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -353,47 +351,34 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
-        /* Toast 提示样式 */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
 
         .toast {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 300px;
-            animation: slideInRight 0.3s ease-out;
+            animation: slideInTop 0.3s ease-out;
         }
 
-        .toast.success {
-            border-left: 4px solid #10b981;
+        .toast.hide {
+            animation: slideOutTop 0.3s ease-out forwards;
         }
 
-        .toast.error {
-            border-left: 4px solid #ef4444;
-        }
-
-        .toast.info {
-            border-left: 4px solid var(--primary-color);
-        }
-
-        @keyframes slideInRight {
+        @keyframes slideInTop {
             from {
-                transform: translateX(100%);
+                transform: translateY(-100%);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateY(0);
                 opacity: 1;
+            }
+        }
+
+        @keyframes slideOutTop {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100%);
+                opacity: 0;
             }
         }
 
@@ -439,6 +424,159 @@
 
         #tag-input-author {
             margin-bottom: 1.5rem;
+        }
+
+        /* 图片上传悬浮按钮样式 */
+        .image-upload-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .image-upload-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+        }
+
+        .image-upload-btn i {
+            font-size: 24px;
+        }
+
+        /* 图片上传模态框样式 */
+        .image-upload-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-upload-modal.show {
+            display: flex;
+        }
+
+        .image-upload-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .image-upload-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .image-upload-body {
+            padding: 20px;
+        }
+
+        .image-upload-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .uploaded-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .uploaded-image-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .uploaded-image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .uploaded-image-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .uploaded-image-item .image-actions {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .image-url-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .upload-progress {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .upload-progress-bar {
+            height: 100%;
+            background: var(--primary-gradient);
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -487,7 +625,7 @@
                     </div>
                     <label class="form-label fw-semibold">文章标签</label>
                     <div class="tags-input" id="tag-input">
-                        <input type="text" class="tag-input" placeholder="多个标签用分号隔开...">
+                        <input type="text" class="tag-input" placeholder="多个标签用分号隔开，按Enter输入(0/5)">
                     </div>
                 </div>
 
@@ -621,6 +759,42 @@
     </div>
 </div>
 
+<!-- 图片上传悬浮按钮 -->
+<div class="image-upload-btn" id="image-upload-btn" title="上传图片">
+    <i class="fas fa-image"></i>
+</div>
+
+<!-- 图片上传模态框 -->
+<div class="image-upload-modal" id="image-upload-modal">
+    <div class="image-upload-content">
+        <div class="image-upload-header">
+            <h5 class="mb-0">
+                <i class="fas fa-image me-2"></i>图片上传
+            </h5>
+            <button type="button" class="btn-close" id="close-upload-modal"></button>
+        </div>
+        <div class="image-upload-body">
+            <div class="upload-area" id="image-upload-area">
+                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-2">点击或拖拽上传图片</p>
+                <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 5MB</small>
+                <input type="file" id="image-file-input" accept="image/*" multiple style="display: none;">
+                <div class="upload-progress" id="upload-progress" style="display: none;">
+                    <div class="upload-progress-bar" id="upload-progress-bar"></div>
+                </div>
+            </div>
+
+            <div class="uploaded-images" id="uploaded-images">
+                <!-- 已上传的图片将显示在这里 -->
+            </div>
+        </div>
+        <div class="image-upload-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-upload">取消</button>
+            <button type="button" class="btn btn-primary" id="insert-selected" disabled>插入选中图片</button>
+        </div>
+    </div>
+</div>
+
 <!-- 操作按钮 -->
 <div class="action-buttons">
     <button class="action-btn draft-btn" id="save-draft" onclick="saveDraft()">
@@ -632,14 +806,15 @@
         发布文章
     </button>
 </div>
+<script src="https://cdn.bootcdn.net/ajax/libs/marked/5.1.2/marked.min.js"></script>
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/quill/2.0.2/quill.js"></script>
 
-<!-- Toast 容器 -->
-<div class="toast-container" id="toast-container"></div>
+<link rel="stylesheet" href="/static/css/bootstrap.css">
+<script src="/static/js/bootstrap.bundle.min.js"></script>
 
-<!-- 引入脚本 -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/easymde@2.18.0/dist/easymde.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script src="/static/js/jquery-3.7.1.min.js"></script>
+
 <script>
     // 初始化变量
     let currentEditor = 'markdown';
@@ -653,8 +828,12 @@
         cover: '',
         tags: [],
         content: '',
-        status: 'draft' // draft or published
+        contentType: 'markdown', // 'markdown' 或 'html'
+        status: 'draft', // draft or published
+        author: ''
     };
+    let uploadedImages = [];
+    let selectedImages = [];
 
     // 初始化编辑器
     document.addEventListener('DOMContentLoaded', function () {
@@ -663,7 +842,7 @@
         initTagInput();
         initCoverUpload();
         initRichToolbar();
-
+        initImageUpload();
         // 自动保存
         setInterval(autoSave, 30000); // 每30秒自动保存一次
 
@@ -676,6 +855,7 @@
         mdEditor = new EasyMDE({
             element: document.getElementById('md-content'),
             spellChecker: false,
+            autoDownloadFontAwesome: false, // 禁用自动下载 Font Awesome
             autosave: {
                 enabled: true,
                 uniqueId: "article_" + Date.now(),
@@ -689,7 +869,10 @@
                 "preview", "side-by-side", "fullscreen"
             ],
             previewRender: function (plainText) {
-                return marked.parse(plainText);
+                return marked.parse(plainText, {
+                    mangle: false,
+                    headerIds: false
+                });
             },
             onchange: function () {
                 updatePreview();
@@ -734,11 +917,8 @@
                 const value = this.getAttribute('data-value');
 
                 if (command === 'insertImage') {
-                    const url = prompt('请输入图片URL:');
-                    if (url) {
-                        const range = quillEditor.getSelection();
-                        quillEditor.insertEmbed(range ? range.index : 0, 'image', url);
-                    }
+                    // 打开图片上传模态框
+                    document.getElementById('image-upload-modal').classList.add('show');
                 } else if (command === 'createLink') {
                     const url = prompt('请输入链接URL:');
                     if (url) {
@@ -760,20 +940,89 @@
 
     // 初始化标签输入
     function initTagInput() {
-        const tagInput = document.querySelector('.tag-input');
+        // 文章标签输入处理
+        const tagInput = document.querySelector('#tag-input .tag-input');
 
         tagInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' || e.key === ';') {
                 e.preventDefault();
-                const tagValue = this.value.trim();
-
-                if (tagValue && !tags.includes(tagValue)) {
-                    tags.push(tagValue);
-                    renderTags();
-                    this.value = '';
-                }
+                processTagInput(this, tags);
             }
         });
+
+        // 处理粘贴事件，支持分号分隔的标签
+        tagInput.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            // 处理中文分号和英文分号
+            const tagValues = pastedText.split(/[;；]/).map(tag => tag.trim()).filter(tag => tag);
+
+            tagValues.forEach(tagValue => {
+                if (tagValue && !tags.includes(tagValue)) {
+                    tags.push(tagValue);
+                }
+            });
+
+            renderTags();
+            this.value = '';
+        });
+
+        // 限制输入长度
+        tagInput.addEventListener('input', function () {
+            // 限制每个标签最多20个字符
+            if (this.value.length > 20) {
+                this.value = this.value.substring(0, 20);
+                showToast('单个标签最多20个字符', 'warning');
+            }
+        });
+
+        // 文章作者输入处理
+        const authorInput = document.querySelector('#tag-input-author .tag-input');
+
+        authorInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                // 作者通常是单个值，直接设置
+                articleData.author = this.value.trim();
+                this.value = '';
+            }
+        });
+
+        authorInput.addEventListener('blur', function () {
+            // 失去焦点时保存作者
+            articleData.author = this.value.trim();
+        });
+    }
+
+    // 处理标签输入的通用函数
+    function processTagInput(inputElement, tagArray) {
+        const tagValue = inputElement.value.trim();
+
+        if (tagValue) {
+            // 处理可能包含分号的输入
+            const tagValues = tagValue.split(/[;；]/).map(tag => tag.trim()).filter(tag => tag);
+
+            tagValues.forEach(tagValue => {
+                // 检查标签长度
+                if (tagValue.length > 20) {
+                    showToast(`标签"${tagValue}"超过20个字符限制`, 'warning');
+                    return;
+                }
+
+                // 检查标签数量
+                if (tagArray.length >= 5) {
+                    showToast('最多只能添加5个标签', 'warning');
+                    return;
+                }
+
+                if (!tagArray.includes(tagValue)) {
+                    tagArray.push(tagValue);
+                }
+            });
+
+            renderTags();
+            inputElement.value = '';
+        }
     }
 
     // 初始化封面上传
@@ -811,6 +1060,232 @@
         });
     }
 
+    // 初始化图片上传功能
+    function initImageUpload() {
+        const uploadBtn = document.getElementById('image-upload-btn');
+        const uploadModal = document.getElementById('image-upload-modal');
+        const closeBtn = document.getElementById('close-upload-modal');
+        const cancelBtn = document.getElementById('cancel-upload');
+        const insertBtn = document.getElementById('insert-selected');
+        const uploadArea = document.getElementById('image-upload-area');
+        const fileInput = document.getElementById('image-file-input');
+
+        // 打开上传模态框
+        uploadBtn.addEventListener('click', function () {
+            uploadModal.classList.add('show');
+        });
+
+        // 关闭上传模态框
+        closeBtn.addEventListener('click', function () {
+            uploadModal.classList.remove('show');
+        });
+
+        cancelBtn.addEventListener('click', function () {
+            uploadModal.classList.remove('show');
+        });
+
+        // 点击模态框外部关闭
+        uploadModal.addEventListener('click', function (e) {
+            if (e.target === uploadModal) {
+                uploadModal.classList.remove('show');
+            }
+        });
+
+        // 上传区域点击事件
+        uploadArea.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function () {
+            this.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleImageUpload(files);
+            }
+        });
+
+        // 文件选择上传
+        fileInput.addEventListener('change', function () {
+            if (this.files.length > 0) {
+                handleImageUpload(this.files);
+            }
+        });
+
+        // 插入选中的图片
+        insertBtn.addEventListener('click', function () {
+            if (selectedImages.length === 0) return;
+
+            if (currentEditor === 'markdown') {
+                // 在Markdown编辑器中插入图片
+                const cursor = mdEditor.codemirror.getCursor();
+                selectedImages.forEach(img => {
+                    const markdownText = `![${img.name}](${img.url})\n`;
+                    mdEditor.codemirror.replaceRange(markdownText, cursor);
+                    cursor.line += 1;
+                });
+            } else {
+                // 在富文本编辑器中插入图片
+                const range = quillEditor.getSelection();
+                selectedImages.forEach(img => {
+                    quillEditor.insertEmbed(range ? range.index : 0, 'image', img.url);
+                });
+            }
+
+            // 关闭模态框并清空选择
+            uploadModal.classList.remove('show');
+            selectedImages = [];
+            updateInsertButton();
+            showToast('图片已插入编辑器', 'success');
+        });
+    }
+
+    // 处理图片上传
+    function handleImageUpload(files) {
+        const progressBar = document.getElementById('upload-progress');
+        const progressBarInner = document.getElementById('upload-progress-bar');
+
+        // 显示进度条
+        progressBar.style.display = 'block';
+        progressBarInner.style.width = '0%';
+
+        // 模拟上传进度
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 30;
+            if (progress > 90) progress = 90;
+            progressBarInner.style.width = `${progress}%`;
+        }, 200);
+
+        // 处理每个文件
+        Array.from(files).forEach(file => {
+            if (!file.type.startsWith('image/')) {
+                showToast(`${file.name} 不是图片文件`, 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast(`${file.name} 超过5MB限制`, 'error');
+                return;
+            }
+
+            // 模拟上传到服务器
+            setTimeout(() => {
+                // 模拟服务器返回的URL
+                const imageUrl = `https://picsum.photos/seed/${Date.now()}_${Math.random().toString(36).substring(2, 9)}/800/600.jpg`;
+
+                // 添加到已上传图片列表
+                const imageInfo = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    url: imageUrl,
+                    size: file.size,
+                    type: file.type
+                };
+
+                uploadedImages.push(imageInfo);
+                renderUploadedImages();
+
+                // 上传完成
+                clearInterval(interval);
+                progressBarInner.style.width = '100%';
+
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    showToast(`${file.name} 上传成功`, 'success');
+                }, 500);
+            }, 1000 + Math.random() * 1000);
+        });
+    }
+
+    // 渲染已上传的图片
+    function renderUploadedImages() {
+        const container = document.getElementById('uploaded-images');
+        container.innerHTML = '';
+
+        uploadedImages.forEach(image => {
+            const imageItem = document.createElement('div');
+            imageItem.className = 'uploaded-image-item';
+            imageItem.dataset.id = image.id;
+
+            const isSelected = selectedImages.some(img => img.id === image.id);
+            if (isSelected) {
+                imageItem.classList.add('selected');
+            }
+
+            imageItem.innerHTML = `
+                <img src="${image.url}" alt="${image.name}">
+                <div class="image-actions">
+                    <span class="select-image" data-id="${image.id}">
+                        <i class="fas fa-${isSelected ? 'check-square' : 'square'}"></i> 选择
+                    </span>
+                    <span class="copy-url" data-url="${image.url}">
+                        <i class="fas fa-copy"></i> 复制
+                    </span>
+                </div>
+                <input type="text" class="image-url-input" value="${image.url}" readonly>
+            `;
+
+            container.appendChild(imageItem);
+        });
+
+        // 添加选择和复制事件
+        document.querySelectorAll('.select-image').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const imageId = parseFloat(this.dataset.id);
+                const image = uploadedImages.find(img => img.id === imageId);
+
+                if (!image) return;
+
+                const index = selectedImages.findIndex(img => img.id === imageId);
+
+                if (index === -1) {
+                    selectedImages.push(image);
+                    this.innerHTML = '<i class="fas fa-check-square"></i> 选择';
+                } else {
+                    selectedImages.splice(index, 1);
+                    this.innerHTML = '<i class="fas fa-square"></i> 选择';
+                }
+
+                updateInsertButton();
+            });
+        });
+
+        document.querySelectorAll('.copy-url').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const url = this.dataset.url;
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('图片URL已复制到剪贴板', 'success');
+                }).catch(() => {
+                    showToast('复制失败，请手动复制', 'error');
+                });
+            });
+        });
+    }
+
+    // 更新插入按钮状态
+    function updateInsertButton() {
+        const insertBtn = document.getElementById('insert-selected');
+        insertBtn.disabled = selectedImages.length === 0;
+
+        if (selectedImages.length > 0) {
+            insertBtn.textContent = `插入${selectedImages.length}张图片`;
+        } else {
+            insertBtn.textContent = '插入选中图片';
+        }
+    }
+
     // 处理文件上传
     function handleFileUpload(file) {
         // 这里应该有实际的文件上传逻辑
@@ -837,27 +1312,52 @@
     // 渲染标签
     function renderTags() {
         const tagContainer = document.getElementById('tag-input');
-        const inputField = document.querySelector('.tag-input');
+        const inputField = document.querySelector('#tag-input .tag-input');
 
         // 清除现有标签
-        document.querySelectorAll('.tag').forEach(tag => tag.remove());
+        document.querySelectorAll('#tag-input .tag').forEach(tag => tag.remove());
 
         // 添加新标签
         tags.forEach(tag => {
             const tagElement = document.createElement('div');
             tagElement.className = 'tag';
             tagElement.innerHTML = `
-                    ${tag}
-                    <i class="fas fa-times tag-remove" onclick="removeTag('${tag}')"></i>
-                `;
+                ${tag}
+                <i class="fas fa-times tag-remove" onclick="removeTag('${tag}')"></i>
+            `;
             tagContainer.insertBefore(tagElement, inputField);
         });
+
+        // 更新标签计数显示
+        updateTagCount();
     }
+
+    // 更新标签计数显示
+    function updateTagCount() {
+        const tagInput = document.querySelector('#tag-input .tag-input');
+        const count = tags.length;
+
+        // 更新输入框占位符
+        if (count >= 5) {
+            tagInput.placeholder = '已达到标签数量上限';
+            tagInput.disabled = true;
+        } else {
+            tagInput.placeholder = `多个标签用分号隔开...(${count}/5)`;
+            tagInput.disabled = false;
+        }
+    }
+
 
     // 移除标签
     function removeTag(tag) {
         tags = tags.filter(t => t !== tag);
         renderTags();
+
+        // 如果标签数量小于5，重新启用输入框
+        if (tags.length < 5) {
+            const tagInput = document.querySelector('#tag-input .tag-input');
+            tagInput.disabled = false;
+        }
     }
 
     // 切换编辑器
@@ -888,7 +1388,10 @@
             }
         } else {
             const markdownContent = mdEditor.value();
-            const htmlContent = marked.parse(markdownContent);
+            const htmlContent = marked.parse(markdownContent, {
+                mangle: false,
+                headerIds: false
+            });
             quillEditor.root.innerHTML = htmlContent;
         }
 
@@ -909,7 +1412,10 @@
         const previewElement = document.getElementById('preview-content');
 
         if (currentEditor === 'markdown') {
-            previewElement.innerHTML = marked.parse(content);
+            previewElement.innerHTML = marked.parse(content, {
+                mangle: false,
+                headerIds: false
+            });
         } else {
             previewElement.innerHTML = content;
         }
@@ -984,9 +1490,19 @@
         }, 500);
     }
 
+    // 从 Cookie 中获取 access_token
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    const token = localStorage.getItem("access_token");
+
     // 发布文章
     function publishArticle() {
         collectArticleData();
+        console.log('发布文章：', articleData);
         articleData.status = 'published';
 
         // 验证必填字段
@@ -1000,15 +1516,68 @@
             return;
         }
 
-        if (!articleData.content) {
+        // 检查内容是否为空（去除空白字符）
+        if (!articleData.content || articleData.content.trim() === '') {
             showToast('请输入文章内容', 'error');
             return;
         }
 
-        // 模拟发布到服务器
-        setTimeout(() => {
-            showToast('文章发布成功', 'success');
-        }, 1000);
+        // 延迟显示成功提示，确保加载提示至少显示一段时间
+        showToast('正在发布文章，请稍候...', 'info');
+
+        // 禁用发布按钮，防止重复提交
+        const publishBtn = document.getElementById('publish-article');
+        const originalBtnText = publishBtn.innerHTML;
+        publishBtn.disabled = true;
+        publishBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>发布中...';
+
+        // 发送AJAX请求
+        $.ajax({
+            type: "POST",
+            url: "/admin/api/articles",
+            headers: {
+                "Authorization": `Bearer ${token}`,  // ✅ 使用Bearer Token
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify(articleData), // 将数据转换为JSON字符串
+            contentType: "application/json", // 设置内容类型为JSON
+            dataType: "json", // 预期服务器返回的数据类型
+            success: function (response) {
+                console.log("文章发布成功:", response);
+                showToast('文章发布成功', 'success');
+
+                // 可以在这里添加成功后的操作，如跳转到文章列表页
+                setTimeout(() => {
+                    window.location.href = '/admin';
+                }, 2000);
+            },
+            error: function (xhr, status, error) {
+                console.error("发布失败:", error);
+
+                // 根据状态码显示不同的错误信息
+                let errorMessage = '文章发布失败';
+
+                if (xhr.status === 400) {
+                    errorMessage = '请求数据格式错误';
+                } else if (xhr.status === 401) {
+                    errorMessage = '您没有权限发布文章';
+                } else if (xhr.status === 500) {
+                    errorMessage = '服务器内部错误，请稍后再试';
+                }
+
+                // 如果服务器返回了具体的错误信息，使用服务器返回的信息
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+
+                showToast(errorMessage, 'error');
+            },
+            complete: function () {
+                // 请求完成后恢复按钮状态
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = originalBtnText;
+            }
+        });
     }
 
     // 收集文章数据
@@ -1019,43 +1588,133 @@
         articleData.tags = tags;
 
         if (currentEditor === 'markdown') {
-            articleData.content = mdEditor.value();
+            // 使用正确的方法获取 Markdown 编辑器内容
+            articleData.content = mdEditor.codemirror.getValue();
+            // 保存内容类型，以便后续处理
+            articleData.contentType = 'markdown';
         } else {
+            // 获取富文本编辑器的完整HTML内容，保留所有样式
             articleData.content = quillEditor.root.innerHTML;
+            // 保存内容类型，以便后续处理
+            articleData.contentType = 'html';
         }
+
+        // 获取发布状态
+        articleData.status = document.getElementById('publish-status').value;
+
+        // 获取作者 - 已经在initTagInput中处理
+        const authorInput = document.querySelector('#tag-input-author .tag-input');
+        if (authorInput && authorInput.value.trim()) {
+            articleData.author = authorInput.value.trim();
+        }
+
+        // 获取封面图片
+        const coverImg = document.querySelector('#cover-upload img');
+        articleData.cover = coverImg ? coverImg.src : '';
+
+        // 调试输出 - 可以在控制台查看收集的数据
+        console.log('收集的文章数据:', articleData);
     }
 
-    // 显示提示
-    function showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toast-container');
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-
-        let icon;
-        if (type === 'success') {
-            icon = '<i class="fas fa-check-circle text-success"></i>';
-        } else if (type === 'error') {
-            icon = '<i class="fas fa-times-circle text-danger"></i>';
-        } else {
-            icon = '<i class="fas fa-info-circle text-primary"></i>';
+    // 显示提示 - 使用Bootstrap Toast组件
+    function showToast(message, type = 'info', duration = 3000) {
+        // 获取或创建Toast容器
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 start-50 translate-middle-x p-3';
+            toastContainer.id = 'toast-container';
+            toastContainer.style.zIndex = '1050';
+            document.body.appendChild(toastContainer);
         }
 
-        toast.innerHTML = `
-                ${icon}
-                <span>${message}</span>
-            `;
+        // 移除所有现有的Toast
+        const existingToasts = toastContainer.querySelectorAll('.toast');
+        existingToasts.forEach(toast => {
+            // 添加隐藏类触发渐出动画
+            toast.classList.add('hide');
 
-        toastContainer.appendChild(toast);
-
-        // 3秒后自动移除
-        setTimeout(() => {
-            toast.style.animation = 'slideInRight 0.3s ease-out reverse';
-            setTimeout(() => {
+            // 监听动画结束事件，然后移除元素
+            toast.addEventListener('animationend', function () {
                 toast.remove();
+            }, {once: true});
+
+            // 如果动画没有触发，设置一个备用定时器
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
             }, 300);
-        }, 3000);
+        });
+
+        // 创建唯一的Toast ID
+        const toastId = 'toast-' + Date.now();
+
+        // 创建Toast元素
+        const toastElement = document.createElement('div');
+        toastElement.className = 'toast';
+        toastElement.id = toastId;
+        toastElement.setAttribute('role', 'alert');
+        toastElement.setAttribute('aria-live', 'assertive');
+        toastElement.setAttribute('aria-atomic', 'true');
+
+        // 根据类型设置背景色
+        let headerClass = '';
+        let icon = '';
+
+        if (type === 'success') {
+            headerClass = 'bg-success text-white';
+            icon = '<i class="fas fa-check-circle me-2"></i>';
+        } else if (type === 'error') {
+            headerClass = 'bg-danger text-white';
+            icon = '<i class="fas fa-times-circle me-2"></i>';
+        } else {
+            headerClass = 'bg-primary text-white';
+            icon = '<i class="fas fa-info-circle me-2"></i>';
+        }
+
+        // 设置Toast内容
+        toastElement.innerHTML = `
+        <div class="toast-header ${headerClass}">
+            ${icon}
+            <strong class="me-auto">系统提示</strong>
+            <small>刚刚</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            ${message}
+        </div>
+    `;
+
+        // 添加到容器
+        toastContainer.appendChild(toastElement);
+
+        // 初始化Bootstrap Toast，使用传入的duration参数
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: duration
+        });
+
+        // 显示Toast
+        toast.show();
+
+        // 监听隐藏事件，添加hide类并从DOM中移除元素
+        toastElement.addEventListener('hide.bs.toast', function () {
+            toastElement.classList.add('hide');
+        });
+
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+        });
+
+        // 返回Toast ID和实例，以便后续操作
+        return {
+            id: toastId,
+            element: toastElement,
+            instance: toast
+        };
     }
+
 </script>
 </body>
 </html>
