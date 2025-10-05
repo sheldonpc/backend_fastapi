@@ -449,16 +449,6 @@
         }
     }
 
-    /* 策略面板样式 */
-    .strategy-panel {
-        display: none;
-    }
-
-    .strategy-panel.active {
-        display: block;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -654,6 +644,15 @@
         color: #6b7280;
         font-weight: 500;
     }
+
+    .strategy-panel {
+        display: none;
+    }
+
+    .strategy-panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease-in-out;
+    }
 </style>
 {% endblock %}
 
@@ -696,9 +695,173 @@
         </div>
     </div>
 </div>
+
+<!-- 策略内容模板 -->
+<template id="strategy-template">
+    <div class="strategy-panel">
+        <div class="strategy-card">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-3">
+                    <i class="bi strategy-icon"></i>
+                    <span class="strategy-name"></span>
+                </h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <p class="card-text text-muted mb-0 strategy-introduction"></p>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-primary strategy-difficulty"></span>
+                        <span class="badge bg-danger strategy-risk-level"></span>
+                        <span class="badge bg-success strategy-holding-period"></span>
+                    </div>
+                </div>
+
+                <!-- 代码区域 -->
+                <div class="code-container">
+                    <div class="code-header">
+                        <div class="code-title">
+                            <i class="bi bi-code-slash"></i>
+                            <span>Python 实现代码</span>
+                        </div>
+                        <div class="code-actions">
+                            <button class="code-action-btn" title="复制代码" data-action="copy"
+                                    data-target="code-__STRATEGY_ID__">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            <button class="code-action-btn" title="全屏查看" data-action="fullscreen"
+                                    data-target="code-__STRATEGY_ID__">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="code-content" id="code-__STRATEGY_ID__">
+                        <!--                        <pre><code class="strategy-code"></code></pre>-->
+                        <pre><code class="language-python strategy-code"></code></pre>
+                    </div>
+                </div>
+
+                <!-- 文字讲解 -->
+                <div class="explanation-container">
+                    <div class="explanation-title">
+                        <i class="bi bi-info-circle"></i>
+                        <span>策略详解</span>
+                    </div>
+                    <div class="explanation-content strategy-detail"></div>
+                </div>
+
+                <!-- 结果展示 -->
+                <div class="result-container">
+                    <div class="result-title">
+                        <i class="bi bi-graph-up"></i>
+                        <span>策略回测结果</span>
+                    </div>
+
+                    <!-- 结果图片 -->
+                    <div class="result-images"></div>
+
+                    <!-- 结果数据 -->
+                    <div class="result-stats">
+                        <div class="stat-card">
+                            <div class="stat-value strategy-expected-return"></div>
+                            <div class="stat-label">预期收益率</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value strategy-sharpe-ratio"></div>
+                            <div class="stat-label">夏普比率</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value strategy-max-drawdown"></div>
+                            <div class="stat-label">最大回撤</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value strategy-win-rate"></div>
+                            <div class="stat-label">胜率</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 策略信息 -->
+                <div class="result-container">
+                    <div class="result-title">
+                        <i class="bi bi-info-circle"></i>
+                        <span>策略信息</span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="text-muted">版本</td>
+                                    <td class="strategy-version"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">创建时间</td>
+                                    <td class="strategy-created-at"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">发布时间</td>
+                                    <td class="strategy-published-at"></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td class="text-muted">浏览次数</td>
+                                    <td class="strategy-view-count"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">点赞次数</td>
+                                    <td class="strategy-like-count"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">状态</td>
+                                    <td class="strategy-status"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 标签 -->
+                    <div class="strategy-tags mt-3">
+                        <span class="text-muted">标签：</span>
+                        <div class="d-inline-flex gap-1"></div>
+                    </div>
+                </div>
+
+                <!-- 评论区 -->
+                <div class="comments-container">
+                    <div class="comments-title">
+                        <i class="bi bi-chat-dots"></i>
+                        <span>策略讨论</span>
+                    </div>
+
+                    <div class="comment-form">
+                        <textarea class="comment-input" data-comment-input="__STRATEGY_ID__"
+                                  placeholder="分享您对__STRATEGY_NAME__的看法..."></textarea>
+                        <button class="comment-submit" data-comment-submit="__STRATEGY_ID__">发表评论</button>
+                    </div>
+
+                    <div class="comment-list" id="comment-list-__STRATEGY_ID__">
+                        <!-- 评论将通过JavaScript动态加载 -->
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            <p class="mt-2 small">正在加载评论...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 {% endblock %}
 
 {% block extra_js %}
+<!-- 在 code-content div 中添加 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
+
 <script>
     // 全局变量存储策略数据
     let strategiesData = [];
@@ -869,6 +1032,20 @@
         const contentContainer = document.getElementById('strategyContent');
         if (!contentContainer) return;
 
+        // 在 renderStrategyContent 函数开始处添加
+        contentContainer.innerHTML = `
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-3">正在加载策略内容...</p>
+          </div>
+        `;
+
+        // 获取模板
+        const template = document.getElementById('strategy-template');
+        const clone = template.content.cloneNode(true);
+
         // 格式化日期
         const formatDate = (dateString) => {
             if (!dateString) return '未知';
@@ -876,173 +1053,136 @@
             return date.toLocaleDateString('zh-CN');
         };
 
-        // 渲染策略内容
-        contentContainer.innerHTML = `
-            <div class="strategy-panel active" id="strategy-${strategy.id}">
-                <div class="strategy-card">
-                    <div class="card-body p-4">
-                        <h2 class="card-title mb-3">
-                            <i class="bi ${strategy.icon || 'bi-cpu'} me-2"></i>${strategy.name}
-                        </h2>
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <p class="card-text text-muted mb-0">
-                                ${strategy.introduction || '暂无简介'}
-                            </p>
-                            <div class="d-flex gap-2">
-                                <span class="badge bg-primary">${strategy.difficulty || '未知'}</span>
-                                <span class="badge bg-danger">${strategy.risk_level || '未知'}</span>
-                                <span class="badge bg-success">${strategy.holding_period || '未知'}</span>
-                            </div>
-                        </div>
+        // 替换模板中的占位符
+        const templateHTML = new XMLSerializer().serializeToString(clone);
+        const filledHTML = templateHTML
+            .replace(/__STRATEGY_ID__/g, strategy.id)
+            .replace(/__STRATEGY_NAME__/g, strategy.name);
 
-                        <!-- 代码区域 -->
-                        <div class="code-container">
-                            <div class="code-header">
-                                <div class="code-title">
-                                    <i class="bi bi-code-slash"></i>
-                                    <span>Python 实现代码</span>
-                                </div>
-                                <div class="code-actions">
-                                    <button class="code-action-btn" title="复制代码" onclick="copyCode('${strategy.id}')">
-                                        <i class="bi bi-clipboard"></i>
-                                    </button>
-                                    <button class="code-action-btn" title="全屏查看" onclick="fullscreenCode('${strategy.id}')">
-                                        <i class="bi bi-arrows-fullscreen"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="code-content" id="code-${strategy.id}">
-                                <pre><code>${strategy.code || '# 暂无代码'}</code></pre>
-                            </div>
-                        </div>
+        // 创建临时容器并设置HTML
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = filledHTML;
 
-                        <!-- 文字讲解 -->
-                        <div class="explanation-container">
-                            <div class="explanation-title">
-                                <i class="bi bi-info-circle"></i>
-                                <span>策略详解</span>
-                            </div>
-                            <div class="explanation-content">
-                                ${strategy.detail ? renderMarkdown(strategy.detail) : '<p>暂无详细说明</p>'}
-                            </div>
-                        </div>
+        // 填充数据
+        const strategyPanel = tempContainer.querySelector('.strategy-panel');
+        strategyPanel.id = `strategy-${strategy.id}`;
+        strategyPanel.classList.add('active'); // 添加active类使面板显示
 
-                        <!-- 结果展示 -->
-                        <div class="result-container">
-                            <div class="result-title">
-                                <i class="bi bi-graph-up"></i>
-                                <span>策略回测结果</span>
-                            </div>
+        tempContainer.querySelector('.strategy-icon').className = `bi ${strategy.icon || 'bi-cpu'}`;
+        tempContainer.querySelector('.strategy-name').textContent = strategy.name;
+        tempContainer.querySelector('.strategy-introduction').textContent = strategy.introduction || '暂无简介';
+        tempContainer.querySelector('.strategy-difficulty').textContent = strategy.difficulty || '未知';
+        tempContainer.querySelector('.strategy-risk-level').textContent = strategy.risk_level || '未知';
+        tempContainer.querySelector('.strategy-holding-period').textContent = strategy.holding_period || '未知';
+        tempContainer.querySelector('.strategy-code').textContent = strategy.code || '# 暂无代码';
+        tempContainer.querySelector('.strategy-detail').innerHTML = strategy.detail ? renderMarkdown(strategy.detail) : '<p>暂无详细说明</p>';
+        tempContainer.querySelector('.strategy-expected-return').textContent = strategy.expected_return ? (strategy.expected_return * 100).toFixed(1) + '%' : '未知';
+        tempContainer.querySelector('.strategy-sharpe-ratio').textContent = strategy.sharpe_ratio ? strategy.sharpe_ratio.toFixed(2) : '未知';
+        tempContainer.querySelector('.strategy-max-drawdown').textContent = strategy.max_drawdown ? (strategy.max_drawdown * 100).toFixed(1) + '%' : '未知';
+        tempContainer.querySelector('.strategy-win-rate').textContent = strategy.win_rate ? (strategy.win_rate * 100).toFixed(0) + '%' : '未知';
+        tempContainer.querySelector('.strategy-version').textContent = strategy.version || '未知';
+        tempContainer.querySelector('.strategy-created-at').textContent = formatDate(strategy.created_at);
+        tempContainer.querySelector('.strategy-published-at').textContent = formatDate(strategy.published_at);
+        tempContainer.querySelector('.strategy-view-count').textContent = strategy.view_count || 0;
+        tempContainer.querySelector('.strategy-like-count').textContent = strategy.like_count || 0;
 
-                            <!-- 结果图片 -->
-                            ${strategy.result_pic && strategy.result_pic.length > 0 ?
-            strategy.result_pic.map(pic => `<img src="${pic}" alt="策略回测结果" class="result-image">`).join('') :
-            '<img src="https://picsum.photos/seed/strategy-' + strategy.id + '/800/400.jpg" alt="策略回测结果" class="result-image">'
+        // 设置状态标签
+        const statusContainer = tempContainer.querySelector('.strategy-status');
+        statusContainer.innerHTML = '';
+        if (strategy.publish) {
+            const publishBadge = document.createElement('span');
+            publishBadge.className = 'badge bg-success';
+            publishBadge.textContent = '已发布';
+            statusContainer.appendChild(publishBadge);
+        } else {
+            const publishBadge = document.createElement('span');
+            publishBadge.className = 'badge bg-secondary';
+            publishBadge.textContent = '未发布';
+            statusContainer.appendChild(publishBadge);
         }
 
-                            <!-- 结果数据 -->
-                            <div class="result-stats">
-                                <div class="stat-card">
-                                    <div class="stat-value">${strategy.expected_return ? (strategy.expected_return * 100).toFixed(1) + '%' : '未知'}</div>
-                                    <div class="stat-label">预期收益率</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value">${strategy.sharpe_ratio ? strategy.sharpe_ratio.toFixed(2) : '未知'}</div>
-                                    <div class="stat-label">夏普比率</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value">${strategy.max_drawdown ? (strategy.max_drawdown * 100).toFixed(1) + '%' : '未知'}</div>
-                                    <div class="stat-label">最大回撤</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-value">${strategy.win_rate ? (strategy.win_rate * 100).toFixed(0) + '%' : '未知'}</div>
-                                    <div class="stat-label">胜率</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 策略信息 -->
-                        <div class="result-container">
-                            <div class="result-title">
-                                <i class="bi bi-info-circle"></i>
-                                <span>策略信息</span>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <table class="table table-borderless">
-                                        <tr>
-                                            <td class="text-muted">版本</td>
-                                            <td>${strategy.version || '未知'}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">创建时间</td>
-                                            <td>${formatDate(strategy.created_at)}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">发布时间</td>
-                                            <td>${formatDate(strategy.published_at)}</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-6">
-                                    <table class="table table-borderless">
-                                        <tr>
-                                            <td class="text-muted">浏览次数</td>
-                                            <td>${strategy.view_count || 0}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">点赞次数</td>
-                                            <td>${strategy.like_count || 0}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-muted">状态</td>
-                                            <td>
-                                                ${strategy.publish ? '<span class="badge bg-success">已发布</span>' : '<span class="badge bg-secondary">未发布</span>'}
-                                                ${strategy.review ? '<span class="badge bg-info ms-1">已审核</span>' : '<span class="badge bg-warning ms-1">未审核</span>'}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- 标签 -->
-                            ${strategy.tags && strategy.tags.length > 0 ?
-            `<div class="mt-3">
-                                    <span class="text-muted">标签：</span>
-                                    ${strategy.tags.map(tag => `<span class="badge bg-light text-dark me-1">${tag}</span>`).join('')}
-                                </div>` : ''
+        if (strategy.review) {
+            const reviewBadge = document.createElement('span');
+            reviewBadge.className = 'badge bg-info ms-1';
+            reviewBadge.textContent = '已审核';
+            statusContainer.appendChild(reviewBadge);
+        } else {
+            const reviewBadge = document.createElement('span');
+            reviewBadge.className = 'badge bg-warning ms-1';
+            reviewBadge.textContent = '未审核';
+            statusContainer.appendChild(reviewBadge);
         }
-                        </div>
 
-                        <!-- 评论区 -->
-                        <div class="comments-container">
-                            <div class="comments-title">
-                                <i class="bi bi-chat-dots"></i>
-                                <span>策略讨论</span>
-                            </div>
+        // 设置结果图片
+        const resultImagesContainer = tempContainer.querySelector('.result-images');
+        if (strategy.result_pic && strategy.result_pic.length > 0) {
+            strategy.result_pic.forEach(pic => {
+                const img = document.createElement('img');
+                img.src = pic;
+                img.alt = '策略回测结果';
+                img.className = 'result-image';
+                resultImagesContainer.appendChild(img);
+            });
+        } else {
+            const img = document.createElement('img');
+            img.src = `https://picsum.photos/seed/strategy-${strategy.id}/800/400.jpg`;
+            img.alt = '策略回测结果';
+            img.className = 'result-image';
+            resultImagesContainer.appendChild(img);
+        }
 
-                            <div class="comment-form">
-                                <textarea class="comment-input" id="comment-input-${strategy.id}" placeholder="分享您对${strategy.name}的看法..."></textarea>
-                                <button class="comment-submit" onclick="submitComment(${strategy.id})">发表评论</button>
-                            </div>
+        // 设置标签
+        const tagsContainer = tempContainer.querySelector('.strategy-tags > div');
+        if (strategy.tags && strategy.tags.length > 0) {
+            strategy.tags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-light text-dark';
+                badge.textContent = tag;
+                tagsContainer.appendChild(badge);
+            });
+        } else {
+            tagsContainer.parentElement.style.display = 'none';
+        }
 
-                            <div class="comment-list" id="comment-list-${strategy.id}">
-                                <!-- 评论将通过JavaScript动态加载 -->
-                                <div class="text-center py-3">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span class="visually-hidden">加载中...</span>
-                                    </div>
-                                    <p class="mt-2 small">正在加载评论...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        // 清空内容容器并添加新内容
+        contentContainer.innerHTML = '';
+        contentContainer.appendChild(tempContainer.firstElementChild);
+        // 初始化代码高亮
+        if (typeof Prism !== 'undefined') {
+            Prism.highlightAll();
+        }
+        // 添加事件监听器
+        addEventListeners(strategy.id);
 
-        // 加载评论
+        // 加载评论 - 取消注释这行
         loadComments(strategy.id);
+    }
+
+    // 添加事件监听器
+    function addEventListeners(strategyId) {
+        // 复制代码按钮
+        const copyBtn = document.querySelector(`[data-action="copy"][data-target="code-${strategyId}"]`);
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function () {
+                copyCode(strategyId);
+            });
+        }
+
+        // 全屏查看代码按钮
+        const fullscreenBtn = document.querySelector(`[data-action="fullscreen"][data-target="code-${strategyId}"]`);
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', function () {
+                fullscreenCode(strategyId);
+            });
+        }
+
+        // 提交评论按钮
+        const commentSubmitBtn = document.querySelector(`[data-comment-submit="${strategyId}"]`);
+        if (commentSubmitBtn) {
+            commentSubmitBtn.addEventListener('click', function () {
+                submitComment(strategyId);
+            });
+        }
     }
 
     // 简单的Markdown渲染函数
@@ -1216,7 +1356,7 @@
 
     // 提交评论
     function submitComment(strategyId) {
-        const commentInput = document.getElementById(`comment-input-${strategyId}`);
+        const commentInput = document.querySelector(`[data-comment-input="${strategyId}"]`);
         if (!commentInput) return;
 
         const commentText = commentInput.value.trim();
