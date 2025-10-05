@@ -447,6 +447,8 @@ class NewMarketScheduler:
             if not self.running:
                 break
             await self.update_eastmoney_news()
+            await asyncio.sleep(5)
+            await self.update_global_calendar()
             if self._shutdown_after_force_once():
                 break
 

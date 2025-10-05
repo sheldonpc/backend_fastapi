@@ -9,7 +9,8 @@ from fastapi import Request
 
 from app.deps import optional_auth_cookie
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
-    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData, Article2
+    StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData, Article2, \
+    Strategy
 from app.core.templates import templates
 import markdown
 
@@ -570,10 +571,12 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
     }
 
     articles = []
+    pen_name = ""
     response = await Article2.all().order_by("-published_at").limit(10).prefetch_related("tags", "author")
     for article in response:
         if article.author:
             author = article.author.username
+            pen_name = article.author.pen_name
             print(author)
         else:
             author = "未知作者"
@@ -582,10 +585,11 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
             "title": article.title,
             "excerpt": article.summary,
             "author": author,
+            "pen_name": pen_name,
             "publish_time": article.published_at.strftime("%Y-%m-%d %H:%M:%S"),
             "views": article.views,
             "tags": [tag.name for tag in article.tags],
-            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
         })
 
     return templates.TemplateResponse("public/article.html", {
@@ -791,9 +795,22 @@ async def article_detail_page(request: Request, article_id: int, current_user=De
         "current_user": current_user
     })
 
+
 @router.get("/strategy")
 async def strategy(request: Request):
     """
     策略页面
     """
-    return templates.TemplateResponse("public/strategy.html", {"request": request})
+    return templates.TemplateResponse(
+        "public/strategy.html", {
+            "request": request
+        })
+
+
+@router.get("/strategy_data")
+async def strategy_data(request: Request):
+    """
+    策略数据
+    """
+    results = await Strategy.all()
+    return {"message": "策略数据获取成功", "data": results}

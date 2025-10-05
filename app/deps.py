@@ -77,6 +77,16 @@ async def get_current_admin(current_user=Depends(get_current_user)):
         )
     return current_user
 
+async def get_current_registered_user(current_user=Depends(get_current_user)):
+    """API注册用户验证"""
+    if current_user.role == "admin" or current_user.role == "registered":
+        return current_user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+
 async def require_admin_cookie(current_user=Depends(require_auth_cookie)):
     """页面管理员验证"""
     if current_user.role != "admin":

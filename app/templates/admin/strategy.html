@@ -443,6 +443,8 @@
                                 <option value="">请选择组别</option>
                                 <option value="趋势类策略">趋势类策略</option>
                                 <option value="价值类策略">价值类策略</option>
+                                <option value="成长类策略">成长类策略</option>
+                                <option value="其他类策略">其他类策略</option>
                             </select>
                         </div>
                     </div>
@@ -615,6 +617,7 @@
     });
 
     // 加载策略列表
+    // 加载策略列表
     async function loadStrategies() {
         const token = localStorage.getItem("access_token");
         if (!token) {
@@ -624,22 +627,23 @@
         }
 
         try {
-            const res = await fetch("/admin/api/strategy", {
+            const res = await fetch("/admin/api/strategies", {
                 headers: {"Authorization": "Bearer " + token}
             });
 
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
             const data = await res.json();
-            strategies = data.items || [];
+            console.log("API返回的数据:", data); // 添加调试日志
+            strategies = data || []; // 直接使用返回的数据，而不是data.items
 
             renderStrategiesTable();
 
         } catch (err) {
             console.error("加载策略失败:", err);
             document.getElementById("strategiesTableBody").innerHTML = `
-            <tr><td colspan="8" class="text-center text-danger">加载失败，请重试</td></tr>
-        `;
+        <tr><td colspan="8" class="text-center text-danger">加载失败，请重试</td></tr>
+    `;
         }
     }
 
@@ -652,9 +656,6 @@
                 <td colspan="8" class="empty-state">
                     <i class="bi bi-inbox"></i>
                     <div>暂无策略数据</div>
-                    <button class="btn btn-primary mt-2" onclick="createNewStrategy()">
-                        <i class="bi bi-plus-circle me-2"></i>新增策略
-                    </button>
                 </td>
             </tr>
             `;
@@ -736,13 +737,14 @@
     }
 
     // 查看策略详情
+    // 查看策略详情
     function viewStrategy(strategyId) {
         const strategy = strategies.find(s => s.id === strategyId);
         if (!strategy) return;
 
         // 填充基本信息
         document.getElementById("detail-name").textContent = strategy.name || '-';
-        document.getElementById("detail-group").textContent = strategy.group_name || '-';
+        document.getElementById("detail-group").textContent = strategy.group_name || '-'; // 确保使用正确的字段名
         document.getElementById("detail-intro").textContent = strategy.introduction || '-';
         document.getElementById("detail-difficulty").textContent = strategy.difficulty || '-';
         document.getElementById("detail-risk").textContent = strategy.risk_level || '-';
@@ -991,16 +993,21 @@
     }
 
     // 工具函数
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     function formatDate(dateStr) {
         if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return isNaN(date) ? '' : date.toLocaleString('zh-CN', {
+
+        // 处理ISO格式日期字符串
+        let date;
+        try {
+            date = new Date(dateStr);
+        } catch (e) {
+            console.error("日期格式错误:", e);
+            return '';
+        }
+
+        if (isNaN(date)) return '';
+
+        return date.toLocaleString('zh-CN', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',

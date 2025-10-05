@@ -27,7 +27,7 @@ async def start_cache_warmup():
         _background_task = asyncio.create_task(_warm_homepage_cache())
         logger.info("✅ 启动首页缓存预热任务")
 
-def stop_cache_warmup():
+async def stop_cache_warmup():
     global _background_task
     if _background_task and not _background_task.done():
         _background_task.cancel()

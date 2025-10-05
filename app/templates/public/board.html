@@ -19,236 +19,121 @@
         }
     }
 
-    /* Tab 导航优化 */
-    #rankingTabs .nav-link {
-        font-weight: 500;
-        padding: 0.6rem 1.2rem;
-        border: none;
-        color: #6c757d;
-        transition: all 0.25s ease;
+    /* 隐藏原有的Tab导航 */
+    #rankingTabs {
+        display: none;
     }
 
-    #rankingTabs .nav-link:hover {
-        color: #0d6efd;
-        background-color: rgba(13, 110, 253, 0.04);
-        border-radius: 6px;
-    }
-
-    #rankingTabs .nav-link.active {
-        color: #0d6efd;
-        background-color: rgba(13, 110, 253, 0.1);
-        border-radius: 6px;
-        box-shadow: inset 0 -2px 0 #0d6efd;
-    }
-
-    /* 周期/池按钮组 */
-    .period-btn, .zt-pool-btn {
-        border: 1px solid #dee2e6;
+    /* 选项卡容器样式 - 单行布局 */
+    .ranking-tabs-container {
+        margin-bottom: 1.5rem;
         background-color: #f8f9fa;
-        color: #495057;
-        font-size: 0.875rem;
-        padding: 0.35rem 0.75rem;
-        transition: all 0.2s ease;
-        border-radius: 6px;
-    }
-
-    .period-btn:hover, .zt-pool-btn:hover {
-        background-color: #e9ecef;
-        color: #0d6efd;
-    }
-
-    .period-btn.active, .zt-pool-btn.active {
-        background-color: #0d6efd;
-        color: white;
-        border-color: #0d6efd;
-        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
-    }
-
-    /* 表格优化 */
-    .table-responsive {
         border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    table.table {
-        margin-bottom: 0;
-    }
-
-    table.table thead th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-        color: #495057;
         padding: 0.75rem 1rem;
-        border-bottom: 2px solid #e9ecef;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-    table.table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    table.table tbody tr:hover {
-        background-color: #f1f5ff !important;
-    }
-
-    table.table td {
-        padding: 0.7rem 1rem;
-        vertical-align: middle;
-    }
-
-    /* 加载状态 */
-    .text-center.py-3 {
-        padding: 1.5rem !important;
-        color: #6c757d;
-        font-size: 0.95rem;
-    }
-
-    .spinner-border-sm {
-        width: 1rem;
-        height: 1rem;
-        margin-right: 0.5rem;
-    }
-
-    /* Tab 内容切换动画 */
-    .tab-content {
-        position: relative;
-    }
-
-    .tab-pane {
-        opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .tab-pane.active {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .tab-pane.show {
-        display: block !important;
-    }
-
-    /* 按钮组间距优化 */
-    .d-flex.gap-2 {
+    /* 选项卡网格 - 单行布局 */
+    .ranking-tabs-grid {
+        display: flex;
         flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
     }
 
-    /* 响应式优化 */
-    @media (max-width: 768px) {
-        .container.py-4 {
-            padding-top: 1rem !important;
-            padding-bottom: 1rem !important;
-        }
-
-        h2.mb-4 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        #rankingTabs .nav-link {
-            padding: 0.5rem 0.8rem;
-            font-size: 0.9rem;
-        }
-    }
-
-    .industry-content,
-    .stock-content,
-    .concept-content,
-    .lhb-content,
-    .hot-content,
-    .zt-content {
-        min-height: 240px; /* 根据你的表格行数调整，建议 200~300px */
-        position: relative;
-    }
-
-    /* 加载状态居中且不改变布局 */
-    .industry-content > div.text-center,
-    .stock-content > div.text-center,
-    .concept-content > div.text-center,
-    .lhb-content > div.text-center,
-    .hot-content > div.text-center,
-    .zt-content > div.text-center {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100%;
-        text-align: center;
-        padding: 0;
-    }
-
-    /* 表格固定布局，防止列宽跳动 */
-    .table-responsive table {
-        table-layout: fixed;
-        width: 100%;
-    }
-
-    .table-responsive th,
-    .table-responsive td {
-        word-wrap: break-word;
-        white-space: normal;
-        overflow: hidden;
-    }
-
-    .tab-content {
-        position: relative;
-        min-height: 500px; /* 设置固定最小高度，防止高度突变 */
-    }
-
-    .tab-pane {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateX(20px);
-        transition: all 0.3s ease-in-out;
-        z-index: 1;
-    }
-
-    .tab-pane.active {
-        position: relative;
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(0);
-        z-index: 2;
-    }
-
-    /* 确保只有一个pane可见 */
-    .tab-pane:not(.active) {
-        display: none !important;
-    }
-
-    .tab-pane.active.show {
-        display: block !important;
-    }
-
-    /* Tab 导航优化 */
-    #rankingTabs .nav-link {
+    /* 选项卡卡片样式 */
+    .ranking-tab {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
         font-weight: 500;
-        padding: 0.6rem 1.2rem;
-        border: none;
-        color: #6c757d;
-        transition: all 0.25s ease;
+        color: #6b7280;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
     }
 
-    #rankingTabs .nav-link:hover {
-        color: #0d6efd;
-        background-color: rgba(13, 110, 253, 0.04);
-        border-radius: 6px;
+    /* 市场数据类选项卡样式 */
+    .ranking-tab[data-tab="industry"],
+    .ranking-tab[data-tab="stock"],
+    .ranking-tab[data-tab="concept"],
+    .ranking-tab[data-tab="hot"] {
+        background-color: rgba(59, 130, 246, 0.1); /* 蓝色背景 */
+        border-color: rgba(59, 130, 246, 0.3);
     }
 
-    #rankingTabs .nav-link.active {
-        color: #0d6efd;
-        background-color: rgba(13, 110, 253, 0.1);
-        border-radius: 6px;
-        box-shadow: inset 0 -2px 0 #0d6efd;
+    /* 榜单类选项卡样式 */
+    .ranking-tab[data-tab="lhb"],
+    .ranking-tab[data-tab="zt"],
+    .ranking-tab[data-tab="hotup"],
+    .ranking-tab[data-tab="hotsearch"] {
+        background-color: rgba(16, 185, 129, 0.1); /* 绿色背景 */
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .ranking-tab:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 市场数据类选项卡悬停效果 */
+    .ranking-tab[data-tab="industry"]:hover,
+    .ranking-tab[data-tab="stock"]:hover,
+    .ranking-tab[data-tab="concept"]:hover,
+    .ranking-tab[data-tab="hot"]:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    /* 榜单类选项卡悬停效果 */
+    .ranking-tab[data-tab="lhb"]:hover,
+    .ranking-tab[data-tab="zt"]:hover,
+    .ranking-tab[data-tab="hotup"]:hover,
+    .ranking-tab[data-tab="hotsearch"]:hover {
+        border-color: #10b981;
+        color: #10b981;
+    }
+
+    /* 市场数据类选项卡激活状态 */
+    .ranking-tab[data-tab="industry"].active,
+    .ranking-tab[data-tab="stock"].active,
+    .ranking-tab[data-tab="concept"].active,
+    .ranking-tab[data-tab="hot"].active {
+        background: linear-gradient(to right, #3b82f6, #2563eb);
+        color: white;
+        border-color: #3b82f6;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+    }
+
+    /* 榜单类选项卡激活状态 */
+    .ranking-tab[data-tab="lhb"].active,
+    .ranking-tab[data-tab="zt"].active,
+    .ranking-tab[data-tab="hotup"].active,
+    .ranking-tab[data-tab="hotsearch"].active {
+        background: linear-gradient(to right, #10b981, #059669);
+        color: white;
+        border-color: #10b981;
+        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+    }
+
+    .ranking-tab i {
+        font-size: 0.9rem;
+    }
+
+    /* 分隔符样式 */
+    .ranking-separator {
+        width: 1px;
+        height: 24px;
+        background-color: #e2e8f0;
+        margin: 0 0.5rem;
     }
 
     /* 周期/池按钮组 */
-    .period-btn, .zt-pool-btn {
+    .period-btn, .zt-pool-btn, .market-btn {
         border: 1px solid #dee2e6;
         background-color: #f8f9fa;
         color: #495057;
@@ -258,12 +143,12 @@
         border-radius: 6px;
     }
 
-    .period-btn:hover, .zt-pool-btn:hover {
+    .period-btn:hover, .zt-pool-btn:hover, .market-btn:hover {
         background-color: #e9ecef;
         color: #0d6efd;
     }
 
-    .period-btn.active, .zt-pool-btn.active {
+    .period-btn.active, .zt-pool-btn.active, .market-btn.active {
         background-color: #0d6efd;
         color: white;
         border-color: #0d6efd;
@@ -279,7 +164,7 @@
 
     table.table {
         margin-bottom: 0;
-        table-layout: fixed; /* 固定表格布局，防止列宽跳动 */
+        table-layout: fixed;
         width: 100%;
     }
 
@@ -313,8 +198,10 @@
     .concept-content,
     .lhb-content,
     .hot-content,
-    .zt-content {
-        min-height: 400px; /* 统一最小高度 */
+    .zt-content,
+    .hotup-content,
+    .hotsearch-content {
+        min-height: 400px;
         position: relative;
     }
 
@@ -337,7 +224,9 @@
     .concept-content > div.text-center,
     .lhb-content > div.text-center,
     .hot-content > div.text-center,
-    .zt-content > div.text-center {
+    .zt-content > div.text-center,
+    .hotup-content > div.text-center,
+    .hotsearch-content > div.text-center {
         position: absolute;
         top: 50%;
         left: 50%;
@@ -352,80 +241,30 @@
         flex-wrap: wrap;
     }
 
-    /* 响应式优化 */
-    @media (max-width: 768px) {
-        .container.py-4 {
-            padding-top: 1rem !important;
-            padding-bottom: 1rem !important;
-        }
-
-        h2.mb-4 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        #rankingTabs .nav-link {
-            padding: 0.5rem 0.8rem;
-            font-size: 0.9rem;
-        }
-
-        .tab-content {
-            min-height: 400px; /* 移动端适当减小高度 */
-        }
-
-        .industry-content,
-        .stock-content,
-        .concept-content,
-        .lhb-content,
-        .hot-content,
-        .zt-content {
-            min-height: 300px;
-        }
+    /* Tab 内容切换动画 */
+    .tab-content {
+        position: relative;
+        min-height: 500px;
     }
 
-    /* 列宽优化 - 根据内容调整 */
-    table.table th:nth-child(1), table.table td:nth-child(1) {
-        width: 8%;
+    .tab-pane {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
     }
 
-    /* 排名 */
-    table.table th:nth-child(2), table.table td:nth-child(2) {
-        width: 12%;
+    .tab-pane.active {
+        display: block;
+        opacity: 1;
     }
 
-    /* 代码 */
-    table.table th:nth-child(3), table.table td:nth-child(3) {
-        width: 15%;
+    /* 确保只有一个pane可见 */
+    .tab-pane {
+        display: none;
     }
 
-    /* 名称 */
-    table.table th:nth-child(4), table.table td:nth-child(4) {
-        width: 10%;
-    }
-
-    /* 价格/指数 */
-    table.table th:nth-child(5), table.table td:nth-child(5) {
-        width: 10%;
-    }
-
-    /* 涨跌幅 */
-    table.table th:nth-child(6), table.table td:nth-child(6) {
-        width: 12%;
-    }
-
-    /* 净额 */
-    table.table th:nth-child(7), table.table td:nth-child(7) {
-        width: 12%;
-    }
-
-    /* 流入 */
-    table.table th:nth-child(8), table.table td:nth-child(8) {
-        width: 10%;
-    }
-
-    /* 流出/换手 */
-    table.table th:nth-child(9), table.table td:nth-child(9) {
-        width: 11%;
+    .tab-pane.active {
+        display: block;
     }
 
     /* 排序表头优化 */
@@ -445,7 +284,83 @@
         opacity: 0.8;
     }
 
-    /* 其他 */
+    /* 响应式优化 */
+    @media (max-width: 768px) {
+        .container.py-4 {
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+
+        h2.mb-4 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ranking-tabs-container {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .ranking-tab {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .ranking-tab i {
+            font-size: 0.8rem;
+        }
+
+        .tab-content {
+            min-height: 400px;
+        }
+
+        .industry-content,
+        .stock-content,
+        .concept-content,
+        .lhb-content,
+        .hot-content,
+        .zt-content,
+        .hotup-content,
+        .hotsearch-content {
+            min-height: 300px;
+        }
+    }
+
+    /* 列宽优化 */
+    table.table th:nth-child(1), table.table td:nth-child(1) {
+        width: 8%;
+    }
+
+    table.table th:nth-child(2), table.table td:nth-child(2) {
+        width: 12%;
+    }
+
+    table.table th:nth-child(3), table.table td:nth-child(3) {
+        width: 15%;
+    }
+
+    table.table th:nth-child(4), table.table td:nth-child(4) {
+        width: 10%;
+    }
+
+    table.table th:nth-child(5), table.table td:nth-child(5) {
+        width: 10%;
+    }
+
+    table.table th:nth-child(6), table.table td:nth-child(6) {
+        width: 12%;
+    }
+
+    table.table th:nth-child(7), table.table td:nth-child(7) {
+        width: 12%;
+    }
+
+    table.table th:nth-child(8), table.table td:nth-child(8) {
+        width: 10%;
+    }
+
+    table.table th:nth-child(9), table.table td:nth-child(9) {
+        width: 11%;
+    }
 </style>
 {% endblock %}
 
@@ -453,51 +368,49 @@
 <div class="container py-4 fade-in">
     <h2 class="mb-4">📊 榜单中心</h2>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs" id="rankingTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="industry-tab" data-bs-toggle="tab" data-bs-target="#industry"
-                    type="button" role="tab">行业
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="stock-tab" data-bs-toggle="tab" data-bs-target="#stock" type="button"
-                    role="tab">个股
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="concept-tab" data-bs-toggle="tab" data-bs-target="#concept" type="button"
-                    role="tab">概念
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="lhb-tab" data-bs-toggle="tab" data-bs-target="#lhb" type="button" role="tab">
-                龙虎榜
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="hot-tab" data-bs-toggle="tab" data-bs-target="#hot" type="button" role="tab">
-                热门股
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="zt-tab" data-bs-toggle="tab" data-bs-target="#zt" type="button" role="tab">
-                涨停股池
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="hotup-tab" data-bs-toggle="tab" data-bs-target="#hotup" type="button"
-                    role="tab">
-                飙升榜
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="hotsearch-tab" data-bs-toggle="tab" data-bs-target="#hotsearch" type="button"
-                    role="tab">
-                热搜榜
-            </button>
-        </li>
-    </ul>
+    <!-- 新的选项卡布局 - 单行布局，用背景色区分组别 -->
+    <div class="ranking-tabs-container">
+        <div class="ranking-tabs-grid">
+            <!-- 市场数据类 -->
+            <div class="ranking-tab active" data-tab="industry" data-bs-toggle="tab" data-bs-target="#industry">
+                <i class="bi bi-building"></i>
+                <span>行业</span>
+            </div>
+            <div class="ranking-tab" data-tab="stock" data-bs-toggle="tab" data-bs-target="#stock">
+                <i class="bi bi-graph-up"></i>
+                <span>个股</span>
+            </div>
+            <div class="ranking-tab" data-tab="concept" data-bs-toggle="tab" data-bs-target="#concept">
+                <i class="bi bi-lightbulb"></i>
+                <span>概念</span>
+            </div>
+            <div class="ranking-tab" data-tab="hot" data-bs-toggle="tab" data-bs-target="#hot">
+                <i class="bi bi-fire"></i>
+                <span>热门股</span>
+            </div>
+
+            <!-- 分隔符 -->
+            <div class="ranking-separator"></div>
+
+            <!-- 榜单类 -->
+            <div class="ranking-tab" data-tab="lhb" data-bs-toggle="tab" data-bs-target="#lhb">
+                <i class="bi bi-trophy"></i>
+                <span>龙虎榜</span>
+            </div>
+            <div class="ranking-tab" data-tab="zt" data-bs-toggle="tab" data-bs-target="#zt">
+                <i class="bi bi-arrow-up-circle"></i>
+                <span>涨停股池</span>
+            </div>
+            <div class="ranking-tab" data-tab="hotup" data-bs-toggle="tab" data-bs-target="#hotup">
+                <i class="bi bi-rocket"></i>
+                <span>飙升榜</span>
+            </div>
+            <div class="ranking-tab" data-tab="hotsearch" data-bs-toggle="tab" data-bs-target="#hotsearch">
+                <i class="bi bi-search"></i>
+                <span>热搜榜</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Tab Content -->
     <div class="tab-content mt-3" id="rankingTabContent">
@@ -595,7 +508,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const tabs = document.querySelectorAll('#rankingTabs button[data-bs-toggle="tab"]');
+        // 更新选择器以匹配新的选项卡结构
+        const tabs = document.querySelectorAll('.ranking-tab[data-bs-toggle="tab"]');
         const periodBtns = document.querySelectorAll('.period-btn');
         const ztPoolBtns = document.querySelectorAll('.zt-pool-btn');
         const marketBtns = document.querySelectorAll('.market-btn');
@@ -656,10 +570,27 @@
             }, 50);
         }
 
+        // 替换你现有的tabs.forEach(tab => {...})部分
         tabs.forEach(tab => {
-            tab.addEventListener('shown.bs.tab', function (e) {
-                const target = e.target.getAttribute('data-bs-target');
-                smoothTabSwitch(target);
+            tab.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // 移除所有选项卡的active类
+                tabs.forEach(t => t.classList.remove('active'));
+                // 添加当前选项卡的active类
+                this.classList.add('active');
+
+                // 获取目标面板
+                const target = this.getAttribute('data-bs-target');
+                const targetPane = document.querySelector(target);
+
+                // 隐藏所有面板
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active', 'show');
+                });
+
+                // 显示目标面板
+                targetPane.classList.add('active', 'show');
 
                 const type = target.replace('#', '');
                 const contentEl = document.querySelector(`${target} .${type}-content`);
@@ -982,13 +913,6 @@
             return html;
         }
 
-        // 获取排序图标
-        // function getSortIcon(field) {
-        //     if (currentSort.field === field) {
-        //         return currentSort.direction === 'asc' ? '↑' : '↓';
-        //     }
-        //     return '↕';
-        // }
         function getSortIcon(field) {
             if (currentSort.field === field) {
                 if (currentSort.direction === 'asc') {

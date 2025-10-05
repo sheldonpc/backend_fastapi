@@ -799,6 +799,9 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // 设置初始时间
+        updateTimeDisplay();
+
         const refreshBtn = document.getElementById('refreshNews');
         const refreshToast = document.getElementById('refreshToast');
         let toastTimeout;
@@ -922,5 +925,19 @@
         updateCurrentTime();
     });
 
+    // 添加更新时间显示的函数
+    function updateTimeDisplay() {
+        const updateTimeEl = document.getElementById('updateTime');
+        if (updateTimeEl) {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            updateTimeEl.textContent = timeString;
+        }
+    }
 </script>
 {% endblock %}

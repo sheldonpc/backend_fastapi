@@ -1,4 +1,4 @@
-from typing import Optional, Annotated
+from typing import Optional, Annotated, Dict, Any
 
 from pydantic import BaseModel, EmailStr, constr, Field
 from tortoise.contrib.pydantic import pydantic_model_creator
@@ -278,6 +278,7 @@ class Article2In(BaseModel):
     status: str = Field("draft", max_length=10, description="状态")
     author: str = Field(..., max_length=100, description="作者")
 
+
 class Article2Out(Article):
     """Article2的输出模型，与ArticleOut相同，但保持命名一致性"""
     pass
@@ -296,3 +297,150 @@ class Article2Detail(ArticleDetail):
 class Article2List(ArticleList):
     """Article2的列表模型，与ArticleList相同，但保持命名一致性"""
     pass
+
+
+class ImageResponse(BaseModel):
+    """图片上传响应模型"""
+    url: str = Field(..., description="图片URL")
+    uuid: Optional[str] = None
+    success: bool = Field(True, description="是否成功")
+    message: str = Field("上传成功", description="消息")
+    id: int = Field(None, description="图片ID")
+    filename: Optional[str] = Field(None, description="图片名称")
+
+
+class ImageItem(BaseModel):
+    """图片上传模型"""
+    id: str = Field(..., description="图片ID")
+    uuid: str
+    original_name: str = Field(..., description="图片名称")
+    filename: str
+    url: str
+    file_size: int
+    content_type: str
+    uploaded_at: datetime
+
+
+class ImageListResponse(BaseModel):
+    """图片列表响应模型"""
+    items: List[ImageItem]
+    total: int
+    page: int
+    size: int
+
+
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List, Dict, Any
+
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List, Dict, Any
+
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List, Dict, Any
+
+
+class StrategyCreate(BaseModel):
+    # 必填字段
+    name: str = Field(..., min_length=1, max_length=100, description="策略名称")
+    group_name: str = Field(..., description="策略组别")
+    code: str = Field(..., description="策略代码")
+    detail: str = Field(..., description="策略详细说明")
+
+    # 可选字段
+    icon: Optional[str] = Field(None, description="策略图标")
+    introduction: Optional[str] = Field(None, max_length=200, description="策略简介")
+    difficulty: Optional[str] = Field("初级", description="策略难度")
+    risk_level: Optional[str] = Field("低", description="风险等级")
+    expected_return: Optional[float] = Field(None, ge=-100, le=1000, description="预期收益率(%)")
+    max_drawdown: Optional[float] = Field(None, ge=0, le=100, description="最大回撤(%)")
+    sharpe_ratio: Optional[float] = Field(None, ge=-5, le=10, description="夏普比率")
+    win_rate: Optional[float] = Field(None, ge=0, le=100, description="胜率(%)")
+    holding_period: Optional[str] = Field("短期", description="持仓周期")
+
+    # 列表字段
+    market_conditions: Optional[List[str]] = Field(default_factory=list, description="市场条件")
+    required_indicators: Optional[List[str]] = Field(default_factory=list, description="所需技术指标")
+    tags: Optional[List[str]] = Field(default_factory=list, description="策略标签")
+    # 修改这里：从字典数组改为字符串数组
+    result_pic: Optional[List[str]] = Field(default_factory=list, description="结果图片URL列表")
+    result_text: Optional[Dict[str, Any]] = Field(default_factory=dict, description="结果数据")
+
+    # 控制字段
+    publish: bool = Field(False, description="是否发布")
+    review: bool = Field(False, description="是否需要审核")
+    version: Optional[str] = Field("1.0", description="版本号")
+
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "name": "趋势跟踪策略",
+                "group_name": "趋势类策略",
+                "code": "# 策略代码...",
+                "detail": "策略详细说明...",
+                "icon": "bi-speedometer2",
+                "introduction": "这是一个趋势跟踪策略",
+                "difficulty": "中级",
+                "risk_level": "中",
+                "expected_return": 15.5,
+                "max_drawdown": 20.5,
+                "sharpe_ratio": 1.5,
+                "win_rate": 65.0,
+                "holding_period": "中期",
+                "market_conditions": ["牛市", "震荡市"],
+                "required_indicators": ["MA", "MACD"],
+                "tags": ["趋势", "量化"],
+                # 修改示例：使用字符串数组而不是字典数组
+                "result_pic": ["http://example.com/image1.jpg"],
+                "result_text": {"年化收益率": "18.7%", "最大回撤": "15.2%"},
+                "publish": False,
+                "review": False,
+                "version": "1.0"
+            }
+        }
+
+    @validator('difficulty')
+    def validate_difficulty(cls, v):
+        if v is not None and v not in ['初级', '中级', '高级']:
+            raise ValueError('难度必须是初级、中级或高级')
+        return v
+
+    @validator('risk_level')
+    def validate_risk_level(cls, v):
+        if v is not None and v not in ['低', '中', '高']:
+            raise ValueError('风险等级必须是低、中或高')
+        return v
+
+    @validator('holding_period')
+    def validate_holding_period(cls, v):
+        if v is not None and v not in ['短期', '中期', '长期']:
+            raise ValueError('持仓周期必须是短期、中期或长期')
+        return v
+
+class StrategyResponse(BaseModel):
+    id: int
+    name: str
+    group_name: str  # 确保这里是 group_name 而不是 group
+    icon: Optional[str] = None
+    introduction: Optional[str] = None
+    difficulty: Optional[str] = None
+    risk_level: Optional[str] = None
+    expected_return: Optional[float] = None
+    max_drawdown: Optional[float] = None
+    sharpe_ratio: Optional[float] = None
+    win_rate: Optional[float] = None
+    holding_period: Optional[str] = None
+    market_conditions: Optional[List[str]] = None
+    required_indicators: Optional[List[str]] = None
+    tags: Optional[List[str]] = None
+    # 修改这里：从字典数组改为字符串数组
+    result_pic: Optional[List[str]] = None
+    result_text: Optional[Dict[str, Any]] = None
+    publish: bool = False
+    review: bool = False
+    version: Optional[str] = None
+    created_at: datetime
+    # 如果数据库模型中没有 updated_at，移除这行
+
+    class Config:
+        orm_mode = True

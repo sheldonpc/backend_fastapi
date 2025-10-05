@@ -1990,4 +1990,23 @@ class Strategy(models.Model):
     class Meta:
         table = "strategy"
 
+class ImageModel(models.Model):
+    """图片模型"""
+    id = fields.IntField(pk=True)
+    uuid = fields.UUIDField(description="图片唯一标识")
+    original_name = fields.CharField(max_length=255, description="原始文件名")
+    filename = fields.CharField(max_length=255, description="保存的文件名")
+    file_path = fields.CharField(max_length=255, description="文件保存路径")
+    file_size = fields.IntField(description="文件大小")
+    content_type = fields.CharField(max_length=100, description="文件类型")
+    url = fields.CharField(max_length=500, description="文件URL")
+    uploaded_by = fields.ForeignKeyField("models.User", related_name="image", null=True, description="上传者")
+    uploaded_at = fields.DatetimeField(description="上传时间")
+
+    class Meta:
+        table = "image"
+
+    def __str__(self):
+        return self.original_name
+
 

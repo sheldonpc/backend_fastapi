@@ -536,6 +536,7 @@
             </div>
 
             <!-- 结果数据 -->
+            <!-- 结果数据 -->
             <div class="form-section">
                 <div class="section-title">
                     <i class="fas fa-chart-pie"></i>结果数据
@@ -546,8 +547,14 @@
                         <div class="upload-area" id="result-pics-upload">
                             <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                             <p class="text-muted mb-1">点击或拖拽上传结果图片</p>
-                            <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 2MB</small>
+                            <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 2MB，每次最多上传10张</small>
                             <input type="file" id="result-pics-file" accept="image/*" multiple style="display: none;">
+                        </div>
+                        <div class="mt-2">
+                            <button style="display: None" type="button" class="btn btn-outline-primary"
+                                    id="batch-upload-btn">
+                                <!--                                <i class="fas fa-upload me-1"></i>批量上传-->
+                            </button>
                         </div>
                         <div id="uploaded-pics" class="mt-2 d-flex flex-wrap gap-2"></div>
                     </div>
@@ -651,6 +658,9 @@
 
     // 初始化页面
     document.addEventListener('DOMContentLoaded', function () {
+        // 清空所有表单内容
+        clearAllForms();
+
         initTagInputs();
         initImageUpload();
         initResultData();
@@ -658,6 +668,8 @@
 
         // 初始化字数统计
         updateCharCount();
+        // 添加批量上传按钮事件监听
+        // document.getElementById('batch-upload-btn').addEventListener('click', uploadMultipleImages);
     });
 
     // 初始化编辑器
@@ -698,6 +710,7 @@
             element: document.getElementById('detail-editor'),
             placeholder: '请输入策略的详细说明，支持Markdown语法...',
             autofocus: false,
+            autoDownloadFontAwesome: false, // 禁用自动下载 Font Awesome
             autosave: {
                 enabled: true,
                 uniqueId: 'strategy-detail',
@@ -815,6 +828,7 @@
     function initImageUpload() {
         const uploadArea = document.getElementById('result-pics-upload');
         const fileInput = document.getElementById('result-pics-file');
+        // const batchUploadBtn = document.getElementById('batch-upload-btn');
 
         uploadArea.addEventListener('click', function () {
             fileInput.click();
@@ -842,59 +856,119 @@
                 handleImageUpload(this.files);
             }
         });
+
+        // 添加批量上传按钮事件
+        // batchUploadBtn.addEventListener('click', uploadMultipleImages);
     }
 
     // 处理图片上传
     function handleImageUpload(files) {
+        // 检查文件数量限制
+        if (files.length > 10) {
+            showToast(`每次最多只能上传10张图片，当前选择了${files.length}张`, 'error', 3000);
+            return;
+        }
+
         Array.from(files).forEach(file => {
             if (!file.type.startsWith('image/')) {
-                showToast(`${file.name} 不是图片文件`, 'error');
+                showToast(`${file.name} 不是图片文件`, 'error', 3000);
                 return;
             }
 
             if (file.size > 2 * 1024 * 1024) {
-                showToast(`${file.name} 超过2MB限制`, 'error');
+                showToast(`${file.name} 超过2MB限制`, 'error', 3000);
                 return;
             }
 
-            // 模拟上传到服务器
-            setTimeout(() => {
-                // 模拟服务器返回的URL
-                const imageUrl = `https://picsum.photos/seed/${Date.now()}_${Math.random().toString(36).substring(2, 9)}/800/600.jpg`;
+            // 创建FormData对象用于上传文件
+            const formData = new FormData();
+            formData.append('file', file);
 
-                // 添加到结果图片列表
-                resultPics.push(imageUrl);
-                renderUploadedPics();
+            // 显示上传进度提示
+            showToast(`正在上传 ${file.name}...`, 'info', 3000);
 
-                showToast(`${file.name} 上传成功`, 'success');
-            }, 1000);
+            // 获取认证token
+            const token = localStorage.getItem("access_token");
+
+            // 发送文件到服务器
+            $.ajax({
+                type: "POST",
+                url: "/admin/api/upload/image",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    const xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function (evt) {
+                        if (evt.lengthComputable) {
+                            const percentComplete = evt.loaded / evt.total * 100;
+                            showToast(`上传进度: ${Math.round(percentComplete)}%`, 'info', 3000);
+                        }
+                    }, false);
+                    return xhr;
+                },
+                // 在handleImageUpload函数的success回调中
+                success: function (response) {
+                    if (response.success && response.url) {
+                        // 只保存URL字符串
+                        resultPics.push(response.url);
+                        renderUploadedPics();
+                        showToast(`${file.name} 上传成功`, 'success', 3000);
+                    } else {
+                        showToast(`${file.name} 上传失败: ${response.message || '服务器返回错误'}`, 'error', 3000);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("上传失败:", error);
+                    let errorMessage = `${file.name} 上传失败`;
+
+                    if (xhr.status === 400) {
+                        errorMessage = '请求数据格式错误或超出上传限制';
+                    } else if (xhr.status === 401) {
+                        errorMessage = '您没有权限上传图片';
+                    } else if (xhr.status === 413) {
+                        errorMessage = '文件太大，服务器拒绝接收';
+                    } else if (xhr.status === 500) {
+                        errorMessage = '服务器内部错误，请稍后再试';
+                    }
+
+                    if (xhr.responseJSON && xhr.responseJSON.detail) {
+                        errorMessage = xhr.responseJSON.detail;
+                    }
+
+                    showToast(errorMessage, 'error', 3000);
+                }
+            });
         });
     }
 
-    // 渲染已上传的图片
     function renderUploadedPics() {
         const container = document.getElementById('uploaded-pics');
         container.innerHTML = '';
 
-        resultPics.forEach((url, index) => {
+        resultPics.forEach((pic, index) => {
             const picElement = document.createElement('div');
             picElement.className = 'position-relative';
             picElement.innerHTML = `
-                <img src="${url}" alt="结果图片" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
-                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0"
-                        onclick="removePic(${index})">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
+            <img src="${pic}" alt="结果图片" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                    onclick="removePic(${index})">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
             container.appendChild(picElement);
         });
     }
 
-    // 移除图片
+    // 修改 removePic 函数
     function removePic(index) {
         resultPics.splice(index, 1);
         renderUploadedPics();
     }
+
 
     // 初始化结果数据
     function initResultData() {
@@ -949,46 +1023,214 @@
     }
 
     // 保存草稿
+    // 保存草稿
     function saveDraft() {
-        collectStrategyData();
-        strategyData.publish = false;
+        // 收集策略数据
+        const data = collectStrategyData();
 
-        // 模拟保存到服务器
-        setTimeout(() => {
-            showToast('草稿已保存', 'success');
-        }, 500);
-    }
-
-    // 发布策略
-    function publishStrategy() {
-        collectStrategyData();
-        strategyData.publish = true;
+        // 设置为草稿状态
+        data.publish = false;
 
         // 验证必填字段
-        if (!strategyData.name) {
-            showToast('请输入策略名称', 'error');
+        if (!data.name || data.name.trim() === '') {
+            showToast('请输入策略名称', 'error', 3000);
             return;
         }
 
-        if (!strategyData.group_name) {
-            showToast('请选择策略组别', 'error');
+        // 显示加载提示
+        showToast('正在保存草稿，请稍候...', 'info', 3000);
+
+        // 禁用保存按钮
+        const saveBtn = document.getElementById('save-draft');
+        const originalBtnText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>保存中...';
+
+        // 发送AJAX请求
+        const token = localStorage.getItem("access_token");
+
+        $.ajax({
+            type: "POST",
+            url: "/admin/api/strategies",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify(data),
+            success: function (response) {
+                console.log("草稿保存成功:", response);
+                showToast('草稿已保存', 'success', 3000);
+
+                // 清空表单
+                clearAllForms();
+
+                // 可选：跳转到策略列表页
+                // setTimeout(() => {
+                //     window.location.href = '/admin/strategy';
+                // }, 2000);
+            },
+            error: function (xhr, status, error) {
+                console.error("保存草稿失败:", error);
+                console.error("响应内容:", xhr.responseText);
+
+                let errorMessage = '保存草稿失败';
+
+                if (xhr.status === 422) {
+                    // 处理验证错误
+                    try {
+                        const errorData = JSON.parse(xhr.responseText);
+                        if (errorData.data && Array.isArray(errorData.data)) {
+                            // 提取具体的错误信息
+                            const errorMessages = errorData.data.map(err => {
+                                if (err.type === 'missing') {
+                                    return `缺少必填字段: ${err.loc[err.loc.length - 1]}`;
+                                } else if (err.type === 'less_than_equal') {
+                                    return `${err.loc[err.loc.length - 1]} 值过大，最大值为 ${err.ctx.le}`;
+                                } else if (err.type === 'string_type') {
+                                    return `${err.loc.join('.')} 应为字符串类型`;
+                                } else {
+                                    return err.msg || '未知验证错误';
+                                }
+                            });
+                            errorMessage = errorMessages.join('; ');
+                        } else if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        console.error("无法解析错误响应:", e);
+                    }
+                } else if (xhr.status === 401) {
+                    errorMessage = '您没有权限保存策略';
+                } else if (xhr.status === 500) {
+                    errorMessage = '服务器内部错误，请稍后再试';
+                }
+
+                showToast(errorMessage, 'error', 5000);
+            },
+            complete: function () {
+                // 恢复按钮状态
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnText;
+            }
+        });
+    }
+
+    // 清空所有表单内容的函数
+    function clearAllForms() {
+        // 重置所有变量
+        marketConditions = [];
+        requiredIndicators = [];
+        tags = [];
+        resultPics = [];
+        resultData = {};
+
+        // 重置策略数据对象
+        strategyData = {
+            name: '',
+            group_name: '',
+            icon: '',
+            introduction: '',
+            code: '',
+            detail: '',
+            result_pic: [],
+            result_text: {},
+            difficulty: '初级',
+            risk_level: '低',
+            expected_return: 0,
+            max_drawdown: 0,
+            sharpe_ratio: 0,
+            win_rate: 0,
+            holding_period: '短期',
+            market_conditions: [],
+            required_indicators: [],
+            tags: [],
+            publish: false,
+            review: false
+        };
+
+        // 清空所有输入框和文本区域
+        document.getElementById('strategy-name').value = '';
+        document.getElementById('strategy-group').value = '';
+        document.getElementById('strategy-icon').value = 'bi-speedometer2'; // 设置默认值
+        document.getElementById('strategy-introduction').value = '';
+        document.getElementById('strategy-difficulty').value = '初级'; // 设置默认值
+        document.getElementById('strategy-risk').value = '低'; // 设置默认值
+        document.getElementById('strategy-holding-period').value = '短期'; // 设置默认值
+        document.getElementById('strategy-win-rate').value = '';
+        document.getElementById('strategy-expected-return').value = '';
+        document.getElementById('strategy-max-drawdown').value = '';
+        document.getElementById('strategy-sharpe-ratio').value = '';
+
+        // 清空标签输入框
+        document.querySelectorAll('.tag-input').forEach(input => {
+            input.value = '';
+        });
+
+        // 清空已添加的标签
+        document.querySelectorAll('.tags-input').forEach(container => {
+            const tags = container.querySelectorAll('.tag');
+            tags.forEach(tag => tag.remove());
+        });
+
+        // 清空结果数据输入框
+        document.querySelector('.result-data-key').value = '';
+        document.querySelector('.result-data-value').value = '';
+
+        // 清空结果数据列表
+        document.getElementById('result-data-list').innerHTML = '';
+
+        // 清空已上传的图片
+        document.getElementById('uploaded-pics').innerHTML = '';
+
+        // 重置字数统计
+        document.getElementById('char-count').textContent = '字数：0';
+
+        // 如果编辑器已初始化，清空编辑器内容
+        if (codeEditor) {
+            codeEditor.value('');
+        }
+        if (detailEditor) {
+            detailEditor.value('');
+        }
+    }
+
+    function publishStrategy() {
+        const data = collectStrategyData();
+
+        // 验证必填字段
+        if (!data.name || data.name.trim() === '') {
+            showToast('请输入策略名称', 'error', 3000);
             return;
         }
 
-        if (!strategyData.code || strategyData.code.trim() === '') {
-            showToast('请输入策略代码', 'error');
+        if (!data.group_name || data.group_name.trim() === '') { // 使用 group_name 而不是 group
+            showToast('请选择策略组别', 'error', 3000);
             return;
         }
 
-        if (!strategyData.detail || strategyData.detail.trim() === '') {
-            showToast('请输入策略详细说明', 'error');
+        if (!data.code || data.code.trim() === '') {
+            showToast('请输入策略代码', 'error', 3000);
             return;
         }
 
-        // 延迟显示成功提示，确保加载提示至少显示一段时间
-        showToast('正在发布策略，请稍候...', 'info');
+        if (!data.detail || data.detail.trim() === '') {
+            showToast('请输入策略详细说明', 'error', 3000);
+            return;
+        }
 
-        // 禁用发布按钮，防止重复提交
+        // 验证数值范围
+        if (data.sharpe_ratio > 10) {
+            showToast('夏普比率不能超过10', 'error', 3000);
+            return;
+        }
+
+        // 设置发布标志
+        data.publish = true;
+
+        // 显示加载提示
+        showToast('正在发布策略，请稍候...', 'info', 5000);
+
+        // 禁用发布按钮
         const publishBtn = document.getElementById('publish-strategy');
         const originalBtnText = publishBtn.innerHTML;
         publishBtn.disabled = true;
@@ -1004,69 +1246,94 @@
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json"
             },
-            data: JSON.stringify(strategyData),
+            data: JSON.stringify(data),
             success: function (response) {
                 console.log("策略发布成功:", response);
-                showToast('策略发布成功', 'success');
+                clearAllForms();
+                showToast('策略发布成功', 'success', 3000);
 
-                // 可以在这里添加成功后的操作，如跳转到策略列表页
+                // 跳转到策略列表页
                 setTimeout(() => {
-                    window.location.href = '/ai-strategy';
+                    window.location.href = '/admin';
                 }, 2000);
             },
             error: function (xhr, status, error) {
                 console.error("发布失败:", error);
+                console.error("响应内容:", xhr.responseText);
 
-                // 根据状态码显示不同的错误信息
                 let errorMessage = '策略发布失败';
 
-                if (xhr.status === 400) {
-                    errorMessage = '请求数据格式错误';
+                if (xhr.status === 422) {
+                    // 处理验证错误
+                    try {
+                        const errorData = JSON.parse(xhr.responseText);
+                        if (errorData.data && Array.isArray(errorData.data)) {
+                            // 提取具体的错误信息
+                            const errorMessages = errorData.data.map(err => {
+                                if (err.type === 'missing') {
+                                    return `缺少必填字段: ${err.loc[err.loc.length - 1]}`;
+                                } else if (err.type === 'less_than_equal') {
+                                    return `${err.loc[err.loc.length - 1]} 值过大，最大值为 ${err.ctx.le}`;
+                                } else if (err.type === 'string_type') {
+                                    return `${err.loc.join('.')} 应为字符串类型`;
+                                } else {
+                                    return err.msg || '未知验证错误';
+                                }
+                            });
+                            errorMessage = errorMessages.join('; ');
+                        } else if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        console.error("无法解析错误响应:", e);
+                    }
                 } else if (xhr.status === 401) {
                     errorMessage = '您没有权限发布策略';
                 } else if (xhr.status === 500) {
                     errorMessage = '服务器内部错误，请稍后再试';
                 }
 
-                // 如果服务器返回了具体的错误信息，使用服务器返回的信息
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMessage = xhr.responseJSON.message;
-                }
-
-                showToast(errorMessage, 'error');
+                showToast(errorMessage, 'error', 5000);
             },
             complete: function () {
-                // 请求完成后恢复按钮状态
+                // 恢复按钮状态
                 publishBtn.disabled = false;
                 publishBtn.innerHTML = originalBtnText;
             }
         });
     }
 
-    // 收集策略数据
     function collectStrategyData() {
-        strategyData.name = document.getElementById('strategy-name').value;
-        strategyData.group_name = document.getElementById('strategy-group').value;
-        strategyData.icon = document.getElementById('strategy-icon').value;
-        strategyData.introduction = document.getElementById('strategy-introduction').value;
-        strategyData.code = codeEditor.value();
-        strategyData.detail = detailEditor.value();
-        strategyData.difficulty = document.getElementById('strategy-difficulty').value;
-        strategyData.risk_level = document.getElementById('strategy-risk').value;
-        strategyData.expected_return = parseFloat(document.getElementById('strategy-expected-return').value) || 0;
-        strategyData.max_drawdown = parseFloat(document.getElementById('strategy-max-drawdown').value) || 0;
-        strategyData.sharpe_ratio = parseFloat(document.getElementById('strategy-sharpe-ratio').value) || 0;
-        strategyData.win_rate = parseFloat(document.getElementById('strategy-win-rate').value) || 0;
-        strategyData.holding_period = document.getElementById('strategy-holding-period').value;
-        strategyData.market_conditions = marketConditions;
-        strategyData.required_indicators = requiredIndicators;
-        strategyData.tags = tags;
-        strategyData.result_pic = resultPics;
-        strategyData.result_text = resultData;
+        strategyData = {
+            name: $('#strategy-name').val(),
+            group_name: $('#strategy-group').val(),
+            icon: $('#strategy-icon').val(),
+            introduction: $('#strategy-introduction').val(),
+            code: codeEditor.value(),
+            detail: detailEditor.value(),
+            difficulty: $('#strategy-difficulty').val(),
+            risk_level: $('#strategy-risk').val(),
+            expected_return: parseFloat($('#strategy-expected-return').val()) || 0,
+            max_drawdown: parseFloat($('#strategy-max-drawdown').val()) || 0,
+            sharpe_ratio: parseFloat($('#strategy-sharpe-ratio').val()) || 0,
+            win_rate: parseFloat($('#strategy-win-rate').val()) || 0,
+            holding_period: $('#strategy-holding-period').val(),
+            market_conditions: marketConditions,
+            required_indicators: requiredIndicators,
+            tags: tags,
+            // 直接使用resultPics，因为它已经是字符串数组
+            result_pic: resultPics,
+            result_text: resultData,
+            publish: false,
+            review: false,
+            version: "1.0"
+        };
 
-        console.log('收集的策略数据:', strategyData);
+        console.log("收集的策略数据:", strategyData);
+        return strategyData;
     }
 
+    // 添加消息队列
     // 显示提示
     function showToast(message, type = 'info', duration = 3000) {
         // 获取或创建Toast容器
@@ -1078,15 +1345,6 @@
             toastContainer.style.zIndex = '1050';
             document.body.appendChild(toastContainer);
         }
-
-        // 移除所有现有的Toast
-        const existingToasts = toastContainer.querySelectorAll('.toast');
-        existingToasts.forEach(toast => {
-            toast.classList.add('hide');
-            toast.addEventListener('animationend', function () {
-                toast.remove();
-            }, {once: true});
-        });
 
         // 创建唯一的Toast ID
         const toastId = 'toast-' + Date.now();
@@ -1116,16 +1374,16 @@
 
         // 设置Toast内容
         toastElement.innerHTML = `
-            <div class="toast-header ${headerClass}">
-                ${icon}
-                <strong class="me-auto">系统提示</strong>
-                <small>刚刚</small>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        `;
+        <div class="toast-header ${headerClass}">
+            ${icon}
+            <strong class="me-auto">系统提示</strong>
+            <small>刚刚</small>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            ${message}
+        </div>
+    `;
 
         // 添加到容器
         toastContainer.appendChild(toastElement);
@@ -1140,10 +1398,6 @@
         toast.show();
 
         // 监听隐藏事件
-        toastElement.addEventListener('hide.bs.toast', function () {
-            toastElement.classList.add('hide');
-        });
-
         toastElement.addEventListener('hidden.bs.toast', function () {
             toastElement.remove();
         });

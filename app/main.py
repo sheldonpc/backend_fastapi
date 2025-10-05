@@ -15,7 +15,7 @@ from app.services.scheduler_market_data import NewMarketScheduler
 from app.utils.logger import init_logger, logger
 from app.database import init_db, close_db
 from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
-    financial, market, api_fetch_data, api_index, root, board, strategy
+    financial, market, api_fetch_data, api_index, root, board, strategy, upload, api_strategy
 from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler
 from app.utils.redis_client import cache_set
 from app.utils.warm_up_tasks import start_cache_warmup, stop_cache_warmup
@@ -86,6 +86,7 @@ app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, all_exception_handler)
 
+app.mount("/upload", StaticFiles(directory="upload"), name="upload")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -106,6 +107,8 @@ app.include_router(api_fetch_data.router)
 app.include_router(api_index.router)
 app.include_router(board.router)
 app.include_router(strategy.router)
+app.include_router(upload.router)
+app.include_router(api_strategy.router)
 # deprecated
 # @app.on_event("startup")
 # async def startup():
