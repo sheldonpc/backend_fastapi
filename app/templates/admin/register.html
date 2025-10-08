@@ -520,11 +520,14 @@
                 body: JSON.stringify({email: email})
             });
 
-            if (res.ok) {
-                showSuccess('验证码已发送到您的邮箱');
+            const data = await res.json();
+
+            // 检查响应中的success字段
+            if (data.success) {
+                showSuccess(data.msg || '验证码已发送到您的邮箱');
             } else {
-                const data = await res.json();
-                showError(data.detail || '验证码发送失败');
+                showError(data.msg || '验证码发送失败');
+                // 如果操作失败，重置按钮状态
                 clearInterval(countdownInterval);
                 sendCodeBtn.disabled = false;
                 sendCodeBtn.textContent = '发送验证码';

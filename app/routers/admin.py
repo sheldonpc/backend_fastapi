@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import random
 from app import models
 from app.deps import get_current_admin, get_current_user, require_admin_cookie
+from app.exceptions import PermissionDenied
 from app.models import User, Article, Category, Tag, Article_Pydantic, Category_Pydantic, Tag_Pydantic, Comment, \
     Comment_Pydantic, User_Pydantic
 from app.schemas import UserOut
@@ -32,6 +33,8 @@ async def verify_admin_cookie(current_admin = Depends(require_admin_cookie)):
 
 @router.get("/")
 async def admin_page(request: Request, current_user = Depends(require_admin_cookie)):
+    if not current_user.is_admin:
+        raise PermissionDenied("您没有管理员权限")
     return templates.TemplateResponse("admin/admin.html", {"request": request, "current_user": current_user})
 
 # ———————————————— 模拟统计数据接口 ————————————————

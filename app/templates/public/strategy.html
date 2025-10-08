@@ -671,9 +671,9 @@
                 <span class="update-indicator"></span>
                 当前时间：<span id="updateTime"></span>
             </small>
-            <button class="btn refresh-btn" id="refreshStrategies">
-                <i class="bi bi-arrow-clockwise me-1"></i>刷新
-            </button>
+<!--            <button class="btn refresh-btn" id="refreshStrategies">-->
+<!--                <i class="bi bi-arrow-clockwise me-1"></i>刷新-->
+<!--            </button>-->
         </div>
     </div>
 
@@ -705,9 +705,9 @@
                     <i class="bi strategy-icon"></i>
                     <span class="strategy-name"></span>
                 </h2>
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <p class="card-text text-muted mb-0 strategy-introduction"></p>
-                    <div class="d-flex gap-2">
+                <p class="card-text text-muted mb-3 strategy-introduction"></p>
+                <div class="d-flex justify-content-end mb-4 me-3">
+                    <div class="d-flex gap-3">
                         <span class="badge bg-primary strategy-difficulty"></span>
                         <span class="badge bg-danger strategy-risk-level"></span>
                         <span class="badge bg-success strategy-holding-period"></span>
@@ -827,28 +827,7 @@
                 </div>
 
                 <!-- 评论区 -->
-                <div class="comments-container">
-                    <div class="comments-title">
-                        <i class="bi bi-chat-dots"></i>
-                        <span>策略讨论</span>
-                    </div>
 
-                    <div class="comment-form">
-                        <textarea class="comment-input" data-comment-input="__STRATEGY_ID__"
-                                  placeholder="分享您对__STRATEGY_NAME__的看法..."></textarea>
-                        <button class="comment-submit" data-comment-submit="__STRATEGY_ID__">发表评论</button>
-                    </div>
-
-                    <div class="comment-list" id="comment-list-__STRATEGY_ID__">
-                        <!-- 评论将通过JavaScript动态加载 -->
-                        <div class="text-center py-3">
-                            <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                <span class="visually-hidden">加载中...</span>
-                            </div>
-                            <p class="mt-2 small">正在加载评论...</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1076,9 +1055,9 @@
         tempContainer.querySelector('.strategy-holding-period').textContent = strategy.holding_period || '未知';
         tempContainer.querySelector('.strategy-code').textContent = strategy.code || '# 暂无代码';
         tempContainer.querySelector('.strategy-detail').innerHTML = strategy.detail ? renderMarkdown(strategy.detail) : '<p>暂无详细说明</p>';
-        tempContainer.querySelector('.strategy-expected-return').textContent = strategy.expected_return ? (strategy.expected_return * 100).toFixed(1) + '%' : '未知';
+        tempContainer.querySelector('.strategy-expected-return').textContent = strategy.expected_return ? (strategy.expected_return * 100).toFixed(2) + '%' : '未知';
         tempContainer.querySelector('.strategy-sharpe-ratio').textContent = strategy.sharpe_ratio ? strategy.sharpe_ratio.toFixed(2) : '未知';
-        tempContainer.querySelector('.strategy-max-drawdown').textContent = strategy.max_drawdown ? (strategy.max_drawdown * 100).toFixed(1) + '%' : '未知';
+        tempContainer.querySelector('.strategy-max-drawdown').textContent = strategy.max_drawdown ? (strategy.max_drawdown * 100).toFixed(2) + '%' : '未知';
         tempContainer.querySelector('.strategy-win-rate').textContent = strategy.win_rate ? (strategy.win_rate * 100).toFixed(0) + '%' : '未知';
         tempContainer.querySelector('.strategy-version').textContent = strategy.version || '未知';
         tempContainer.querySelector('.strategy-created-at').textContent = formatDate(strategy.created_at);
@@ -1155,7 +1134,7 @@
         addEventListeners(strategy.id);
 
         // 加载评论 - 取消注释这行
-        loadComments(strategy.id);
+        // loadComments(strategy.id);
     }
 
     // 添加事件监听器

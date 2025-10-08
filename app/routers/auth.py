@@ -38,8 +38,6 @@ async def register(user: schemas.UserCreate, response: Response):
     if exists:
         raise HTTPException(status_code=400, detail="Email already exists")
 
-    print(user.email, user.password, user.username)
-
     user_obj = await models.User.create(
         email=user.email,
         username=user.username,
@@ -107,10 +105,20 @@ async def reset_password(email: str, new_password: str, code: str):
 @router.post("/send-code")
 async def send_code(request: schemas.SendCodeRequest):
     email = request.email
+
+    # 检查邮箱是否已被占用
+    user = await models.User.filter(email=email).first()
+    if user:
+        # 不再抛出异常，而是直接返回一个表示失败的JSON对象
+        return {"success": False, "msg": "邮箱已被占用，请更换"}
+
+    # 如果邮箱未被占用，则继续执行发送验证码的逻辑
     code = generate_verification_code()
     await set_code(str(email), code)
     asyncio.create_task(send_email(to_email=email, subject="注册验证码", code=code))
-    return {"msg": "验证码已发送，请检查邮箱"}
+
+    # 返回一个表示成功的JSON对象
+    return {"success": True, "msg": "验证码已发送，请检查邮箱"}
 
 
 @router.get("/logout")

@@ -1,0 +1,2505 @@
+{% extends "public/base.html" %}
+
+{% block title %}AI智选 - 五市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 页面整体动画 */
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 代码区域样式 */
+    .code-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .code-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .code-title {
+        font-weight: 600;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .code-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .code-action-btn {
+        background: none;
+        border: none;
+        color: #6b7280;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .code-action-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--primary-color);
+    }
+
+    .code-content {
+        background-color: #1e293b;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .code-content pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    /* 结果展示区域 */
+    .result-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid #e2e8f0;
+    }
+
+    .result-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .result-image {
+        width: 100%;
+        border-radius: 8px;
+        margin: 1rem 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .result-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .stat-card {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    /* 文字讲解区域 */
+    .explanation-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid #e2e8f0;
+    }
+
+    .explanation-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .explanation-content {
+        color: #4b5563;
+        line-height: 1.7;
+    }
+
+    .explanation-content p {
+        margin-bottom: 1rem;
+    }
+
+    .explanation-content h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: #374151;
+    }
+
+    .explanation-content ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .explanation-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* 评论区样式 */
+    .comments-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .comments-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .comment-form {
+        margin-bottom: 2rem;
+    }
+
+    .comment-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+        margin-bottom: 1rem;
+    }
+
+    .comment-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .comment-submit {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .comment-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .comment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .comment-item {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .comment-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .comment-content {
+        flex: 1;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .comment-time {
+        font-size: 0.875rem;
+        color: #9ca3af;
+    }
+
+    .comment-text {
+        color: #4b5563;
+        line-height: 1.5;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .comment-action {
+        font-size: 0.875rem;
+        color: #6b7280;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .comment-action:hover {
+        color: var(--primary-color);
+    }
+
+    /* 加载动画 */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 8px;
+        height: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* 页面标题样式 */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    .update-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        animation: pulse_indicator 2s infinite;
+    }
+
+    @keyframes pulse_indicator {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+
+    /* 刷新按钮 */
+    .refresh-btn {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 25px;
+        color: white;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        color: white;
+    }
+
+    .refresh-btn:hover .bi-arrow-clockwise {
+        animation: rotate 0.5s ease-in-out;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .strategy-tabs {
+            padding-bottom: 0.5rem;
+        }
+
+        .strategy-tab {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .code-content {
+            font-size: 0.8rem;
+        }
+
+        .result-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* 策略面板样式 */
+    .strategy-panel {
+        display: none;
+    }
+
+    .strategy-panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* 选项卡容器样式 - 单行布局 */
+    .strategy-tabs-container {
+        margin-bottom: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 选项卡网格 - 单行布局 */
+    .strategy-tabs-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    /* 选项卡卡片样式 */
+    .strategy-tab {
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #6b7280;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+
+    /* 趋势类策略选项卡样式 */
+    .strategy-tab[data-tab="momentum"],
+    .strategy-tab[data-tab="mean-reversion"],
+    .strategy-tab[data-tab="technical"] {
+        background-color: rgba(59, 130, 246, 0.1); /* 蓝色背景 */
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    /* 价值类策略选项卡样式 */
+    .strategy-tab[data-tab="value"],
+    .strategy-tab[data-tab="growth"] {
+        background-color: rgba(16, 185, 129, 0.1); /* 绿色背景 */
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .strategy-tab:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 趋势类策略悬停效果 */
+    .strategy-tab[data-tab="momentum"]:hover,
+    .strategy-tab[data-tab="mean-reversion"]:hover,
+    .strategy-tab[data-tab="technical"]:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    /* 价值类策略悬停效果 */
+    .strategy-tab[data-tab="value"]:hover,
+    .strategy-tab[data-tab="growth"]:hover {
+        border-color: #10b981;
+        color: #10b981;
+    }
+
+    /* 趋势类策略激活状态 */
+    .strategy-tab[data-tab="momentum"].active,
+    .strategy-tab[data-tab="mean-reversion"].active,
+    .strategy-tab[data-tab="technical"].active {
+        background: linear-gradient(to right, #3b82f6, #2563eb);
+        color: white;
+        border-color: #3b82f6;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3);
+    }
+
+    /* 价值类策略激活状态 */
+    .strategy-tab[data-tab="value"].active,
+    .strategy-tab[data-tab="growth"].active {
+        background: linear-gradient(to right, #10b981, #059669);
+        color: white;
+        border-color: #10b981;
+        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+    }
+
+    .strategy-tab i {
+        font-size: 0.9rem;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .strategy-tabs-container {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .strategy-tab {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .strategy-tab i {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* 分隔符样式 */
+    .strategy-separator {
+        width: 1px;
+        height: 24px;
+        background-color: #e2e8f0;
+        margin: 0 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-cpu"></i>AI智选
+            </h1>
+            <p class="page-subtitle">智能投资策略，助您把握市场机会</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <small class="text-muted me-3">
+                <span class="update-indicator"></span>
+                当前时间：<span id="updateTime">{{ update_time }}</span>
+            </small>
+            <button class="btn refresh-btn" id="refreshStrategies">
+                <i class="bi bi-arrow-clockwise me-1"></i>刷新
+            </button>
+        </div>
+    </div>
+
+    <!-- 策略选项卡 - 单行布局，用背景色区分组别 -->
+    <div class="strategy-tabs-container">
+        <div class="strategy-tabs-grid">
+            <!-- 趋势类策略 -->
+            <div class="strategy-tab active" data-tab="momentum">
+                <i class="bi bi-speedometer2"></i>
+                <span>动量策略</span>
+            </div>
+            <div class="strategy-tab" data-tab="mean-reversion">
+                <i class="bi bi-arrow-left-right"></i>
+                <span>均值回归</span>
+            </div>
+            <div class="strategy-tab" data-tab="technical">
+                <i class="bi bi-bar-chart-line"></i>
+                <span>技术分析</span>
+            </div>
+
+            <!-- 分隔符 -->
+            <div class="strategy-separator"></div>
+
+            <!-- 价值类策略 -->
+            <div class="strategy-tab" data-tab="value">
+                <i class="bi bi-piggy-bank"></i>
+                <span>价值投资</span>
+            </div>
+            <div class="strategy-tab" data-tab="growth">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>成长投资</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 策略内容区域 -->
+    <div class="strategy-content">
+        <!-- 动量策略 -->
+        <div class="strategy-panel active" id="momentum-panel">
+            <div class="strategy-card">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-3">
+                        <i class="bi bi-speedometer2 me-2"></i>动量策略
+                    </h2>
+                    <p class="card-text text-muted mb-4">
+                        基于价格动量的投资策略，寻找近期表现强劲的股票，预期其将继续保持上涨趋势。</p>
+
+                    <!-- 代码区域 -->
+                    <div class="code-container">
+                        <div class="code-header">
+                            <div class="code-title">
+                                <i class="bi bi-code-slash"></i>
+                                <span>Python 实现代码</span>
+                            </div>
+                            <div class="code-actions">
+                                <button class="code-action-btn" title="复制代码">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="code-action-btn" title="全屏查看">
+                                    <i class="bi bi-arrows-fullscreen"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>import pandas as pd
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+
+# 定义动量策略函数
+def momentum_strategy(tickers, start_date, end_date, lookback_period=30, top_n=5):
+    """
+    基于价格动量的选股策略
+
+    参数:
+    tickers: 股票代码列表
+    start_date: 回测开始日期
+    end_date: 回测结束日期
+    lookback_period: 动量计算回看期(天)
+    top_n: 选择表现最好的股票数量
+
+    返回:
+    选中的股票列表及其动量值
+    """
+    # 下载股票数据
+    data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
+
+    # 计算每个股票的动量(过去lookback_period天的收益率)
+    momentum = (data.iloc[-1] / data.iloc[-lookback_period] - 1) * 100
+
+    # 按动量排序并选择top_n只股票
+    selected_stocks = momentum.sort_values(ascending=False).head(top_n)
+
+    return selected_stocks
+
+# 示例使用
+if __name__ == "__main__":
+    # 定义股票池
+    stock_pool = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM',
+                  'V', 'JNJ', 'WMT', 'PG', 'UNH', 'HD', 'MA', 'BAC', 'XOM', 'PFE',
+                  'CSCO', 'ADBE', 'CRM', 'NFLX', 'ACN', 'NKE', 'DIS']
+
+    # 设置日期范围
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+
+    # 运行动量策略
+    selected = momentum_strategy(stock_pool, start_date, end_date)
+
+    # 打印结果
+    print("基于动量策略选出的股票:")
+    for ticker, momentum in selected.items():
+        print(f"{ticker}: {momentum:.2f}%")
+
+    # 可视化结果
+    plt.figure(figsize=(12, 6))
+    selected.sort_values().plot(kind='barh', color='skyblue')
+    plt.title('动量策略选股结果')
+    plt.xlabel('动量 (%)')
+    plt.ylabel('股票代码')
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 文字讲解 -->
+                    <div class="explanation-container">
+                        <div class="explanation-title">
+                            <i class="bi bi-info-circle"></i>
+                            <span>策略详解</span>
+                        </div>
+                        <div class="explanation-content">
+                            <p>
+                                动量策略是一种基于"强者恒强"理念的投资方法，其核心逻辑是近期表现优异的股票在未来一段时间内很可能继续表现良好。这种策略认为市场存在趋势性，价格会延续原有的运动方向。</p>
+
+                            <h3>策略原理</h3>
+                            <p>动量策略基于以下两个主要假设：</p>
+                            <ul>
+                                <li><strong>反应不足</strong>：投资者对新信息反应缓慢，导致价格逐渐调整而非瞬间反应</li>
+                                <li><strong>羊群效应</strong>：投资者倾向于跟随市场趋势，进一步加强现有趋势</li>
+                            </ul>
+
+                            <h3>实施步骤</h3>
+                            <ul>
+                                <li>确定股票池：选择一定范围内的股票作为候选</li>
+                                <li>计算动量指标：通常使用过去N个月的价格收益率</li>
+                                <li>排序筛选：根据动量指标对股票进行排序，选择排名靠前的股票</li>
+                                <li>定期调整：定期重新计算动量并调整投资组合</li>
+                            </ul>
+
+                            <h3>优缺点分析</h3>
+                            <p><strong>优点：</strong></p>
+                            <ul>
+                                <li>简单直观，易于实施</li>
+                                <li>在趋势明显的市场中表现良好</li>
+                                <li>有大量学术研究支持其有效性</li>
+                            </ul>
+
+                            <p><strong>缺点：</strong></p>
+                            <ul>
+                                <li>在市场转折点时容易遭受较大损失</li>
+                                <li>可能导致投资组合集中于少数热门股票</li>
+                                <li>交易成本较高，需要频繁调整</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 结果展示 -->
+                    <div class="result-container">
+                        <div class="result-title">
+                            <i class="bi bi-graph-up"></i>
+                            <span>策略回测结果</span>
+                        </div>
+                        <img src="https://picsum.photos/seed/momentum-strategy/800/400.jpg" alt="动量策略回测结果"
+                             class="result-image">
+
+                        <div class="result-stats">
+                            <div class="stat-card">
+                                <div class="stat-value">18.7%</div>
+                                <div class="stat-label">年化收益率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">1.42</div>
+                                <div class="stat-label">夏普比率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">23.5%</div>
+                                <div class="stat-label">最大回撤</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">68%</div>
+                                <div class="stat-label">胜率</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="comments-container">
+                        <div class="comments-title">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>策略讨论</span>
+                        </div>
+
+                        <div class="comment-form">
+                            <textarea class="comment-input" placeholder="分享您对动量策略的看法..."></textarea>
+                            <button class="comment-submit">发表评论</button>
+                        </div>
+
+                        <div class="comment-list">
+                            <div class="comment-item">
+                                <div class="comment-avatar">张</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">张明</div>
+                                        <div class="comment-time">2023-11-15 14:30</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        动量策略在牛市中确实表现不错，但在熊市中风险较大。我建议结合市场环境调整策略参数，在市场下跌趋势中降低仓位或暂时观望。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (12)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="comment-item">
+                                <div class="comment-avatar">李</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">李华</div>
+                                        <div class="comment-time">2023-11-14 09:15</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        我在使用动量策略时发现，结合基本面筛选效果更好。比如先通过财务指标筛选出优质公司，再从中选择动量较强的股票，可以避免一些纯粹的炒作股。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (8)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 均值回归策略 -->
+        <div class="strategy-panel" id="mean-reversion-panel">
+            <div class="strategy-card">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-3">
+                        <i class="bi bi-arrow-left-right me-2"></i>均值回归策略
+                    </h2>
+                    <p class="card-text text-muted mb-4">
+                        基于价格回归均值的理论，寻找偏离历史均值较远的股票，预期其将向均值回归。</p>
+
+                    <!-- 代码区域 -->
+                    <div class="code-container">
+                        <div class="code-header">
+                            <div class="code-title">
+                                <i class="bi bi-code-slash"></i>
+                                <span>Python 实现代码</span>
+                            </div>
+                            <div class="code-actions">
+                                <button class="code-action-btn" title="复制代码">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="code-action-btn" title="全屏查看">
+                                    <i class="bi bi-arrows-fullscreen"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>import pandas as pd
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+from scipy import stats
+
+def mean_reversion_strategy(tickers, start_date, end_date, lookback_period=60, z_threshold=2.0):
+    """
+    基于均值回归的选股策略
+
+    参数:
+    tickers: 股票代码列表
+    start_date: 回测开始日期
+    end_date: 回测结束日期
+    lookback_period: 均值计算回看期(天)
+    z_threshold: Z分数阈值，用于判断偏离程度
+
+    返回:
+    选中的股票列表及其Z分数
+    """
+    # 下载股票数据
+    data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
+
+    # 计算每个股票的Z分数
+    results = {}
+
+    for ticker in tickers:
+        if ticker in data.columns:
+            prices = data[ticker].dropna()
+            if len(prices) > lookback_period:
+                # 计算移动平均和标准差
+                mean = prices.rolling(window=lookback_period).mean().iloc[-1]
+                std = prices.rolling(window=lookback_period).std().iloc[-1]
+                current_price = prices.iloc[-1]
+
+                # 计算Z分数
+                z_score = (current_price - mean) / std
+
+                # 只考虑显著偏离均值的股票
+                if abs(z_score) > z_threshold:
+                    results[ticker] = z_score
+
+    # 转换为Series并按Z分数绝对值排序
+    result_series = pd.Series(results)
+    result_series = result_series.reindex(result_series.abs().sort_values(ascending=False).index)
+
+    return result_series
+
+# 示例使用
+if __name__ == "__main__":
+    # 定义股票池
+    stock_pool = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM',
+                  'V', 'JNJ', 'WMT', 'PG', 'UNH', 'HD', 'MA', 'BAC', 'XOM', 'PFE',
+                  'CSCO', 'ADBE', 'CRM', 'NFLX', 'ACN', 'NKE', 'DIS']
+
+    # 设置日期范围
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+
+    # 运行均值回归策略
+    selected = mean_reversion_strategy(stock_pool, start_date, end_date)
+
+    # 打印结果
+    print("基于均值回归策略选出的股票:")
+    for ticker, z_score in selected.items():
+        direction = "超跌" if z_score < 0 else "超涨"
+        print(f"{ticker}: Z分数={z_score:.2f} ({direction})")
+
+    # 可视化结果
+    plt.figure(figsize=(12, 6))
+    colors = ['red' if x < 0 else 'green' for x in selected.values]
+    selected.plot(kind='bar', color=colors)
+    plt.title('均值回归策略选股结果')
+    plt.xlabel('股票代码')
+    plt.ylabel('Z分数')
+    plt.axhline(y=0, color='black', linestyle='-', alpha=0.3)
+    plt.axhline(y=2, color='red', linestyle='--', alpha=0.5)
+    plt.axhline(y=-2, color='green', linestyle='--', alpha=0.5)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 文字讲解 -->
+                    <div class="explanation-container">
+                        <div class="explanation-title">
+                            <i class="bi bi-info-circle"></i>
+                            <span>策略详解</span>
+                        </div>
+                        <div class="explanation-content">
+                            <p>
+                                均值回归策略基于金融学中的均值回归理论，即资产价格会围绕其长期均值波动，当价格偏离均值过大时，会有回归均值的趋势。这种策略认为市场存在过度反应，投资者情绪会导致价格偏离基本面价值。</p>
+
+                            <h3>策略原理</h3>
+                            <p>均值回归策略基于以下核心假设：</p>
+                            <ul>
+                                <li><strong>价格波动性</strong>：资产价格会围绕其内在价值波动，不会无限偏离</li>
+                                <li><strong>市场过度反应</strong>：投资者情绪会导致价格过度上涨或下跌</li>
+                                <li><strong>回归机制</strong>：当偏离达到一定程度时，市场力量会促使价格回归均值</li>
+                            </ul>
+
+                            <h3>实施步骤</h3>
+                            <ul>
+                                <li>确定股票池：选择流动性好、历史数据充足的股票</li>
+                                <li>计算均值和标准差：使用历史数据计算每个股票的均值和波动率</li>
+                                <li>计算偏离度：通常使用Z分数衡量当前价格相对于均值的偏离程度</li>
+                                <li>筛选股票：选择偏离度超过阈值的股票，超跌的买入，超涨的卖出</li>
+                                <li>设定止损：为防止价格继续偏离，设定合理的止损点</li>
+                            </ul>
+
+                            <h3>优缺点分析</h3>
+                            <p><strong>优点：</strong></p>
+                            <ul>
+                                <li>理论基础扎实，有统计学支持</li>
+                                <li>在震荡市中表现良好</li>
+                                <li>可以利用市场情绪过度反应获利</li>
+                            </ul>
+
+                            <p><strong>缺点：</strong></p>
+                            <ul>
+                                <li>在强趋势市场中容易亏损</li>
+                                <li>需要准确判断偏离程度，避免"接飞刀"</li>
+                                <li>回归时间不确定，可能需要长期持仓</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 结果展示 -->
+                    <div class="result-container">
+                        <div class="result-title">
+                            <i class="bi bi-graph-up"></i>
+                            <span>策略回测结果</span>
+                        </div>
+                        <img src="https://picsum.photos/seed/mean-reversion-strategy/800/400.jpg"
+                             alt="均值回归策略回测结果" class="result-image">
+
+                        <div class="result-stats">
+                            <div class="stat-card">
+                                <div class="stat-value">15.2%</div>
+                                <div class="stat-label">年化收益率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">1.25</div>
+                                <div class="stat-label">夏普比率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">18.3%</div>
+                                <div class="stat-label">最大回撤</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">72%</div>
+                                <div class="stat-label">胜率</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="comments-container">
+                        <div class="comments-title">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>策略讨论</span>
+                        </div>
+
+                        <div class="comment-form">
+                            <textarea class="comment-input" placeholder="分享您对均值回归策略的看法..."></textarea>
+                            <button class="comment-submit">发表评论</button>
+                        </div>
+
+                        <div class="comment-list">
+                            <div class="comment-item">
+                                <div class="comment-avatar">王</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">王强</div>
+                                        <div class="comment-time">2023-11-13 16:45</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        均值回归策略在震荡市中确实有效，但关键在于如何判断"均值"是合理的。我建议结合基本面分析，确保公司的内在价值没有发生根本变化。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (15)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="comment-item">
+                                <div class="comment-avatar">赵</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">赵敏</div>
+                                        <div class="comment-time">2023-11-12 11:20</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        我在使用均值回归策略时发现，不同行业的回归周期差异很大。科技股可能快速回归，而传统行业可能需要更长时间。因此，针对不同行业调整策略参数很重要。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (9)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 价值投资策略 -->
+        <div class="strategy-panel" id="value-panel">
+            <div class="strategy-card">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-3">
+                        <i class="bi bi-piggy-bank me-2"></i>价值投资策略
+                    </h2>
+                    <p class="card-text text-muted mb-4">
+                        基于基本面分析，寻找被市场低估的优质股票，长期持有等待价值回归。</p>
+
+                    <!-- 代码区域 -->
+                    <div class="code-container">
+                        <div class="code-header">
+                            <div class="code-title">
+                                <i class="bi bi-code-slash"></i>
+                                <span>Python 实现代码</span>
+                            </div>
+                            <div class="code-actions">
+                                <button class="code-action-btn" title="复制代码">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="code-action-btn" title="全屏查看">
+                                    <i class="bi bi-arrows-fullscreen"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>import pandas as pd
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+
+def value_investing_strategy(tickers, lookback_period=252):
+    """
+    基于价值投资的选股策略
+
+    参数:
+    tickers: 股票代码列表
+    lookback_period: 数据回看期(天)，默认为一年
+
+    返回:
+    选中的股票列表及其价值指标
+    """
+    results = {}
+
+    for ticker in tickers:
+        try:
+            # 获取股票信息
+            stock = yf.Ticker(ticker)
+
+            # 获取财务数据
+            info = stock.info
+            financials = stock.financials
+            balance_sheet = stock.balance_sheet
+            cashflow = stock.cashflow
+
+            # 计算价值指标
+            pe_ratio = info.get('forwardPE', np.nan)
+            pb_ratio = info.get('priceToBook', np.nan)
+            ps_ratio = info.get('priceToSalesTrailing12Months', np.nan)
+            dividend_yield = info.get('dividendYield', np.nan) * 100 if info.get('dividendYield') else np.nan
+
+            # 计算ROE和ROA
+            if not financials.empty and not balance_sheet.empty:
+                net_income = financials.loc['Net Income'].iloc[0] if 'Net Income' in financials.index else np.nan
+                total_equity = balance_sheet.loc['Total Stockholder Equity'].iloc[0] if 'Total Stockholder Equity' in balance_sheet.index else np.nan
+                total_assets = balance_sheet.loc['Total Assets'].iloc[0] if 'Total Assets' in balance_sheet.index else np.nan
+
+                roe = (net_income / total_equity * 100) if not np.isnan(net_income) and not np.isnan(total_equity) and total_equity != 0 else np.nan
+                roa = (net_income / total_assets * 100) if not np.isnan(net_income) and not np.isnan(total_assets) and total_assets != 0 else np.nan
+            else:
+                roe = np.nan
+                roa = np.nan
+
+            # 计算综合价值分数 (越低越好)
+            # 给每个指标打分 (0-10)，然后加权平均
+            pe_score = 0
+            pb_score = 0
+            ps_score = 0
+            div_score = 0
+            roe_score = 0
+
+            # PE评分 (0-10分，PE越低分数越高)
+            if not np.isnan(pe_ratio):
+                if pe_ratio < 10:
+                    pe_score = 10
+                elif pe_ratio < 15:
+                    pe_score = 8
+                elif pe_ratio < 20:
+                    pe_score = 6
+                elif pe_ratio < 25:
+                    pe_score = 4
+                else:
+                    pe_score = 2
+
+            # PB评分 (0-10分，PB越低分数越高)
+            if not np.isnan(pb_ratio):
+                if pb_ratio < 1:
+                    pb_score = 10
+                elif pb_ratio < 1.5:
+                    pb_score = 8
+                elif pb_ratio < 2:
+                    pb_score = 6
+                elif pb_ratio < 3:
+                    pb_score = 4
+                else:
+                    pb_score = 2
+
+            # PS评分 (0-10分，PS越低分数越高)
+            if not np.isnan(ps_ratio):
+                if ps_ratio < 1:
+                    ps_score = 10
+                elif ps_ratio < 2:
+                    ps_score = 8
+                elif ps_ratio < 3:
+                    ps_score = 6
+                elif ps_ratio < 5:
+                    ps_score = 4
+                else:
+                    ps_score = 2
+
+            # 股息收益率评分 (0-10分，收益率越高分数越高)
+            if not np.isnan(dividend_yield):
+                if dividend_yield > 5:
+                    div_score = 10
+                elif dividend_yield > 3:
+                    div_score = 8
+                elif dividend_yield > 2:
+                    div_score = 6
+                elif dividend_yield > 1:
+                    div_score = 4
+                else:
+                    div_score = 2
+
+            # ROE评分 (0-10分，ROE越高分数越高)
+            if not np.isnan(roe):
+                if roe > 20:
+                    roe_score = 10
+                elif roe > 15:
+                    roe_score = 8
+                elif roe > 10:
+                    roe_score = 6
+                elif roe > 5:
+                    roe_score = 4
+                else:
+                    roe_score = 2
+
+            # 计算综合分数 (权重: PE 30%, PB 20%, PS 15%, 股息 15%, ROE 20%)
+            total_score = (pe_score * 0.3 + pb_score * 0.2 + ps_score * 0.15 +
+                          div_score * 0.15 + roe_score * 0.2)
+
+            # 只考虑有足够数据的股票
+            if not np.isnan(pe_ratio) or not np.isnan(pb_ratio):
+                results[ticker] = {
+                    'score': total_score,
+                    'pe': pe_ratio,
+                    'pb': pb_ratio,
+                    'ps': ps_ratio,
+                    'dividend': dividend_yield,
+                    'roe': roe
+                }
+
+        except Exception as e:
+            print(f"Error processing {ticker}: {e}")
+            continue
+
+    # 转换为DataFrame并按分数排序
+    if results:
+        df = pd.DataFrame.from_dict(results, orient='index')
+        df = df.sort_values('score', ascending=False)
+        return df
+    else:
+        return pd.DataFrame()
+
+# 示例使用
+if __name__ == "__main__":
+    # 定义股票池
+    stock_pool = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM',
+                  'V', 'JNJ', 'WMT', 'PG', 'UNH', 'HD', 'MA', 'BAC', 'XOM', 'PFE',
+                  'CSCO', 'ADBE', 'CRM', 'NFLX', 'ACN', 'NKE', 'DIS', 'KO', 'PEP',
+                  'T', 'INTC', 'CMCSA']
+
+    # 运行价值投资策略
+    selected = value_investing_strategy(stock_pool)
+
+    # 打印结果
+    if not selected.empty:
+        print("基于价值投资策略选出的股票:")
+        print(selected.head(10))
+
+        # 可视化结果
+        plt.figure(figsize=(12, 8))
+
+        # 创建子图
+        plt.subplot(2, 2, 1)
+        top_stocks = selected.head(10)
+        top_stocks['score'].plot(kind='bar', color='skyblue')
+        plt.title('价值投资综合评分')
+        plt.ylabel('评分')
+        plt.xticks(rotation=45)
+
+        plt.subplot(2, 2, 2)
+        top_stocks['pe'].plot(kind='bar', color='lightgreen')
+        plt.title('市盈率 (PE)')
+        plt.ylabel('PE')
+        plt.xticks(rotation=45)
+
+        plt.subplot(2, 2, 3)
+        top_stocks['pb'].plot(kind='bar', color='salmon')
+        plt.title('市净率 (PB)')
+        plt.ylabel('PB')
+        plt.xticks(rotation=45)
+
+        plt.subplot(2, 2, 4)
+        top_stocks['roe'].plot(kind='bar', color='gold')
+        plt.title('净资产收益率 (ROE %)')
+        plt.ylabel('ROE (%)')
+        plt.xticks(rotation=45)
+
+        plt.tight_layout()
+        plt.show()
+    else:
+        print("未能获取有效的股票数据")</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 文字讲解 -->
+                    <div class="explanation-container">
+                        <div class="explanation-title">
+                            <i class="bi bi-info-circle"></i>
+                            <span>策略详解</span>
+                        </div>
+                        <div class="explanation-content">
+                            <p>
+                                价值投资策略是由本杰明·格雷厄姆和戴维·多德提出的投资方法，后来由沃伦·巴菲特发扬光大。其核心思想是寻找被市场低估的优质公司，以低于其内在价值的价格买入，并长期持有直到市场认识到其真实价值。</p>
+
+                            <h3>策略原理</h3>
+                            <p>价值投资策略基于以下核心假设：</p>
+                            <ul>
+                                <li><strong>市场有效性有限</strong>：市场短期内可能被情绪驱动，导致价格偏离内在价值</li>
+                                <li><strong>价值回归</strong>：长期来看，股票价格会回归其内在价值</li>
+                                <li><strong>安全边际</strong>：以低于内在价值的价格买入，提供保护缓冲</li>
+                            </ul>
+
+                            <h3>实施步骤</h3>
+                            <ul>
+                                <li>筛选股票池：选择财务健康、业务稳定的公司</li>
+                                <li>财务分析：评估公司的盈利能力、资产质量、负债水平等</li>
+                                <li>估值计算：使用多种方法(如DCF、PE、PB等)估算公司内在价值</li>
+                                <li>比较价格与价值：寻找市场价格显著低于内在价值的股票</li>
+                                <li>构建投资组合：分散投资于多只被低估的股票</li>
+                                <li>长期持有：耐心等待市场认识到股票的真实价值</li>
+                            </ul>
+
+                            <h3>关键指标</h3>
+                            <p>价值投资常用的估值指标包括：</p>
+                            <ul>
+                                <li><strong>市盈率(P/E)</strong>：衡量股价相对于每股收益的倍数</li>
+                                <li><strong>市净率(P/B)</strong>：衡量股价相对于每股净资产的倍数</li>
+                                <li><strong>市销率(P/S)</strong>：衡量股价相对于每股销售额的倍数</li>
+                                <li><strong>股息收益率</strong>：反映公司分红能力</li>
+                                <li><strong>净资产收益率(ROE)</strong>：衡量公司盈利能力</li>
+                            </ul>
+
+                            <h3>优缺点分析</h3>
+                            <p><strong>优点：</strong></p>
+                            <ul>
+                                <li>风险相对较低，有安全边际保护</li>
+                                <li>适合长期投资，复利效应显著</li>
+                                <li>避免市场情绪波动的影响</li>
+                            </ul>
+
+                            <p><strong>缺点：</strong></p>
+                            <ul>
+                                <li>可能错过高增长股票的机会</li>
+                                <li>价值回归时间不确定，可能需要长期等待</li>
+                                <li>对财务分析能力要求较高</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 结果展示 -->
+                    <div class="result-container">
+                        <div class="result-title">
+                            <i class="bi bi-graph-up"></i>
+                            <span>策略回测结果</span>
+                        </div>
+                        <img src="https://picsum.photos/seed/value-investing-strategy/800/400.jpg"
+                             alt="价值投资策略回测结果" class="result-image">
+
+                        <div class="result-stats">
+                            <div class="stat-card">
+                                <div class="stat-value">12.8%</div>
+                                <div class="stat-label">年化收益率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">1.35</div>
+                                <div class="stat-label">夏普比率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">15.6%</div>
+                                <div class="stat-label">最大回撤</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">75%</div>
+                                <div class="stat-label">胜率</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="comments-container">
+                        <div class="comments-title">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>策略讨论</span>
+                        </div>
+
+                        <div class="comment-form">
+                            <textarea class="comment-input" placeholder="分享您对价值投资策略的看法..."></textarea>
+                            <button class="comment-submit">发表评论</button>
+                        </div>
+
+                        <div class="comment-list">
+                            <div class="comment-item">
+                                <div class="comment-avatar">陈</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">陈明</div>
+                                        <div class="comment-time">2023-11-11 10:30</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        价值投资确实是一种稳健的策略，但关键在于如何准确评估公司的内在价值。我建议结合行业前景和公司竞争力分析，避免陷入"价值陷阱"。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (18)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="comment-item">
+                                <div class="comment-avatar">刘</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">刘洋</div>
+                                        <div class="comment-time">2023-11-10 14:15</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        我在实践价值投资时发现，结合一些成长性指标效果更好。纯粹的低估值可能意味着公司基本面恶化，而适度估值加上良好成长性的公司往往表现更佳。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (12)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成长投资策略 -->
+        <div class="strategy-panel" id="growth-panel">
+            <div class="strategy-card">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-3">
+                        <i class="bi bi-graph-up-arrow me-2"></i>成长投资策略
+                    </h2>
+                    <p class="card-text text-muted mb-4">
+                        专注于寻找具有高增长潜力的公司，即使当前估值较高，也愿意为未来增长支付溢价。</p>
+
+                    <!-- 代码区域 -->
+                    <div class="code-container">
+                        <div class="code-header">
+                            <div class="code-title">
+                                <i class="bi bi-code-slash"></i>
+                                <span>Python 实现代码</span>
+                            </div>
+                            <div class="code-actions">
+                                <button class="code-action-btn" title="复制代码">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="code-action-btn" title="全屏查看">
+                                    <i class="bi bi-arrows-fullscreen"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>import pandas as pd
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+
+def growth_investing_strategy(tickers, lookback_period=252):
+    """
+    基于成长投资的选股策略
+
+    参数:
+    tickers: 股票代码列表
+    lookback_period: 数据回看期(天)，默认为一年
+
+    返回:
+    选中的股票列表及其成长指标
+    """
+    results = {}
+
+    for ticker in tickers:
+        try:
+            # 获取股票信息
+            stock = yf.Ticker(ticker)
+
+            # 获取财务数据
+            info = stock.info
+            financials = stock.financials
+            balance_sheet = stock.balance_sheet
+
+            # 计算成长指标
+            revenue_growth = info.get('revenueGrowth', np.nan) * 100 if info.get('revenueGrowth') else np.nan
+            earnings_growth = info.get('earningsGrowth', np.nan) * 100 if info.get('earningsGrowth') else np.nan
+            earnings_quarterly_growth = info.get('earningsQuarterlyGrowth', np.nan) * 100 if info.get('earningsQuarterlyGrowth') else np.nan
+
+            # 计算历史增长率
+            if not financials.empty and len(financials.columns) >= 3:
+                # 获取最近三年的收入数据
+                if 'Total Revenue' in financials.index:
+                    revenues = financials.loc['Total Revenue']
+                    if len(revenues) >= 3:
+                        # 计算年收入增长率
+                        revenue_growth_yoy = []
+                        for i in range(len(revenues) - 1):
+                            if revenues.iloc[i] != 0:
+                                growth = (revenues.iloc[i] / revenues.iloc[i+1] - 1) * 100
+                                revenue_growth_yoy.append(growth)
+
+                        # 平均收入增长率
+                        avg_revenue_growth = np.mean(revenue_growth_yoy) if revenue_growth_yoy else np.nan
+                    else:
+                        avg_revenue_growth = np.nan
+                else:
+                    avg_revenue_growth = np.nan
+
+                # 获取最近三年的净利润数据
+                if 'Net Income' in financials.index:
+                    net_incomes = financials.loc['Net Income']
+                    if len(net_incomes) >= 3:
+                        # 计算年净利润增长率
+                        earnings_growth_yoy = []
+                        for i in range(len(net_incomes) - 1):
+                            if net_incomes.iloc[i+1] != 0:
+                                growth = (net_incomes.iloc[i] / net_incomes.iloc[i+1] - 1) * 100
+                                earnings_growth_yoy.append(growth)
+
+                        # 平均净利润增长率
+                        avg_earnings_growth = np.mean(earnings_growth_yoy) if earnings_growth_yoy else np.nan
+                    else:
+                        avg_earnings_growth = np.nan
+                else:
+                    avg_earnings_growth = np.nan
+            else:
+                avg_revenue_growth = np.nan
+                avg_earnings_growth = np.nan
+
+            # 计算ROE和ROA
+            if not financials.empty and not balance_sheet.empty:
+                net_income = financials.loc['Net Income'].iloc[0] if 'Net Income' in financials.index else np.nan
+                total_equity = balance_sheet.loc['Total Stockholder Equity'].iloc[0] if 'Total Stockholder Equity' in balance_sheet.index else np.nan
+                total_assets = balance_sheet.loc['Total Assets'].iloc[0] if 'Total Assets' in balance_sheet.index else np.nan
+
+                roe = (net_income / total_equity * 100) if not np.isnan(net_income) and not np.isnan(total_equity) and total_equity != 0 else np.nan
+                roa = (net_income / total_assets * 100) if not np.isnan(net_income) and not np.isnan(total_assets) and total_assets != 0 else np.nan
+            else:
+                roe = np.nan
+                roa = np.nan
+
+            # 获取PEG比率
+            peg_ratio = info.get('pegRatio', np.nan)
+
+            # 计算综合成长分数 (越高越好)
+            # 给每个指标打分 (0-10)，然后加权平均
+            revenue_score = 0
+            earnings_score = 0
+            roe_score = 0
+            peg_score = 0
+
+            # 收入增长率评分 (0-10分，增长率越高分数越高)
+            if not np.isnan(revenue_growth):
+                if revenue_growth > 30:
+                    revenue_score = 10
+                elif revenue_growth > 20:
+                    revenue_score = 8
+                elif revenue_growth > 15:
+                    revenue_score = 6
+                elif revenue_growth > 10:
+                    revenue_score = 4
+                elif revenue_growth > 5:
+                    revenue_score = 2
+                else:
+                    revenue_score = 0
+
+            # 利润增长率评分 (0-10分，增长率越高分数越高)
+            if not np.isnan(earnings_growth):
+                if earnings_growth > 30:
+                    earnings_score = 10
+                elif earnings_growth > 20:
+                    earnings_score = 8
+                elif earnings_growth > 15:
+                    earnings_score = 6
+                elif earnings_growth > 10:
+                    earnings_score = 4
+                elif earnings_growth > 5:
+                    earnings_score = 2
+                else:
+                    earnings_score = 0
+
+            # ROE评分 (0-10分，ROE越高分数越高)
+            if not np.isnan(roe):
+                if roe > 25:
+                    roe_score = 10
+                elif roe > 20:
+                    roe_score = 8
+                elif roe > 15:
+                    roe_score = 6
+                elif roe > 10:
+                    roe_score = 4
+                elif roe > 5:
+                    roe_score = 2
+                else:
+                    roe_score = 0
+
+            # PEG评分 (0-10分，PEG越接近1分数越高)
+            if not np.isnan(peg_ratio) and peg_ratio > 0:
+                if 0.8 <= peg_ratio <= 1.2:
+                    peg_score = 10
+                elif 0.6 <= peg_ratio < 0.8 or 1.2 < peg_ratio <= 1.5:
+                    peg_score = 8
+                elif 0.4 <= peg_ratio < 0.6 or 1.5 < peg_ratio <= 2.0:
+                    peg_score = 6
+                elif 0.2 <= peg_ratio < 0.4 or 2.0 < peg_ratio <= 2.5:
+                    peg_score = 4
+                else:
+                    peg_score = 2
+
+            # 计算综合分数 (权重: 收入增长 30%, 利润增长 30%, ROE 20%, PEG 20%)
+            total_score = (revenue_score * 0.3 + earnings_score * 0.3 +
+                          roe_score * 0.2 + peg_score * 0.2)
+
+            # 只考虑有足够数据的股票
+            if not np.isnan(revenue_growth) or not np.isnan(earnings_growth):
+                results[ticker] = {
+                    'score': total_score,
+                    'revenue_growth': revenue_growth,
+                    'earnings_growth': earnings_growth,
+                    'avg_revenue_growth': avg_revenue_growth,
+                    'avg_earnings_growth': avg_earnings_growth,
+                    'roe': roe,
+                    'peg_ratio': peg_ratio
+                }
+
+        except Exception as e:
+            print(f"Error processing {ticker}: {e}")
+            continue
+
+    # 转换为DataFrame并按分数排序
+    if results:
+        df = pd.DataFrame.from_dict(results, orient='index')
+        df = df.sort_values('score', ascending=False)
+        return df
+    else:
+        return pd.DataFrame()
+
+# 示例使用
+if __name__ == "__main__":
+    # 定义股票池 (偏向科技和成长股)
+    stock_pool = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'ADBE',
+                  'CRM', 'NFLX', 'PYPL', 'SQ', 'ZM', 'DOCU', 'SNOW', 'PLTR', 'U',
+                  'ASAN', 'TWLO', 'OKTA', 'DDOG', 'CRWD', 'ZS', 'FSLY', 'NET']
+
+    # 运行成长投资策略
+    selected = growth_investing_strategy(stock_pool)
+
+    # 打印结果
+    if not selected.empty:
+        print("基于成长投资策略选出的股票:")
+        print(selected.head(10))
+
+        # 可视化结果
+        plt.figure(figsize=(12, 8))
+
+        # 创建子图
+        plt.subplot(2, 2, 1)
+        top_stocks = selected.head(10)
+        top_stocks['score'].plot(kind='bar', color='skyblue')
+        plt.title('成长投资综合评分')
+        plt.ylabel('评分')
+        plt.xticks(rotation=45)
+
+        plt.subplot(2, 2, 2)
+        top_stocks['revenue_growth'].plot(kind='bar', color='lightgreen')
+        plt.title('收入增长率 (%)')
+        plt.ylabel('增长率 (%)')
+        plt.xticks(rotation=45)
+
+        plt.subplot(2, 2, 3)
+        top_stocks['earnings_growth'].plot(kind='bar', color='salmon')
+        plt.title('利润增长率 (%)')
+        plt.ylabel('增长率 (%)')
+        plt.xticks(rotation=45)
+
+        plt.subplot(2, 2, 4)
+        top_stocks['roe'].plot(kind='bar', color='gold')
+        plt.title('净资产收益率 (ROE %)')
+        plt.ylabel('ROE (%)')
+        plt.xticks(rotation=45)
+
+        plt.tight_layout()
+        plt.show()
+    else:
+        print("未能获取有效的股票数据")</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 文字讲解 -->
+                    <div class="explanation-container">
+                        <div class="explanation-title">
+                            <i class="bi bi-info-circle"></i>
+                            <span>策略详解</span>
+                        </div>
+                        <div class="explanation-content">
+                            <p>
+                                成长投资策略专注于寻找具有高增长潜力的公司，这些公司通常处于快速发展的行业，拥有创新产品或服务，并且收入和利润增长速度远超行业平均水平。成长投资者愿意为这种高增长支付较高的估值溢价。</p>
+
+                            <h3>策略原理</h3>
+                            <p>成长投资策略基于以下核心假设：</p>
+                            <ul>
+                                <li><strong>增长创造价值</strong>：高增长公司的价值会随时间快速提升</li>
+                                <li><strong>市场反应滞后</strong>：市场往往低估长期增长的潜力</li>
+                                <li><strong>复利效应</strong>：持续高增长会产生显著的复利效应</li>
+                            </ul>
+
+                            <h3>实施步骤</h3>
+                            <ul>
+                                <li>筛选行业：选择具有高增长潜力的行业和领域</li>
+                                <li>识别公司：寻找在这些行业中具有竞争优势的公司</li>
+                                <li>财务分析：评估公司的收入增长、利润增长和盈利能力</li>
+                                <li>估值评估：使用PEG、PS等适合成长股的估值方法</li>
+                                <li>构建组合：分散投资于多只高成长股票</li>
+                                <li>持续跟踪：定期评估公司增长前景，及时调整投资组合</li>
+                            </ul>
+
+                            <h3>关键指标</h3>
+                            <p>成长投资常用的指标包括：</p>
+                            <ul>
+                                <li><strong>收入增长率</strong>：衡量公司业务扩张速度</li>
+                                <li><strong>利润增长率</strong>：衡量公司盈利能力提升速度</li>
+                                <li><strong>PEG比率</strong>：市盈率相对于增长率的比率，通常小于1表示被低估</li>
+                                <li><strong>净资产收益率(ROE)</strong>：衡量公司利用股东资本创造利润的能力</li>
+                                <li><strong>研发投入比例</strong>：衡量公司对创新的重视程度</li>
+                            </ul>
+
+                            <h3>优缺点分析</h3>
+                            <p><strong>优点：</strong></p>
+                            <ul>
+                                <li>有机会获得远超市场平均的回报</li>
+                                <li>投资于创新和未来发展趋势</li>
+                                <li>适合长期投资，享受复利增长</li>
+                            </ul>
+
+                            <p><strong>缺点：</strong></p>
+                            <ul>
+                                <li>估值通常较高，风险较大</li>
+                                <li>增长不及预期时股价可能大幅下跌</li>
+                                <li>需要持续跟踪公司基本面变化</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 结果展示 -->
+                    <div class="result-container">
+                        <div class="result-title">
+                            <i class="bi bi-graph-up"></i>
+                            <span>策略回测结果</span>
+                        </div>
+                        <img src="https://picsum.photos/seed/growth-investing-strategy/800/400.jpg"
+                             alt="成长投资策略回测结果" class="result-image">
+
+                        <div class="result-stats">
+                            <div class="stat-card">
+                                <div class="stat-value">22.5%</div>
+                                <div class="stat-label">年化收益率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">1.38</div>
+                                <div class="stat-label">夏普比率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">28.7%</div>
+                                <div class="stat-label">最大回撤</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">65%</div>
+                                <div class="stat-label">胜率</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="comments-container">
+                        <div class="comments-title">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>策略讨论</span>
+                        </div>
+
+                        <div class="comment-form">
+                            <textarea class="comment-input" placeholder="分享您对成长投资策略的看法..."></textarea>
+                            <button class="comment-submit">发表评论</button>
+                        </div>
+
+                        <div class="comment-list">
+                            <div class="comment-item">
+                                <div class="comment-avatar">孙</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">孙伟</div>
+                                        <div class="comment-time">2023-11-09 16:20</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        成长投资确实能带来高回报，但关键在于识别真正的成长股和炒作股。我建议关注公司的护城河和现金流，而不仅仅是增长率。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (21)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="comment-item">
+                                <div class="comment-avatar">周</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">周静</div>
+                                        <div class="comment-time">2023-11-08 09:45</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        我在使用成长投资策略时发现，结合行业生命周期分析很重要。处于成长期初期的行业往往有更多机会，而成熟行业中的成长股可能面临天花板。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (14)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技术分析策略 -->
+        <div class="strategy-panel" id="technical-panel">
+            <div class="strategy-card">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-3">
+                        <i class="bi bi-bar-chart-line me-2"></i>技术分析策略
+                    </h2>
+                    <p class="card-text text-muted mb-4">
+                        基于价格和成交量等市场数据，运用各种技术指标和图表模式来预测未来价格走势。</p>
+
+                    <!-- 代码区域 -->
+                    <div class="code-container">
+                        <div class="code-header">
+                            <div class="code-title">
+                                <i class="bi bi-code-slash"></i>
+                                <span>Python 实现代码</span>
+                            </div>
+                            <div class="code-actions">
+                                <button class="code-action-btn" title="复制代码">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="code-action-btn" title="全屏查看">
+                                    <i class="bi bi-arrows-fullscreen"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="code-content">
+                            <pre><code>import pandas as pd
+import numpy as np
+import yfinance as yf
+import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+import talib
+
+def technical_analysis_strategy(tickers, start_date, end_date):
+    """
+    基于技术分析的选股策略
+
+    参数:
+    tickers: 股票代码列表
+    start_date: 回测开始日期
+    end_date: 回测结束日期
+
+    返回:
+    选中的股票列表及其技术指标信号
+    """
+    results = {}
+
+    for ticker in tickers:
+        try:
+            # 下载股票数据
+            data = yf.download(ticker, start=start_date, end=end_date)
+
+            if len(data) < 50:  # 确保有足够的数据
+                continue
+
+            # 计算技术指标
+            close = data['Close'].values
+            high = data['High'].values
+            low = data['Low'].values
+            volume = data['Volume'].values
+
+            # 移动平均线
+            sma_20 = talib.SMA(close, timeperiod=20)
+            sma_50 = talib.SMA(close, timeperiod=50)
+            ema_12 = talib.EMA(close, timeperiod=12)
+            ema_26 = talib.EMA(close, timeperiod=26)
+
+            # MACD
+            macd, macd_signal, macd_hist = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
+
+            # RSI
+            rsi = talib.RSI(close, timeperiod=14)
+
+            # 布林带
+            bb_upper, bb_middle, bb_lower = talib.BBANDS(close, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+
+            # 随机指标
+            slowk, slowd = talib.STOCH(high, low, close, fastk_period=5, slowk_period=3, slowd_period=3, slowk_matype=0)
+
+            # 成交量移动平均
+            volume_sma = talib.SMA(volume, timeperiod=20)
+
+            # 获取最新指标值
+            current_price = close[-1]
+            current_sma_20 = sma_20[-1]
+            current_sma_50 = sma_50[-1]
+            current_ema_12 = ema_12[-1]
+            current_ema_26 = ema_26[-1]
+            current_macd = macd[-1]
+            current_macd_signal = macd_signal[-1]
+            current_macd_hist = macd_hist[-1]
+            current_rsi = rsi[-1]
+            current_bb_upper = bb_upper[-1]
+            current_bb_middle = bb_middle[-1]
+            current_bb_lower = bb_lower[-1]
+            current_slowk = slowk[-1]
+            current_slowd = slowd[-1]
+            current_volume = volume[-1]
+            current_volume_sma = volume_sma[-1]
+
+            # 计算技术信号 (0-100分)
+            signals = {}
+
+            # 移动平均线信号 (20分)
+            ma_signal = 0
+            if current_price > current_sma_20 > current_sma_50:
+                ma_signal = 20  # 强势上涨
+            elif current_price > current_sma_20 and current_sma_20 > current_sma_50:
+                ma_signal = 15  # 上涨趋势
+            elif current_price < current_sma_20 < current_sma_50:
+                ma_signal = 5   # 强势下跌
+            elif current_price < current_sma_20 and current_sma_20 < current_sma_50:
+                ma_signal = 10  # 下跌趋势
+            else:
+                ma_signal = 12  # 横盘
+
+            signals['MA'] = ma_signal
+
+            # MACD信号 (20分)
+            macd_signal = 0
+            if current_macd > current_macd_signal and current_macd_hist > 0:
+                macd_signal = 20  # 金叉且柱状图为正
+            elif current_macd > current_macd_signal and current_macd_hist < 0:
+                macd_signal = 15  # 金叉但柱状图为负
+            elif current_macd < current_macd_signal and current_macd_hist < 0:
+                macd_signal = 5   # 死叉且柱状图为负
+            elif current_macd < current_macd_signal and current_macd_hist > 0:
+                macd_signal = 10  # 死叉但柱状图为正
+            else:
+                macd_signal = 12  # 中性
+
+            signals['MACD'] = macd_signal
+
+            # RSI信号 (20分)
+            rsi_signal = 0
+            if 30 <= current_rsi <= 70:
+                rsi_signal = 20  # 正常区间
+            elif current_rsi < 30:
+                rsi_signal = 15  # 超卖
+            elif current_rsi > 70:
+                rsi_signal = 5   # 超买
+            else:
+                rsi_signal = 12  # 中性
+
+            signals['RSI'] = rsi_signal
+
+            # 布林带信号 (20分)
+            bb_signal = 0
+            if current_price > current_bb_upper:
+                bb_signal = 5    # 超过上轨，可能回调
+            elif current_price < current_bb_lower:
+                bb_signal = 20   # 低于下轨，可能反弹
+            elif current_bb_middle < current_price < current_bb_upper:
+                bb_signal = 15   # 在上轨和中轨之间，强势
+            elif current_bb_lower < current_price < current_bb_middle:
+                bb_signal = 10   # 在下轨和中轨之间，弱势
+            else:
+                bb_signal = 12   # 中性
+
+            signals['BB'] = bb_signal
+
+            # 随机指标信号 (10分)
+            stoch_signal = 0
+            if current_slowk > current_slowd and current_slowk < 80:
+                stoch_signal = 10  # 金叉且未超买
+            elif current_slowk > current_slowd and current_slowk >= 80:
+                stoch_signal = 5   # 金叉但超买
+            elif current_slowk < current_slowd and current_slowk > 20:
+                stoch_signal = 5   # 死叉但未超卖
+            elif current_slowk < current_slowd and current_slowk <= 20:
+                stoch_signal = 8   # 死叉且超卖，可能反弹
+            else:
+                stoch_signal = 6   # 中性
+
+            signals['Stoch'] = stoch_signal
+
+            # 成交量信号 (10分)
+            volume_signal = 0
+            if current_volume > current_volume_sma * 1.5:
+                volume_signal = 10  # 成交量显著放大
+            elif current_volume > current_volume_sma * 1.2:
+                volume_signal = 8   # 成交量适度放大
+            elif current_volume < current_volume_sma * 0.8:
+                volume_signal = 5   # 成交量萎缩
+            else:
+                volume_signal = 6   # 成交量正常
+
+            signals['Volume'] = volume_signal
+
+            # 计算总信号分数
+            total_score = sum(signals.values())
+
+            # 存储结果
+            results[ticker] = {
+                'score': total_score,
+                'price': current_price,
+                'sma_20': current_sma_20,
+                'sma_50': current_sma_50,
+                'macd': current_macd,
+                'macd_signal': current_macd_signal,
+                'rsi': current_rsi,
+                'bb_upper': current_bb_upper,
+                'bb_lower': current_bb_lower,
+                'signals': signals
+            }
+
+        except Exception as e:
+            print(f"Error processing {ticker}: {e}")
+            continue
+
+    # 转换为DataFrame并按分数排序
+    if results:
+        df = pd.DataFrame.from_dict(results, orient='index')
+        df = df.sort_values('score', ascending=False)
+        return df
+    else:
+        return pd.DataFrame()
+
+# 可视化技术指标
+def plot_technical_indicators(ticker, start_date, end_date):
+    """
+    绘制股票的技术指标图表
+
+    参数:
+    ticker: 股票代码
+    start_date: 开始日期
+    end_date: 结束日期
+    """
+    # 下载股票数据
+    data = yf.download(ticker, start=start_date, end=end_date)
+
+    # 计算技术指标
+    close = data['Close']
+    high = data['High']
+    low = data['Low']
+    volume = data['Volume']
+
+    # 移动平均线
+    sma_20 = talib.SMA(close.values, timeperiod=20)
+    sma_50 = talib.SMA(close.values, timeperiod=50)
+
+    # MACD
+    macd, macd_signal, macd_hist = talib.MACD(close.values, fastperiod=12, slowperiod=26, signalperiod=9)
+
+    # RSI
+    rsi = talib.RSI(close.values, timeperiod=14)
+
+    # 布林带
+    bb_upper, bb_middle, bb_lower = talib.BBANDS(close.values, timeperiod=20, nbdevup=2, nbdevdn=2, matype=0)
+
+    # 创建图表
+    fig = plt.figure(figsize=(14, 10))
+
+    # 价格和移动平均线
+    ax1 = plt.subplot(4, 1, 1)
+    ax1.plot(data.index, close, label='Close Price')
+    ax1.plot(data.index, sma_20, label='SMA 20')
+    ax1.plot(data.index, sma_50, label='SMA 50')
+    ax1.set_title(f'{ticker} Price and Moving Averages')
+    ax1.set_ylabel('Price')
+    ax1.legend()
+    ax1.grid(True)
+
+    # MACD
+    ax2 = plt.subplot(4, 1, 2)
+    ax2.plot(data.index, macd, label='MACD')
+    ax2.plot(data.index, macd_signal, label='Signal')
+    ax2.bar(data.index, macd_hist, label='Histogram')
+    ax2.set_title('MACD')
+    ax2.set_ylabel('MACD')
+    ax2.legend()
+    ax2.grid(True)
+
+    # RSI
+    ax3 = plt.subplot(4, 1, 3)
+    ax3.plot(data.index, rsi, label='RSI')
+    ax3.axhline(y=70, color='r', linestyle='--')
+    ax3.axhline(y=30, color='g', linestyle='--')
+    ax3.set_title('RSI')
+    ax3.set_ylabel('RSI')
+    ax3.legend()
+    ax3.grid(True)
+
+    # 布林带
+    ax4 = plt.subplot(4, 1, 4)
+    ax4.plot(data.index, close, label='Close Price')
+    ax4.plot(data.index, bb_upper, label='Upper Band')
+    ax4.plot(data.index, bb_middle, label='Middle Band')
+    ax4.plot(data.index, bb_lower, label='Lower Band')
+    ax4.fill_between(data.index, bb_upper, bb_lower, color='gray', alpha=0.1)
+    ax4.set_title('Bollinger Bands')
+    ax4.set_ylabel('Price')
+    ax4.set_xlabel('Date')
+    ax4.legend()
+    ax4.grid(True)
+
+    plt.tight_layout()
+    plt.show()
+
+# 示例使用
+if __name__ == "__main__":
+    # 定义股票池
+    stock_pool = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'JPM',
+                  'V', 'JNJ', 'WMT', 'PG', 'UNH', 'HD', 'MA', 'BAC', 'XOM', 'PFE',
+                  'CSCO', 'ADBE', 'CRM', 'NFLX', 'ACN', 'NKE', 'DIS']
+
+    # 设置日期范围
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+
+    # 运行技术分析策略
+    selected = technical_analysis_strategy(stock_pool, start_date, end_date)
+
+    # 打印结果
+    if not selected.empty:
+        print("基于技术分析策略选出的股票:")
+        print(selected.head(10))
+
+        # 可视化结果
+        plt.figure(figsize=(12, 6))
+        top_stocks = selected.head(10)
+        top_stocks['score'].plot(kind='bar', color='skyblue')
+        plt.title('技术分析综合评分')
+        plt.ylabel('评分')
+        plt.xticks(rotation=45)
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.tight_layout()
+        plt.show()
+
+        # 绘制技术最佳股票的技术指标图表
+        best_stock = selected.index[0]
+        plot_technical_indicators(best_stock, start_date, end_date)
+    else:
+        print("未能获取有效的股票数据")</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- 文字讲解 -->
+                    <div class="explanation-container">
+                        <div class="explanation-title">
+                            <i class="bi bi-info-circle"></i>
+                            <span>策略详解</span>
+                        </div>
+                        <div class="explanation-content">
+                            <p>
+                                技术分析策略基于"历史会重演"的理念，通过研究历史价格和成交量数据来预测未来价格走势。技术分析师认为，所有已知信息已经反映在价格中，市场价格走势会形成可识别的模式，这些模式可以用来预测未来的价格变动。</p>
+
+                            <h3>策略原理</h3>
+                            <p>技术分析策略基于以下核心假设：</p>
+                            <ul>
+                                <li><strong>市场包容一切信息</strong>：所有已知和未知信息已经反映在价格中</li>
+                                <li><strong>价格沿趋势变动</strong>：价格会沿着趋势方向运动，直到出现明确的反转信号</li>
+                                <li><strong>历史会重演</strong>：市场心理和行为模式会重复出现，形成可识别的图表模式</li>
+                            </ul>
+
+                            <h3>常用技术指标</h3>
+                            <p>技术分析中常用的指标包括：</p>
+                            <ul>
+                                <li><strong>移动平均线(MA)</strong>：平滑价格波动，识别趋势方向</li>
+                                <li><strong>相对强弱指数(RSI)</strong>：衡量价格变动的速度和幅度，识别超买超卖</li>
+                                <li><strong>MACD</strong>：识别趋势变化和动量</li>
+                                <li><strong>布林带</strong>：衡量价格波动性和相对位置</li>
+                                <li><strong>随机指标</strong>：比较收盘价与价格区间，识别超买超卖</li>
+                            </ul>
+
+                            <h3>实施步骤</h3>
+                            <ul>
+                                <li>数据收集：获取足够的历史价格和成交量数据</li>
+                                <li>指标计算：计算各种技术指标</li>
+                                <li>信号生成：根据指标组合生成买卖信号</li>
+                                <li>风险管理：设置止损点和仓位管理</li>
+                                <li>执行交易：根据信号执行买卖操作</li>
+                                <li>绩效评估：定期评估策略表现并调整参数</li>
+                            </ul>
+
+                            <h3>优缺点分析</h3>
+                            <p><strong>优点：</strong></p>
+                            <ul>
+                                <li>适用于各种时间框架，从短期交易到长期投资</li>
+                                <li>提供明确的买卖信号，减少主观判断</li>
+                                <li>可以帮助识别趋势和转折点</li>
+                            </ul>
+
+                            <p><strong>缺点：</strong></p>
+                            <ul>
+                                <li>在震荡市中容易产生假信号</li>
+                                <li>滞后性：技术指标基于历史数据，可能滞后于市场变化</li>
+                                <li>过度优化：历史表现良好的参数在未来可能失效</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 结果展示 -->
+                    <div class="result-container">
+                        <div class="result-title">
+                            <i class="bi bi-graph-up"></i>
+                            <span>策略回测结果</span>
+                        </div>
+                        <img src="https://picsum.photos/seed/technical-analysis-strategy/800/400.jpg"
+                             alt="技术分析策略回测结果" class="result-image">
+
+                        <div class="result-stats">
+                            <div class="stat-card">
+                                <div class="stat-value">16.3%</div>
+                                <div class="stat-label">年化收益率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">1.28</div>
+                                <div class="stat-label">夏普比率</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">21.4%</div>
+                                <div class="stat-label">最大回撤</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">63%</div>
+                                <div class="stat-label">胜率</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 评论区 -->
+                    <div class="comments-container">
+                        <div class="comments-title">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>策略讨论</span>
+                        </div>
+
+                        <div class="comment-form">
+                            <textarea class="comment-input" placeholder="分享您对技术分析策略的看法..."></textarea>
+                            <button class="comment-submit">发表评论</button>
+                        </div>
+
+                        <div class="comment-list">
+                            <div class="comment-item">
+                                <div class="comment-avatar">吴</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">吴明</div>
+                                        <div class="comment-time">2023-11-07 13:30</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        技术分析在短期交易中确实有用，但关键在于多个指标的确认。单一指标容易产生假信号，我建议至少使用3-5个不同类型的指标来确认交易信号。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (16)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="comment-item">
+                                <div class="comment-avatar">郑</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">郑华</div>
+                                        <div class="comment-time">2023-11-06 10:15</div>
+                                    </div>
+                                    <div class="comment-text">
+                                        我在使用技术分析时发现，结合市场环境调整策略参数很重要。牛市和熊市中的有效指标和参数可能不同，需要根据市场状态灵活调整。
+                                    </div>
+                                    <div class="comment-actions">
+                                        <span class="comment-action"><i
+                                                class="bi bi-hand-thumbs-up"></i> 赞同 (11)</span>
+                                        <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 选项卡切换功能
+    const tabs = document.querySelectorAll('.strategy-tab');
+    const panels = document.querySelectorAll('.strategy-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            // 移除所有选项卡的active类
+            tabs.forEach(t => t.classList.remove('active'));
+            // 添加当前选项卡的active类
+            this.classList.add('active');
+
+            // 获取目标面板ID
+            const targetPanelId = this.getAttribute('data-tab') + '-panel';
+
+            // 隐藏所有面板
+            panels.forEach(panel => panel.classList.remove('active'));
+
+            // 显示目标面板
+            const targetPanel = document.getElementById(targetPanelId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 选项卡切换功能
+        const tabs = document.querySelectorAll('.strategy-tab');
+        const panels = document.querySelectorAll('.strategy-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function () {
+                // 移除所有选项卡的active类
+                tabs.forEach(t => t.classList.remove('active'));
+                // 添加当前选项卡的active类
+                this.classList.add('active');
+
+                // 获取目标面板ID
+                const targetPanelId = this.getAttribute('data-tab') + '-panel';
+
+                // 隐藏所有面板
+                panels.forEach(panel => panel.classList.remove('active'));
+
+                // 显示目标面板
+                const targetPanel = document.getElementById(targetPanelId);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
+            });
+        });
+
+        // 刷新按钮功能
+        const refreshBtn = document.getElementById('refreshStrategies');
+        const updateTimeEl = document.getElementById('updateTime');
+
+        refreshBtn?.addEventListener('click', function () {
+            const button = this;
+            const icon = button.querySelector('.bi-arrow-clockwise');
+
+            button.disabled = true;
+            icon.style.animation = 'rotate 1s linear infinite';
+
+            // 模拟刷新过程
+            setTimeout(() => {
+                button.disabled = false;
+                icon.style.animation = '';
+
+                // 更新时间显示
+                const now = new Date();
+                const timeString = now.toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                if (updateTimeEl) {
+                    updateTimeEl.textContent = timeString;
+                }
+
+                console.log('策略数据已刷新');
+            }, 1500);
+        });
+
+        // 复制代码功能
+        const copyButtons = document.querySelectorAll('.code-action-btn');
+        copyButtons.forEach(button => {
+            if (button.title === '复制代码') {
+                button.addEventListener('click', function () {
+                    const codeContainer = this.closest('.code-container');
+                    const codeContent = codeContainer.querySelector('.code-content pre').textContent;
+
+                    navigator.clipboard.writeText(codeContent).then(() => {
+                        // 临时改变图标表示复制成功
+                        const icon = this.querySelector('i');
+                        icon.classList.remove('bi-clipboard');
+                        icon.classList.add('bi-check');
+
+                        setTimeout(() => {
+                            icon.classList.remove('bi-check');
+                            icon.classList.add('bi-clipboard');
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                    });
+                });
+            }
+        });
+
+        // 评论提交功能
+        const commentForms = document.querySelectorAll('.comment-form');
+        commentForms.forEach(form => {
+            const submitBtn = form.querySelector('.comment-submit');
+            const textarea = form.querySelector('.comment-input');
+
+            submitBtn.addEventListener('click', function () {
+                const commentText = textarea.value.trim();
+
+                if (commentText) {
+                    // 创建新评论元素
+                    const commentList = form.nextElementSibling;
+                    const newComment = document.createElement('div');
+                    newComment.className = 'comment-item';
+
+                    // 获取当前时间
+                    const now = new Date();
+                    const timeString = now.toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    // 生成随机用户名和头像
+                    const names = ['张', '李', '王', '刘', '陈', '杨', '赵', '黄', '周', '吴'];
+                    const randomName = names[Math.floor(Math.random() * names.length)];
+
+                    // 构建评论HTML
+                    newComment.innerHTML = `
+                        <div class="comment-avatar">${randomName}</div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <div class="comment-author">${randomName}明</div>
+                                <div class="comment-time">${timeString}</div>
+                            </div>
+                            <div class="comment-text">${commentText}</div>
+                            <div class="comment-actions">
+                                <span class="comment-action"><i class="bi bi-hand-thumbs-up"></i> 赞同 (0)</span>
+                                <span class="comment-action"><i class="bi bi-reply"></i> 回复</span>
+                            </div>
+                        </div>
+                    `;
+
+                    // 添加到评论列表
+                    commentList.insertBefore(newComment, commentList.firstChild);
+
+                    // 清空输入框
+                    textarea.value = '';
+
+                    // 添加点赞功能
+                    const likeBtn = newComment.querySelector('.comment-action');
+                    likeBtn.addEventListener('click', function () {
+                        const likeCount = this.textContent.match(/\d+/)[0];
+                        const newCount = parseInt(likeCount) + 1;
+                        this.innerHTML = `<i class="bi bi-hand-thumbs-up"></i> 赞同 (${newCount})`;
+                    });
+                }
+            });
+        });
+
+        // 点赞功能
+        const likeButtons = document.querySelectorAll('.comment-action');
+        likeButtons.forEach(button => {
+            if (button.textContent.includes('赞同')) {
+                button.addEventListener('click', function () {
+                    const likeCount = this.textContent.match(/\d+/)[0];
+                    const newCount = parseInt(likeCount) + 1;
+                    this.innerHTML = `<i class="bi bi-hand-thumbs-up"></i> 赞同 (${newCount})`;
+                });
+            }
+        });
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            if (updateTimeEl && !updateTimeEl.textContent.trim()) {
+                updateTimeEl.textContent = timeString;
+            }
+        }
+
+        updateCurrentTime();
+    });
+</script>
+{% endblock %}

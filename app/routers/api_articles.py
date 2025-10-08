@@ -8,7 +8,7 @@ import uuid
 
 from sqlalchemy.dialects.mssql.information_schema import views
 
-from app.deps import get_current_admin, get_current_user
+from app.deps import get_current_admin, get_current_user, get_current_registered_user
 from app.models import Article2, Category2, Tag2
 from app.schemas import Article2In, Article2Out
 
@@ -91,7 +91,7 @@ async def get_articles(current_admin=Depends(get_current_admin)):
     return {"items": articles_data, "total": len(articles_data)}
 
 @router.post("/", status_code=201)
-async def create_article(article_data: Article2In, current_admin=Depends(get_current_admin)):
+async def create_article(article_data: Article2In, current_admin=Depends(get_current_registered_user)):
     # 获取分类
     category = await Category2.filter(cn_name=article_data.category).first()
 
@@ -119,7 +119,7 @@ async def create_article(article_data: Article2In, current_admin=Depends(get_cur
             content=article_data.content,
             content_type=article_data.contentType,
             summary=article_data.summary,
-            status=article_data.status,
+            status="draft",
             views=0,
             likes=0,
             is_top=False,

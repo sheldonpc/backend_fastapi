@@ -1,0 +1,1360 @@
+{% extends "public/base.html" %}
+
+{% block title %}个人中心 - 五市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* 页面整体动画 */
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 个人中心容器样式 */
+    .profile-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+    }
+
+    /*.profile-avatar {*/
+    /*    width: 100px;*/
+    /*    height: 100px;*/
+    /*    border-radius: 50%;*/
+    /*    object-fit: cover;*/
+    /*    border: 4px solid #f0f0f0;*/
+    /*}*/
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+
+    .profile-meta {
+        display: flex;
+        gap: 1rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-bio {
+        color: #4b5563;
+        margin-top: 0.5rem;
+    }
+
+    /* 标签页样式 */
+    .profile-tabs {
+        display: flex;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-tab {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        color: #6b7280;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .profile-tab:hover {
+        color: var(--primary-color);
+    }
+
+    .profile-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    /* 内容区域样式 */
+    .profile-content {
+        display: none;
+    }
+
+    .profile-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* 表单样式 */
+    .profile-form {
+        max-width: 600px;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* 列表项样式 */
+    .list-item {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .list-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .list-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .list-item-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .list-item-meta {
+        display: flex;
+        gap: 1rem;
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+
+    .list-item-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .list-item-action {
+        background: none;
+        border: none;
+        color: #6b7280;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .list-item-action:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--primary-color);
+    }
+
+    .list-item-action.delete:hover {
+        color: #ef4444;
+    }
+
+    .list-item-content {
+        color: #4b5563;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+
+    /* 按钮样式 */
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-secondary:hover {
+        background-color: #e5e7eb;
+    }
+
+    .btn-danger {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #dc2626;
+    }
+
+    /* 空状态样式 */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #d1d5db;
+    }
+
+    .empty-state-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+
+    .empty-state-description {
+        margin-bottom: 1.5rem;
+    }
+
+    /* 分页样式 */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.25rem;
+        margin-top: 2rem;
+    }
+
+    .page-item {
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .page-item:hover {
+        background-color: #f9fafb;
+        color: var(--primary-color);
+    }
+
+    .page-item.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .list-item-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .list-item-actions {
+            align-self: flex-end;
+        }
+    }
+
+    /* 头像样式 */
+    .profile-avatar-edit {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f0f0f0;
+        border: 4px solid #f0f0f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-avatar-edit img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .default-avatar {
+        font-size: 80px !important;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">
+                个人中心
+            </h1>
+            <p class="page-subtitle">管理您的个人信息和内容</p>
+        </div>
+    </div>
+
+    <!-- 个人信息区域 -->
+    <div class="profile-container">
+        <!-- 用户头像部分 -->
+        <div class="profile-header">
+            <img src="{{ current_user.avatar_url or 'https://picsum.photos/seed/default-avatar/150/150.jpg' }}"
+                 alt="用户头像" class="profile-avatar-edit">
+            <div class="profile-info">
+                <h2 class="profile-name">{{ current_user.pen_name or current_user.username }}</h2>
+                <div class="profile-meta">
+                    <span><i class="bi bi-envelope"></i> {{ current_user.email }}</span>
+                    <span><i
+                            class="bi bi-calendar"></i> 加入于 {{ current_user.created_at.strftime('%Y年%m月') }}</span>
+                    <span><i class="bi bi-shield-check"></i> {{ current_user.role }}</span>
+                </div>
+                <p class="profile-bio">这个人很懒，还没有填写个人简介...</p>
+            </div>
+            <div>
+                <button class="btn btn-primary" id="editProfileBtn">
+                    <i class="bi bi-pencil-square"></i> 编辑资料
+                </button>
+            </div>
+        </div>
+
+        <!-- 标签页 -->
+        <div class="profile-tabs">
+            <div class="profile-tab active" data-tab="articles">
+                <i class="bi bi-file-text"></i> 我的文章
+            </div>
+            <div class="profile-tab" data-tab="strategies">
+                <i class="bi bi-cpu"></i> 我的策略
+            </div>
+            <div class="profile-tab" data-tab="comments">
+                <i class="bi bi-chat-dots"></i> 我的评论
+            </div>
+            <div class="profile-tab" data-tab="settings">
+                <i class="bi bi-gear"></i> 账户设置
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="profile-content active" id="articles-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>我的文章</h3>
+                <a href="/articles/create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> 新建文章
+                </a>
+            </div>
+            <div id="articles-list">
+                <!-- 文章列表将通过JavaScript动态加载 -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-3">正在加载文章...</p>
+                </div>
+            </div>
+            <div class="pagination" id="articles-pagination">
+                <!-- 分页将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <div class="profile-content" id="strategies-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>我的策略</h3>
+                <a href="/strategy/create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> 新建策略
+                </a>
+            </div>
+            <div id="strategies-list">
+                <!-- 策略列表将通过JavaScript动态加载 -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-3">正在加载策略...</p>
+                </div>
+            </div>
+            <div class="pagination" id="strategies-pagination">
+                <!-- 分页将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <div class="profile-content" id="comments-content">
+            <h3 class="mb-4">我的评论</h3>
+            <div id="comments-list">
+                <!-- 评论列表将通过JavaScript动态加载 -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-3">正在加载评论...</p>
+                </div>
+            </div>
+            <div class="pagination" id="comments-pagination">
+                <!-- 分页将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <div class="profile-content" id="settings-content">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <h3 class="mb-4 text-center">账户设置</h3>
+                    <form class="profile-form" id="profileForm">
+                        <div class="form-group">
+                            <label for="username" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="username" value="{{ current_user.username }}"
+                                   readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="penName" class="form-label">笔名</label>
+                            <input type="text" class="form-control" id="penName"
+                                   value="{{ current_user.pen_name or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">电子邮箱</label>
+                            <input type="email" class="form-control" id="email" value="{{ current_user.email }}"
+                                   readonly>
+                            <div class="form-text">电子邮箱不可修改，如需更改请联系管理员</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="avatarUrl" class="form-label">头像</label>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="avatar-preview">
+                                    <img id="avatarPreview"
+                                         src="{{ current_user.avatar_url or 'https://picsum.photos/seed/default-avatar/150/150.jpg' }}"
+                                         alt="头像预览"
+                                         class="rounded-circle"
+                                         style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #e9ecef;">
+                                </div>
+                                <div>
+                                    <input type="file" id="avatarFile" class="form-control" accept="image/*"
+                                           style="display: none;">
+                                    <button type="button" class="btn btn-outline-primary" id="uploadAvatarBtn">
+                                        <i class="bi bi-upload"></i> 上传头像
+                                    </button>
+                                    <div class="form-text mt-2">支持 JPG、PNG、GIF、WebP 格式，最大 5MB</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="avatarUrl" value="{{ current_user.avatar_url or '' }}">
+                            <div id="uploadProgress" class="progress mt-2" style="display: none;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bio" class="form-label">个人简介</label>
+                            <textarea class="form-control" id="bio" rows="4">这个人很懒，还没有填写个人简介...</textarea>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center mt-4">
+                            <button type="submit" class="btn btn-primary" id="saveProfileBtn">保存更改</button>
+                            <button type="button" class="btn btn-secondary" id="cancelEditBtn">取消</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>您确定要删除这个<span id="deleteType"></span>吗？此操作不可撤销。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 全局变量
+    let currentTab = 'articles';
+    let currentPage = {
+        articles: 1,
+        strategies: 1,
+        comments: 1
+    };
+    let deleteType = '';
+    let deleteId = null;
+    let deleteModal;
+    let accessToken = localStorage.getItem('access_token');
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function () {
+        // 检查用户是否已登录
+        if (!accessToken) {
+            showToast('请先登录', 'warning');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
+            return;
+        }
+
+        // 初始化模态框
+        deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+        // 绑定标签页切换事件
+        document.querySelectorAll('.profile-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                switchTab(this.getAttribute('data-tab'));
+            });
+        });
+
+        // 绑定编辑资料按钮
+        document.getElementById('editProfileBtn').addEventListener('click', function () {
+            switchTab('settings');
+        });
+
+        // 绑定取消编辑按钮
+        document.getElementById('cancelEditBtn').addEventListener('click', function () {
+            switchTab('articles');
+        });
+
+        // 绑定表单提交事件
+        document.getElementById('profileForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            updateProfile();
+        });
+
+        // 绑定确认删除按钮
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            confirmDelete();
+        });
+
+        // 头像上传相关
+        const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+        const avatarFile = document.getElementById('avatarFile');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const avatarUrl = document.getElementById('avatarUrl');
+        const uploadProgress = document.getElementById('uploadProgress');
+
+        // 点击上传按钮触发文件选择
+        uploadAvatarBtn.addEventListener('click', function () {
+            avatarFile.click();
+        });
+
+        // 文件选择后预览并上传
+        avatarFile.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            // 检查文件类型
+            if (!file.type.startsWith('image/')) {
+                showToast('请选择图片文件', 'danger');
+                return;
+            }
+
+            // 检查文件大小
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+                showToast('图片大小不能超过5MB', 'danger');
+                return;
+            }
+
+            // 预览图片
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                avatarPreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // 上传图片
+            uploadAvatar(file);
+        });
+
+        // 加载初始数据
+        loadArticles();
+    });
+
+    // 切换标签页
+    function switchTab(tabName) {
+        // 更新标签页状态
+        document.querySelectorAll('.profile-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+        // 更新内容区域
+        document.querySelectorAll('.profile-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(`${tabName}-content`).classList.add('active');
+
+        // 更新当前标签
+        currentTab = tabName;
+
+        // 加载对应数据
+        switch (tabName) {
+            case 'articles':
+                loadArticles();
+                break;
+            case 'strategies':
+                loadStrategies();
+                break;
+            case 'comments':
+                loadComments();
+                break;
+            // settings不需要加载数据
+        }
+    }
+
+    // 上传头像函数
+    function uploadAvatar(file) {
+        const progressBar = uploadProgress.querySelector('.progress-bar');
+
+        // 显示进度条
+        uploadProgress.style.display = 'block';
+        progressBar.style.width = '0%';
+
+        // 创建FormData对象用于上传文件
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // 获取认证token
+        const token = localStorage.getItem("access_token");
+
+        // 使用fetch API上传文件
+        fetch('/admin/api/upload/image', {
+            method: 'POST',
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 上传完成
+                progressBar.style.width = '100%';
+
+                if (data.success && data.url) {
+                    // 更新头像URL
+                    avatarUrl.value = data.url;
+                    showToast('头像上传成功', 'success');
+                } else {
+                    showToast('头像上传失败: ' + (data.message || '服务器返回错误'), 'danger');
+                    // 恢复原头像
+                    const originalUrl = avatarUrl.value;
+                    avatarPreview.src = originalUrl || 'https://picsum.photos/seed/default-avatar/150/150.jpg';
+                }
+            })
+            .catch(error => {
+                console.error('上传头像失败:', error);
+                let errorMessage = '头像上传失败';
+
+                if (error.message.includes('401')) {
+                    errorMessage = '您没有权限上传图片';
+                } else if (error.message.includes('413')) {
+                    errorMessage = '文件太大，服务器拒绝接收';
+                } else if (error.message.includes('500')) {
+                    errorMessage = '服务器内部错误，请稍后再试';
+                }
+
+                showToast(errorMessage, 'danger');
+
+                // 恢复原头像
+                const originalUrl = avatarUrl.value;
+                avatarPreview.src = originalUrl || 'https://picsum.photos/seed/default-avatar/150/150.jpg';
+            })
+            .finally(() => {
+                // 延迟隐藏进度条
+                setTimeout(() => {
+                    uploadProgress.style.display = 'none';
+                }, 500);
+            });
+
+        // 模拟上传进度（因为fetch API不直接支持上传进度）
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 30;
+            if (progress > 90) progress = 90;
+            progressBar.style.width = `${progress}%`;
+        }, 200);
+
+        // 清除定时器
+        setTimeout(() => {
+            clearInterval(interval);
+        }, 2000);
+    }
+
+    // 加载文章列表
+    async function loadArticles() {
+        const articlesList = document.getElementById('articles-list');
+        articlesList.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="mt-3">正在加载文章...</p>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/api/user/articles?page=${currentPage.articles}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showToast('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return;
+                }
+                throw new Error('获取文章列表失败');
+            }
+
+            const data = await response.json();
+            renderArticles(data.items);
+            renderPagination('articles', data.total_pages, data.current_page);
+        } catch (error) {
+            console.error('获取文章列表失败:', error);
+            articlesList.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">加载失败</h4>
+                    <p>无法获取文章列表，请稍后再试。</p>
+                    <hr>
+                    <p class="mb-0">错误信息: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // 渲染文章列表
+    function renderArticles(articles) {
+        const articlesList = document.getElementById('articles-list');
+
+        if (articles.length === 0) {
+            articlesList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-file-text"></i>
+                    </div>
+                    <h3 class="empty-state-title">暂无文章</h3>
+                    <p class="empty-state-description">您还没有创建任何文章，点击右侧"新建文章"按钮开始创作吧！</p>
+                </div>
+            `;
+            return;
+        }
+
+        articlesList.innerHTML = articles.map(article => `
+            <div class="list-item" data-id="${article.id}">
+                <div class="list-item-header">
+                    <div>
+                        <h4 class="list-item-title">${article.title}</h4>
+                        <div class="list-item-meta">
+                            <span><i class="bi bi-eye"></i> ${article.views} 浏览</span>
+                            <span><i class="bi bi-heart"></i> ${article.likes} 点赞</span>
+                            <span><i class="bi bi-chat-dots"></i> ${article.comment_count} 评论</span>
+                            <span><i class="bi bi-calendar"></i> ${formatDate(article.created_at)}</span>
+                            <span class="badge ${article.status === 'published' ? 'bg-success' : 'bg-secondary'}">${article.status === 'published' ? '已发布' : '草稿'}</span>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <a href="/articles/edit/${article.id}" class="list-item-action">
+                            <i class="bi bi-pencil"></i> 编辑
+                        </a>
+                        <button class="list-item-action delete" data-id="${article.id}">
+                            <i class="bi bi-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    ${article.summary || article.content.substring(0, 200) + '...'}
+                </div>
+            </div>
+        `).join('');
+
+        // 绑定删除按钮事件
+        document.querySelectorAll('#articles-list .delete').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const articleId = this.getAttribute('data-id');
+                showDeleteModal('article', articleId);
+            });
+        });
+    }
+
+    // 加载策略列表
+    async function loadStrategies() {
+        const strategiesList = document.getElementById('strategies-list');
+        strategiesList.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="mt-3">正在加载策略...</p>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/api/user/strategies?page=${currentPage.strategies}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showToast('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return;
+                }
+                throw new Error('获取策略列表失败');
+            }
+
+            const data = await response.json();
+            renderStrategies(data.items);
+            renderPagination('strategies', data.total_pages, data.current_page);
+        } catch (error) {
+            console.error('获取策略列表失败:', error);
+            strategiesList.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">加载失败</h4>
+                    <p>无法获取策略列表，请稍后再试。</p>
+                    <hr>
+                    <p class="mb-0">错误信息: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // 渲染策略列表
+    function renderStrategies(strategies) {
+        const strategiesList = document.getElementById('strategies-list');
+
+        if (strategies.length === 0) {
+            strategiesList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h3 class="empty-state-title">暂无策略</h3>
+                    <p class="empty-state-description">您还没有创建任何策略，点击右侧"新建策略"按钮开始创建吧！</p>
+                </div>
+            `;
+            return;
+        }
+
+        strategiesList.innerHTML = strategies.map(strategy => `
+            <div class="list-item" data-id="${strategy.id}">
+                <div class="list-item-header">
+                    <div>
+                        <h4 class="list-item-title">
+                            <i class="bi ${strategy.icon || 'bi-cpu'}"></i> ${strategy.name}
+                        </h4>
+                        <div class="list-item-meta">
+                            <span><i class="bi bi-tag"></i> ${strategy.group_name}</span>
+                            <span><i class="bi bi-eye"></i> ${strategy.view_count} 浏览</span>
+                            <span><i class="bi bi-heart"></i> ${strategy.like_count} 点赞</span>
+                            <span><i class="bi bi-calendar"></i> ${formatDate(strategy.created_at)}</span>
+                            <span class="badge ${strategy.publish ? 'bg-success' : 'bg-secondary'}">${strategy.publish ? '已发布' : '草稿'}</span>
+                            <span class="badge ${strategy.review ? 'bg-info' : 'bg-warning'}">${strategy.review ? '已审核' : '未审核'}</span>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <a href="/strategies/edit/${strategy.id}" class="list-item-action">
+                            <i class="bi bi-pencil"></i> 编辑
+                        </a>
+                        <button class="list-item-action delete" data-id="${strategy.id}">
+                            <i class="bi bi-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    ${strategy.introduction}
+                </div>
+            </div>
+        `).join('');
+
+        // 绑定删除按钮事件
+        document.querySelectorAll('#strategies-list .delete').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const strategyId = this.getAttribute('data-id');
+                showDeleteModal('strategy', strategyId);
+            });
+        });
+    }
+
+    // 加载评论列表
+    async function loadComments() {
+        const commentsList = document.getElementById('comments-list');
+        commentsList.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="mt-3">正在加载评论...</p>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/api/user/comments?page=${currentPage.comments}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showToast('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return;
+                }
+                throw new Error('获取评论列表失败');
+            }
+
+            const data = await response.json();
+            renderComments(data.items);
+            renderPagination('comments', data.total_pages, data.current_page);
+        } catch (error) {
+            console.error('获取评论列表失败:', error);
+            commentsList.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">加载失败</h4>
+                    <p>无法获取评论列表，请稍后再试。</p>
+                    <hr>
+                    <p class="mb-0">错误信息: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // 渲染评论列表
+    function renderComments(comments) {
+        const commentsList = document.getElementById('comments-list');
+
+        if (comments.length === 0) {
+            commentsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <h3 class="empty-state-title">暂无评论</h3>
+                    <p class="empty-state-description">您还没有发表任何评论。</p>
+                </div>
+            `;
+            return;
+        }
+
+        commentsList.innerHTML = comments.map(comment => `
+            <div class="list-item" data-id="${comment.id}">
+                <div class="list-item-header">
+                    <div>
+                        <h4 class="list-item-title">评论于: ${comment.article ? comment.article.title : '已删除的文章'}</h4>
+                        <div class="list-item-meta">
+                            <span><i class="bi bi-calendar"></i> ${formatDate(comment.created_at)}</span>
+                            ${comment.updated_at !== comment.created_at ? `<span><i class="bi bi-pencil"></i> 编辑于 ${formatDate(comment.updated_at)}</span>` : ''}
+                            <span class="badge ${comment.is_approved ? 'bg-success' : 'bg-warning'}">${comment.is_approved ? '已审核' : '待审核'}</span>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="list-item-action edit" data-id="${comment.id}">
+                            <i class="bi bi-pencil"></i> 编辑
+                        </button>
+                        <button class="list-item-action delete" data-id="${comment.id}">
+                            <i class="bi bi-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    ${comment.content}
+                </div>
+            </div>
+        `).join('');
+
+        // 绑定编辑和删除按钮事件
+        document.querySelectorAll('#comments-list .edit').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-id');
+                editComment(commentId);
+            });
+        });
+
+        document.querySelectorAll('#comments-list .delete').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-id');
+                showDeleteModal('comment', commentId);
+            });
+        });
+    }
+
+    // 渲染分页
+    function renderPagination(type, totalPages, currentPage) {
+        const paginationContainer = document.getElementById(`${type}-pagination`);
+
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = '';
+
+        // 上一页按钮
+        if (currentPage > 1) {
+            paginationHTML += `<div class="page-item" data-page="${currentPage - 1}"><i class="bi bi-chevron-left"></i></div>`;
+        }
+
+        // 页码按钮
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                paginationHTML += `<div class="page-item ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</div>`;
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                paginationHTML += `<div class="page-item disabled">...</div>`;
+            }
+        }
+
+        // 下一页按钮
+        if (currentPage < totalPages) {
+            paginationHTML += `<div class="page-item" data-page="${currentPage + 1}"><i class="bi bi-chevron-right"></i></div>`;
+        }
+
+        paginationContainer.innerHTML = paginationHTML;
+
+        // 绑定分页点击事件
+        paginationContainer.querySelectorAll('.page-item:not(.disabled)').forEach(item => {
+            item.addEventListener('click', function () {
+                const page = parseInt(this.getAttribute('data-page'));
+                currentPage[type] = page;
+                if (type === 'articles') {
+                    loadArticles();
+                } else if (type === 'strategies') {
+                    loadStrategies();
+                } else if (type === 'comments') {
+                    loadComments();
+                }
+            });
+        });
+    }
+
+    // 编辑评论
+    async function editComment(commentId) {
+        try {
+            const response = await fetch(`/api/comments/${commentId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showToast('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return;
+                }
+                throw new Error('获取评论详情失败');
+            }
+
+            const comment = await response.json();
+
+            // 创建一个简单的编辑对话框
+            const newContent = prompt('编辑评论内容:', comment.content);
+            if (newContent === null) return; // 用户取消
+
+            if (newContent.trim() === '') {
+                showToast('评论内容不能为空', 'danger');
+                return;
+            }
+
+            // 更新评论
+            const updateResponse = await fetch(`/api/comments/${commentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({content: newContent})
+            });
+
+            if (!updateResponse.ok) {
+                if (updateResponse.status === 401) {
+                    showToast('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return;
+                }
+                throw new Error('更新评论失败');
+            }
+
+            loadComments();
+            showToast('评论更新成功', 'success');
+        } catch (error) {
+            console.error('编辑评论失败:', error);
+            showToast('编辑评论失败，请稍后再试', 'danger');
+        }
+    }
+
+    // 显示删除确认模态框
+    function showDeleteModal(type, id) {
+        deleteType = type;
+        deleteId = id;
+
+        const typeText = type === 'article' ? '文章' : type === 'strategy' ? '策略' : '评论';
+        document.getElementById('deleteType').textContent = typeText;
+
+        deleteModal.show();
+    }
+
+    // 确认删除
+    async function confirmDelete() {
+        if (!deleteId || !deleteType) return;
+
+        try {
+            const url = deleteType === 'article' ? `/api/articles/${deleteId}` :
+                deleteType === 'strategy' ? `/api/strategies/${deleteId}` :
+                    `/api/comments/${deleteId}`;
+
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showToast('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return;
+                }
+                throw new Error(`删除${deleteType === 'article' ? '文章' : deleteType === 'strategy' ? '策略' : '评论'}失败`);
+            }
+
+            deleteModal.hide();
+
+            // 重新加载数据
+            if (deleteType === 'article') {
+                loadArticles();
+            } else if (deleteType === 'strategy') {
+                loadStrategies();
+            } else {
+                loadComments();
+            }
+
+            // 显示成功消息
+            showToast(`删除成功`, 'success');
+        } catch (error) {
+            console.error(`删除${deleteType === 'article' ? '文章' : deleteType === 'strategy' ? '策略' : '评论'}失败:`, error);
+            showToast(`删除失败，请稍后再试`, 'danger');
+        }
+    }
+
+    // 更新用户资料
+    async function updateProfile() {
+        // 获取表单数据
+        const profileData = {
+            pen_name: document.getElementById('penName').value,
+            email: document.getElementById('email').value,
+            avatar_url: document.getElementById('avatarUrl').value,
+            bio: document.getElementById('bio').value
+        };
+
+        // 获取提交按钮并添加加载状态
+        const submitBtn = document.querySelector('#saveProfileBtn');
+        const originalBtnText = submitBtn.innerHTML;
+
+        // 显示加载状态
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span class="ms-2">保存中...</span>
+        `;
+
+        try {
+            const response = await fetch('/api/user/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(profileData)
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    showToast('登录已过期，请重新登录', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    return;
+                }
+                throw new Error('更新个人资料失败');
+            }
+
+            // 更新页面上的用户信息
+            document.querySelector('.profile-name').textContent = profileData.pen_name || profileData.username;
+            document.querySelector('.profile-bio').textContent = profileData.bio;
+
+            // 更新头像显示
+            if (profileData.avatar_url) {
+                document.querySelector('.profile-avatar-edit').src = profileData.avatar_url;
+            }
+
+            // 显示成功消息
+            showToast('个人资料更新成功', 'success');
+
+            // 切换回文章标签页
+            switchTab('articles');
+        } catch (error) {
+            console.error('更新个人资料失败:', error);
+            showToast('更新个人资料失败，请稍后再试', 'danger');
+        } finally {
+            // 恢复按钮状态
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+        if (!dateString) return '未知';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // 显示提示消息
+    function showToast(message, type = 'info') {
+        // 创建toast元素
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+        // 添加到页面
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        toastContainer.appendChild(toast);
+        document.body.appendChild(toastContainer);
+
+        // 显示toast
+        const bsToast = new bootstrap.Toast(toast, {
+            autohide: true,
+            delay: 3000
+        });
+        bsToast.show();
+
+        // 监听隐藏事件，移除元素
+        toast.addEventListener('hidden.bs.toast', function () {
+            document.body.removeChild(toastContainer);
+        });
+    }
+</script>
+{% endblock %}

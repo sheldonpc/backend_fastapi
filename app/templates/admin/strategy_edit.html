@@ -1023,7 +1023,6 @@
     }
 
     // 保存草稿
-    // 保存草稿
     function saveDraft() {
         // 收集策略数据
         const data = collectStrategyData();
@@ -1254,7 +1253,7 @@
 
                 // 跳转到策略列表页
                 setTimeout(() => {
-                    window.location.href = '/admin';
+                    window.location.href = '/strategy';
                 }, 2000);
             },
             error: function (xhr, status, error) {
@@ -1334,7 +1333,6 @@
     }
 
     // 添加消息队列
-    // 显示提示
     function showToast(message, type = 'info', duration = 3000) {
         // 获取或创建Toast容器
         let toastContainer = document.getElementById('toast-container');

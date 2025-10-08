@@ -1,0 +1,380 @@
+{% extends "public/base.html" %}
+
+{% block title %}错误 - 五市信息平台{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+        100% {
+            transform: translateY(0px);
+        }
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+        }
+    }
+
+    @keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        10%, 30%, 50%, 70%, 90% {
+            transform: translateX(-5px);
+        }
+        20%, 40%, 60%, 80% {
+            transform: translateX(5px);
+        }
+    }
+
+    .error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .error-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 800px;
+        width: 100%;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .error-header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .error-code {
+        font-size: 6rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .error-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .error-subtitle {
+        font-size: 1rem;
+        opacity: 0.8;
+        position: relative;
+        z-index: 1;
+    }
+
+    .error-body {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .error-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .error-message {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: #4b5563;
+    }
+
+    .error-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, var(--primary-color) 0%, rgba(59, 130, 246, 0.8) 90%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-home:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+        transform: translateY(-2px);
+        color: #4b5563;
+    }
+
+    .error-details {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 10px;
+        text-align: left;
+    }
+
+    .error-details h6 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+
+    .error-details p {
+        margin-bottom: 0.5rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .error-details code {
+        background: #e5e7eb;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    /* 特定错误代码的样式 */
+    .error-404 .error-icon {
+        color: #3b82f6;
+    }
+
+    .error-403 .error-icon {
+        color: #f59e0b;
+    }
+
+    .error-500 .error-icon {
+        color: #ef4444;
+    }
+
+    .error-422 .error-icon {
+        color: #8b5cf6;
+    }
+
+    /* 动画效果 */
+    .error-code.shake {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    .pulse-button {
+        animation: pulse 2s infinite;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .error-code {
+            font-size: 4rem;
+        }
+
+        .error-title {
+            font-size: 1.2rem;
+        }
+
+        .error-message {
+            font-size: 1rem;
+        }
+
+        .error-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-home, .btn-secondary {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-card error-{{ status_code }}">
+        <div class="error-header">
+            <div class="error-code" id="errorCode">{{ status_code }}</div>
+            <h2 class="error-title">出错了！</h2>
+            <p class="error-subtitle">抱歉，您访问的页面出现了问题</p>
+        </div>
+
+        <div class="error-body">
+            <div class="error-icon">
+                {% if status_code == 404 %}
+                <i class="bi bi-search"></i>
+                {% elif status_code == 403 %}
+                <i class="bi bi-shield-exclamation"></i>
+                {% elif status_code == 500 %}
+                <i class="bi bi-exclamation-triangle"></i>
+                {% elif status_code == 422 %}
+                <i class="bi bi-input-cursor-text"></i>
+                {% else %}
+                <i class="bi bi-exclamation-circle"></i>
+                {% endif %}
+            </div>
+
+            <p class="error-message">{{ message }}</p>
+
+            <div class="error-actions">
+                <a href="/" class="btn btn-home pulse-button">
+                    <i class="bi bi-house-door me-2"></i>返回首页
+                </a>
+                <button class="btn btn-secondary" onclick="history.back()">
+                    <i class="bi bi-arrow-left me-2"></i>返回上页
+                </button>
+            </div>
+
+            <div class="error-details">
+                <h6>错误详情</h6>
+                <p>错误代码: <code>{{ status_code }}</code></p>
+                <p>错误信息: <code>{{ message }}</code></p>
+                <p>时间: <code id="errorTime"></code></p>
+<!--                {% if request %}-->
+<!--                <p>请求路径: <code>{{ request.url.path }}</code></p>-->
+<!--                {% endif %}-->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 设置当前时间
+        const now = new Date();
+        const timeString = now.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        document.getElementById('errorTime').textContent = timeString;
+
+        // 错误代码动画
+        const errorCode = document.getElementById('errorCode');
+        errorCode.classList.add('shake');
+        setTimeout(() => {
+            errorCode.classList.remove('shake');
+        }, 500);
+
+        // 根据错误代码显示不同的提示信息
+        const status =
+            {
+                status_code
+            }
+
+        ;
+        let customMessage = '';
+
+        switch (status) {
+            case 404:
+                customMessage = '您访问的页面不存在，可能已被删除或移动';
+                break;
+            case 403:
+                customMessage = '您没有权限访问此页面，请联系管理员获取权限';
+                break;
+            case 500:
+                customMessage = '服务器内部错误，我们正在努力修复中';
+                break;
+            case 422:
+                customMessage = '请求参数验证失败，请检查您的输入';
+                break;
+            default:
+                customMessage = '发生了未知错误，请稍后再试';
+        }
+
+        // 如果没有自定义消息，使用默认消息
+        const messageElement = document.querySelector('.error-message');
+        if (messageElement && messageElement.textContent.trim() === '{{ message }}') {
+            messageElement.textContent = customMessage;
+        }
+
+        // 添加页面加载动画
+        document.querySelector('.error-card').style.opacity = '0';
+        document.querySelector('.error-card').style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            document.querySelector('.error-card').style.transition = 'all 0.6s ease-out';
+            document.querySelector('.error-card').style.opacity = '1';
+            document.querySelector('.error-card').style.transform = 'translateY(0)';
+        }, 100);
+
+        // 添加按钮点击效果
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+    });
+</script>
+{% endblock %}

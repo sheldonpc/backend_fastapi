@@ -10,7 +10,7 @@ from fastapi import Request
 from app.deps import optional_auth_cookie
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
     StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData, Article2, \
-    Strategy
+    Strategy, Comment2
 from app.core.templates import templates
 import markdown
 
@@ -465,97 +465,44 @@ async def get_calendar_events_api(
 @router.get("/article")
 async def home_page(request: Request, current_user=Depends(optional_auth_cookie)):
     """首页"""
-    # 模拟热门推荐文章（顶部2-3篇）
-    featured_articles = [
-        {
-            "id": 1,
-            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
-            "author": "张明分析师",
-            "publish_time": "2024-01-15",
-            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
-        },
-        {
-            "id": 2,
-            "title": "半导体行业深度报告：AI芯片需求爆发下的投资机会",
-            "author": "李强研究员",
-            "publish_time": "2024-01-10",
-            "feature_image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
-        },
-        {
-            "id": 3,
-            "title": "2024年美联储政策展望及对科技股影响",
-            "author": "王伟顾问",
-            "publish_time": "2024-01-08",
-            "feature_image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
-        }
-    ]
+    featured_articles = []
+    featured = await Article2.all().filter(is_featured=True).order_by("-published_at").limit(3).prefetch_related("tags", "author")
+    for article in featured:
+        featured_articles.append({
+            "id": article.id,
+            "title": article.title,
+            "author": article.author.username,
+            "publish_time": article.published_at.strftime("%Y-%m-%d"),
+            "feature_image": article.cover
+        })
 
-    # 模拟相关推荐
-    recommended_articles = [
-        {
-            "id": 6,
-            "title": "中国制造业转型升级的投资逻辑",
-            "publish_time": "2024-01-02"
-        },
-        {
-            "id": 7,
-            "title": "新能源车行业2024年投资策略",
-            "publish_time": "2023-12-28"
-        },
-        {
-            "id": 8,
-            "title": "云计算基础设施投资机会分析",
-            "publish_time": "2023-12-25"
-        }
-    ]
+    recommended_articles = []
+    reco = await Article2.all().filter(is_top=True).order_by("-published_at").limit(5)
+    for article in reco:
+        recommended_articles.append({
+            "id": article.id,
+            "title": article.title,
+            "publish_time": article.published_at.strftime("%Y-%m-%d"),
+        })
 
-    # 模拟热门文章
-    hot_articles = [
-        {
-            "id": 5,
-            "title": "巴菲特最新持仓分析：为何重仓科技股？",
-            "views": 3562
-        },
-        {
-            "id": 1,
-            "title": "2024年全球股市展望：人工智能浪潮下的投资机遇",
-            "views": 2847
-        },
-        {
-            "id": 6,
-            "title": "中国制造业转型升级的投资逻辑",
-            "views": 2987
-        }
-    ]
+    hot = await Article2.all().order_by("-views").limit(5)
+    hot_articles = []
+    for article in hot:
+        hot_articles.append({
+            "id": article.id,
+            "title": article.title,
+            "views": article.views
+        })
 
-    # 模拟最新评论
-    recent_comments = [
-        {
-            "user": "投资新手",
-            "content": "这篇文章分析得很透彻，特别是对半导体行业的展望很有启发！",
-            "time": "2小时前"
-        },
-        {
-            "user": "老股民",
-            "content": "AI确实是未来方向，但估值是否过高需要谨慎判断",
-            "time": "5小时前"
-        },
-        {
-            "user": "机构分析师",
-            "content": "数据翔实，逻辑清晰，对投资决策有重要参考价值",
-            "time": "1天前"
-        }
-    ]
+    recent_comments = []
+    comments = await Comment2.all().order_by("-created_at").limit(10).prefetch_related("author")
+    for comment in comments:
+        recent_comments.append({
+            "user": comment.author.username,
+            "content": comment.content,
+            "time": comment.created_at.strftime("%Y-%m-%d %H:%M")
+        })
 
-    # 模拟热门标签
-    popular_tags = [
-        {"name": "人工智能", "count": 156},
-        {"name": "投资策略", "count": 142},
-        {"name": "科技股", "count": 128},
-        {"name": "半导体", "count": 115},
-        {"name": "宏观经济", "count": 98},
-        {"name": "美联储", "count": 87}
-    ]
 
     # 模拟分页数据
     pagination = {
@@ -572,7 +519,8 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
 
     articles = []
     pen_name = ""
-    response = await Article2.all().order_by("-published_at").limit(10).prefetch_related("tags", "author")
+    response = await (Article2.all().filter(status="published").
+                      order_by("-published_at").limit(10).prefetch_related("tags", "author"))
     for article in response:
         if article.author:
             author = article.author.username
@@ -589,18 +537,16 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
             "publish_time": article.published_at.strftime("%Y-%m-%d %H:%M:%S"),
             "views": article.views,
             "tags": [tag.name for tag in article.tags],
-            "feature_image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+            "feature_image": article.cover,
         })
 
     return templates.TemplateResponse("public/article.html", {
         "request": request,
-        "article": None,  # 首页没有具体文章
         "featured_articles": featured_articles,
         "articles": articles,
         "recommended_articles": recommended_articles,
         "hot_articles": hot_articles,
         "recent_comments": recent_comments,
-        "popular_tags": popular_tags,
         "pagination": pagination,
         "current_user": current_user
     })
@@ -797,13 +743,14 @@ async def article_detail_page(request: Request, article_id: int, current_user=De
 
 
 @router.get("/strategy")
-async def strategy(request: Request):
+async def strategy(request: Request, current_user = Depends(optional_auth_cookie)):
     """
     策略页面
     """
     return templates.TemplateResponse(
         "public/strategy.html", {
-            "request": request
+            "request": request,
+            "current_user": current_user
         })
 
 
@@ -812,5 +759,16 @@ async def strategy_data(request: Request):
     """
     策略数据
     """
-    results = await Strategy.all()
+    results = await Strategy.filter(review=True)
     return {"message": "策略数据获取成功", "data": results}
+
+@router.get("/profile")
+async def profile(request: Request, current_user = Depends(optional_auth_cookie)):
+    """
+    个人中心
+    """
+    return templates.TemplateResponse(
+        "public/profile.html", {
+            "request": request,
+            "current_user": current_user
+        })

@@ -1,8 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from tortoise.expressions import Q
-
+from app.core.templates import templates
 from app import schemas, models
 from app.deps import get_current_user
 
@@ -18,6 +18,14 @@ async def create_article(article: schemas.ArticleCreate, current_user = Depends(
         is_published=article.is_published
     )
     return await schemas.ArticleOut.from_tortoise_orm(article_obj)
+
+@router.get("/create")
+async def create_article(request: Request):
+    return templates.TemplateResponse(
+        "admin/article_edit.html",
+        {"request": request, "title": "新建文章"}
+    )
+
 
 # 修改文章
 @router.put("/{article_id}", response_model=schemas.ArticleOut)

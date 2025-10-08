@@ -578,8 +578,62 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        .cover-upload-container {
+            position: relative;
+            min-height: 200px;
+        }
+
+        .cover-preview {
+            /*position: absolute;*/
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            border: 1px dashed #dee2e6;
+            padding: 1rem;
+        }
+
+        .cover-preview img {
+            max-height: 180px;
+            object-fit: contain;
+            margin-bottom: 0.5rem;
+        }
+
+        .cover-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .upload-area {
+            border: 1px dashed #dee2e6;
+            border-radius: 0.375rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .upload-area.dragover {
+            background-color: #e9ecef;
+            border-color: #0d6efd;
+        }
+
     </style>
 </head>
+
 <body>
 <div class="editor-container">
     <!-- 文章头部信息 -->
@@ -611,10 +665,8 @@
 
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">发布状态</label>
-                    <select class="form-select" id="publish-status">
+                    <select class="form-select" id="publish-status" disabled>
                         <option value="draft">草稿</option>
-                        <option value="published">已发布</option>
-                        <option value="scheduled">定时发布</option>
                     </select>
                 </div>
 
@@ -631,11 +683,25 @@
 
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">封面图片</label>
-                    <div class="upload-area" id="cover-upload">
-                        <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-                        <p class="text-muted mb-1">点击或拖拽上传封面图片</p>
-                        <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 2MB</small>
-                        <input type="file" id="cover-file" accept="image/*" style="display: none;">
+                    <div class="cover-upload-container">
+                        <div class="upload-area" id="cover-upload">
+                            <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-1">点击或拖拽上传封面图片</p>
+                            <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 2MB</small>
+                            <input type="file" id="cover-file" accept="image/*" style="display: none;">
+                        </div>
+                        <div id="uploaded-cover" class="cover-preview" style="display: none;">
+                            <img src="" alt="封面图片" class="img-fluid rounded shadow-sm">
+                            <div class="cover-actions">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="changeCover()">
+                                    <i class="fas fa-edit me-1"></i>更换
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="removeCoverImage()">
+                                    <i class="fas fa-trash me-1"></i>删除
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -653,9 +719,9 @@
             <button class="switch-btn active" id="md-editor-btn" onclick="switchEditor('markdown')">
                 <i class="fab fa-markdown me-1"></i>Markdown编辑器
             </button>
-            <button class="switch-btn" id="rich-editor-btn" onclick="switchEditor('rich')">
-                <i class="fas fa-font me-1"></i>富文本编辑器
-            </button>
+            <!--            <button class="switch-btn" id="rich-editor-btn" onclick="switchEditor('rich')">-->
+            <!--                <i class="fas fa-font me-1"></i>富文本编辑器-->
+            <!--            </button>-->
             <span class="ms-3 text-muted">
                     <i class="fas fa-info-circle me-1"></i>
                     当前使用：<strong id="current-editor">Markdown编辑器</strong>
@@ -759,10 +825,6 @@
     </div>
 </div>
 
-<!-- 图片上传悬浮按钮 -->
-<div class="image-upload-btn" id="image-upload-btn" title="上传图片">
-    <i class="fas fa-image"></i>
-</div>
 
 <!-- 图片上传模态框 -->
 <div class="image-upload-modal" id="image-upload-modal">
@@ -777,7 +839,7 @@
             <div class="upload-area" id="image-upload-area">
                 <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
                 <p class="text-muted mb-2">点击或拖拽上传图片</p>
-                <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 5MB</small>
+                <small class="text-muted">支持 JPG、PNG、GIF 格式，最大 2MB，每次最多上传10张</small>
                 <input type="file" id="image-file-input" accept="image/*" multiple style="display: none;">
                 <div class="upload-progress" id="upload-progress" style="display: none;">
                     <div class="upload-progress-bar" id="upload-progress-bar"></div>
@@ -834,6 +896,7 @@
     };
     let uploadedImages = [];
     let selectedImages = [];
+    let coverImage = null;
 
     // 初始化编辑器
     document.addEventListener('DOMContentLoaded', function () {
@@ -1049,31 +1112,134 @@
 
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                handleFileUpload(files[0]);
+                // 只处理第一个文件，确保只有一张封面图片
+                handleCoverUpload(files[0]);
             }
         });
 
         fileInput.addEventListener('change', function () {
             if (this.files.length > 0) {
-                handleFileUpload(this.files[0]);
+                // 只处理第一个文件，确保只有一张封面图片
+                handleCoverUpload(this.files[0]);
             }
         });
     }
 
+    // 处理封面上传
+    function handleCoverUpload(file) {
+        if (!file.type.startsWith('image/')) {
+            showToast('请上传图片文件', 'error', 3000);
+            return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            showToast('图片大小不能超过2MB', 'error', 3000);
+            return;
+        }
+
+        // 创建FormData对象用于上传文件
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // 显示上传进度提示
+        showToast(`正在上传 ${file.name}...`, 'info', 3000);
+
+        // 获取认证token
+        const token = localStorage.getItem("access_token");
+
+        // 发送文件到服务器
+        $.ajax({
+            type: "POST",
+            url: "/admin/api/upload/image",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            xhr: function () {
+                const xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function (evt) {
+                    if (evt.lengthComputable) {
+                        const percentComplete = evt.loaded / evt.total * 100;
+                        showToast(`上传进度: ${Math.round(percentComplete)}%`, 'info', 3000);
+                    }
+                }, false);
+                return xhr;
+            },
+            success: function (response) {
+                if (response.success && response.url) {
+                    // 保存封面图片URL，替换之前的图片
+                    coverImage = response.url;
+                    renderCoverImage();
+                    showToast(`${file.name} 上传成功`, 'success', 3000);
+                } else {
+                    showToast(`${file.name} 上传失败: ${response.message || '服务器返回错误'}`, 'error', 3000);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("上传失败:", error);
+                let errorMessage = `${file.name} 上传失败`;
+
+                if (xhr.status === 400) {
+                    errorMessage = '请求数据格式错误或超出上传限制';
+                } else if (xhr.status === 401) {
+                    errorMessage = '您没有权限上传图片';
+                } else if (xhr.status === 413) {
+                    errorMessage = '文件太大，服务器拒绝接收';
+                } else if (xhr.status === 500) {
+                    errorMessage = '服务器内部错误，请稍后再试';
+                }
+
+                if (xhr.responseJSON && xhr.responseJSON.detail) {
+                    errorMessage = xhr.responseJSON.detail;
+                }
+
+                showToast(errorMessage, 'error', 3000);
+            }
+        });
+    }
+
+    // 渲染封面图片
+    function renderCoverImage() {
+        const uploadArea = document.getElementById('cover-upload');
+        const coverPreview = document.getElementById('uploaded-cover');
+        const previewImg = coverPreview.querySelector('img');
+
+        if (coverImage) {
+            // 设置图片源
+            previewImg.src = coverImage;
+
+            // 显示预览区域，隐藏上传区域
+            uploadArea.style.display = 'none';
+            coverPreview.style.display = 'flex';
+        } else {
+            // 显示上传区域，隐藏预览区域
+            uploadArea.style.display = 'block';
+            coverPreview.style.display = 'none';
+        }
+    }
+
+    // 更换封面图片
+    function changeCover() {
+        document.getElementById('cover-file').click();
+    }
+
+    // 移除封面图片
+    function removeCoverImage() {
+        coverImage = null;
+        renderCoverImage();
+        showToast('封面图片已删除', 'info');
+    }
+
     // 初始化图片上传功能
     function initImageUpload() {
-        const uploadBtn = document.getElementById('image-upload-btn');
         const uploadModal = document.getElementById('image-upload-modal');
         const closeBtn = document.getElementById('close-upload-modal');
         const cancelBtn = document.getElementById('cancel-upload');
         const insertBtn = document.getElementById('insert-selected');
         const uploadArea = document.getElementById('image-upload-area');
         const fileInput = document.getElementById('image-file-input');
-
-        // 打开上传模态框
-        uploadBtn.addEventListener('click', function () {
-            uploadModal.classList.add('show');
-        });
 
         // 关闭上传模态框
         closeBtn.addEventListener('click', function () {
@@ -1153,6 +1319,12 @@
 
     // 处理图片上传
     function handleImageUpload(files) {
+        // 检查文件数量限制
+        if (files.length > 10) {
+            showToast(`每次最多只能上传10张图片，当前选择了${files.length}张`, 'error', 3000);
+            return;
+        }
+
         const progressBar = document.getElementById('upload-progress');
         const progressBarInner = document.getElementById('upload-progress-bar');
 
@@ -1171,41 +1343,93 @@
         // 处理每个文件
         Array.from(files).forEach(file => {
             if (!file.type.startsWith('image/')) {
-                showToast(`${file.name} 不是图片文件`, 'error');
+                showToast(`${file.name} 不是图片文件`, 'error', 3000);
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) {
-                showToast(`${file.name} 超过5MB限制`, 'error');
+            if (file.size > 2 * 1024 * 1024) {
+                showToast(`${file.name} 超过2MB限制`, 'error', 3000);
                 return;
             }
 
-            // 模拟上传到服务器
-            setTimeout(() => {
-                // 模拟服务器返回的URL
-                const imageUrl = `https://picsum.photos/seed/${Date.now()}_${Math.random().toString(36).substring(2, 9)}/800/600.jpg`;
+            // 创建FormData对象用于上传文件
+            const formData = new FormData();
+            formData.append('file', file);
 
-                // 添加到已上传图片列表
-                const imageInfo = {
-                    id: Date.now() + Math.random(),
-                    name: file.name,
-                    url: imageUrl,
-                    size: file.size,
-                    type: file.type
-                };
+            // 显示上传进度提示
+            showToast(`正在上传 ${file.name}...`, 'info', 3000);
 
-                uploadedImages.push(imageInfo);
-                renderUploadedImages();
+            // 获取认证token
+            const token = localStorage.getItem("access_token");
 
-                // 上传完成
-                clearInterval(interval);
-                progressBarInner.style.width = '100%';
+            // 发送文件到服务器
+            $.ajax({
+                type: "POST",
+                url: "/admin/api/upload/image",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function () {
+                    const xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function (evt) {
+                        if (evt.lengthComputable) {
+                            const percentComplete = evt.loaded / evt.total * 100;
+                            showToast(`上传进度: ${Math.round(percentComplete)}%`, 'info', 3000);
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function (response) {
+                    if (response.success && response.url) {
+                        // 添加到已上传图片列表
+                        const imageInfo = {
+                            id: Date.now() + Math.random(),
+                            name: file.name,
+                            url: response.url,
+                            size: file.size,
+                            type: file.type
+                        };
 
-                setTimeout(() => {
-                    progressBar.style.display = 'none';
-                    showToast(`${file.name} 上传成功`, 'success');
-                }, 500);
-            }, 1000 + Math.random() * 1000);
+                        uploadedImages.push(imageInfo);
+                        renderUploadedImages();
+                        showToast(`${file.name} 上传成功`, 'success', 3000);
+                    } else {
+                        showToast(`${file.name} 上传失败: ${response.message || '服务器返回错误'}`, 'error', 3000);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("上传失败:", error);
+                    let errorMessage = `${file.name} 上传失败`;
+
+                    if (xhr.status === 400) {
+                        errorMessage = '请求数据格式错误或超出上传限制';
+                    } else if (xhr.status === 401) {
+                        errorMessage = '您没有权限上传图片';
+                    } else if (xhr.status === 413) {
+                        errorMessage = '文件太大，服务器拒绝接收';
+                    } else if (xhr.status === 500) {
+                        errorMessage = '服务器内部错误，请稍后再试';
+                    }
+
+                    if (xhr.responseJSON && xhr.responseJSON.detail) {
+                        errorMessage = xhr.responseJSON.detail;
+                    }
+
+                    showToast(errorMessage, 'error', 3000);
+                },
+                complete: function () {
+                    // 上传完成
+                    clearInterval(interval);
+                    progressBarInner.style.width = '100%';
+
+                    setTimeout(() => {
+                        progressBar.style.display = 'none';
+                    }, 500);
+                }
+            });
         });
     }
 
@@ -1283,29 +1507,6 @@
             insertBtn.textContent = `插入${selectedImages.length}张图片`;
         } else {
             insertBtn.textContent = '插入选中图片';
-        }
-    }
-
-    // 处理文件上传
-    function handleFileUpload(file) {
-        // 这里应该有实际的文件上传逻辑
-        // 现在只是模拟
-        if (file.type.startsWith('image/')) {
-            showToast('图片上传成功', 'success');
-
-            // 更新上传区域显示
-            const uploadArea = document.getElementById('cover-upload');
-            uploadArea.innerHTML = `
-                    <img src="${URL.createObjectURL(file)}" alt="封面图片" style="max-width: 100%; max-height: 200px;">
-                    <p class="mt-2 mb-0">${file.name}</p>
-                    <small class="text-muted">点击重新上传</small>
-                    <input type="file" id="cover-file" accept="image/*" style="display: none;">
-                `;
-
-            // 重新绑定事件
-            initCoverUpload();
-        } else {
-            showToast('请上传图片文件', 'error');
         }
     }
 
@@ -1479,15 +1680,115 @@
 
     // 保存草稿
     function saveDraft(isAuto = false) {
+        // 收集文章数据
         collectArticleData();
         articleData.status = 'draft';
 
-        // 模拟保存到服务器
-        setTimeout(() => {
+        // 验证必填字段
+        if (!articleData.title || articleData.title.trim() === '') {
             if (!isAuto) {
-                showToast('草稿已保存', 'success');
+                showToast('请输入文章标题', 'error', 3000);
             }
-        }, 500);
+            return;
+        }
+
+        if (!articleData.content || articleData.content.trim() === '') {
+            if (!isAuto) {
+                showToast('请输入文章内容', 'error', 3000);
+            }
+            return;
+        }
+
+
+        if (!articleData.tags || articleData.tags.trim() === '') {
+            if (!isAuto) {
+                showToast('请输入文章标签', 'error', 3000);
+            }
+            return;
+        }
+
+        if (!articleData.cover || articleData.cover.trim() === '') {
+            if (!isAuto) {
+                showToast('请上传文章封面图片', 'error', 3000);
+            }
+            return;
+        }
+
+        // 显示加载提示
+        if (!isAuto) {
+            showToast('正在保存草稿，请稍候...', 'info', 3000);
+        }
+
+        // 禁用保存按钮
+        const saveBtn = document.getElementById('save-draft');
+        const originalBtnText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>保存中...';
+
+        // 获取认证token
+        const token = localStorage.getItem("access_token");
+
+        // 发送AJAX请求
+        $.ajax({
+            type: "POST",
+            url: "/admin/api/articles",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify(articleData),
+            success: function (response) {
+                console.log("草稿保存成功:", response);
+                if (!isAuto) {
+                    showToast('草稿已保存', 'success', 3000);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("保存草稿失败:", error);
+                console.error("响应内容:", xhr.responseText);
+
+                let errorMessage = '保存草稿失败';
+
+                if (xhr.status === 422) {
+                    // 处理验证错误
+                    try {
+                        const errorData = JSON.parse(xhr.responseText);
+                        if (errorData.data && Array.isArray(errorData.data)) {
+                            // 提取具体的错误信息
+                            const errorMessages = errorData.data.map(err => {
+                                if (err.type === 'missing') {
+                                    return `缺少必填字段: ${err.loc[err.loc.length - 1]}`;
+                                } else if (err.type === 'less_than_equal') {
+                                    return `${err.loc[err.loc.length - 1]} 值过大，最大值为 ${err.ctx.le}`;
+                                } else if (err.type === 'string_type') {
+                                    return `${err.loc.join('.')} 应为字符串类型`;
+                                } else {
+                                    return err.msg || '未知验证错误';
+                                }
+                            });
+                            errorMessage = errorMessages.join('; ');
+                        } else if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        console.error("无法解析错误响应:", e);
+                    }
+                } else if (xhr.status === 401) {
+                    errorMessage = '您没有权限保存文章';
+                } else if (xhr.status === 500) {
+                    errorMessage = '服务器内部错误，请稍后再试';
+                }
+
+                if (!isAuto) {
+                    showToast(errorMessage, 'error', 5000);
+                }
+            },
+            complete: function () {
+                // 恢复按钮状态
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnText;
+            }
+        });
     }
 
     // 从 Cookie 中获取 access_token
@@ -1521,6 +1822,10 @@
             showToast('请输入文章内容', 'error');
             return;
         }
+        if (!articleData.cover) {
+            showToast('请上传文章封面图片', 'error');
+            return;
+        }
 
         // 延迟显示成功提示，确保加载提示至少显示一段时间
         showToast('正在发布文章，请稍候...', 'info');
@@ -1548,7 +1853,7 @@
 
                 // 可以在这里添加成功后的操作，如跳转到文章列表页
                 setTimeout(() => {
-                    window.location.href = '/admin';
+                    window.location.href = '/article';
                 }, 2000);
             },
             error: function (xhr, status, error) {
@@ -1594,7 +1899,8 @@
             articleData.contentType = 'markdown';
         } else {
             // 获取富文本编辑器的完整HTML内容，保留所有样式
-            articleData.content = quillEditor.root.innerHTML;
+            // articleData.content = quillEditor.root.innerHTML;
+            articleData.content = "";
             // 保存内容类型，以便后续处理
             articleData.contentType = 'html';
         }
@@ -1609,8 +1915,7 @@
         }
 
         // 获取封面图片
-        const coverImg = document.querySelector('#cover-upload img');
-        articleData.cover = coverImg ? coverImg.src : '';
+        articleData.cover = coverImage || '';
 
         // 调试输出 - 可以在控制台查看收集的数据
         console.log('收集的文章数据:', articleData);
