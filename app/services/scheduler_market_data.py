@@ -5,9 +5,14 @@ from datetime import datetime, time, timedelta
 from dataclasses import dataclass
 from enum import Enum
 from functools import wraps
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Dict
 from zoneinfo import ZoneInfo
 import chinese_calendar as cn_calendar
+
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.job import Job
 
 from app.services.market_data_service import (
     fetch_realtime_market_data, fetch_fx_market_data, fetch_minute_cn_market_data,
@@ -34,32 +39,33 @@ class TradingSession:
 
 
 class ScheduleType(Enum):
-    CN_5MIN = "cn_5min"  # 中国交易时间5分钟任务
-    GLOBAL_5MIN = "global_5min"  # 全球指数5分钟任务
-    DAILY_CN = "daily_cn"  # 中国每日任务
-    HOURLY = "hourly"  # 小时任务
-    NEWS_HOURLY = "news_hourly"  # 新闻小时任务
-    AI_FIRST = "ai_first"  # AI早间任务
-    AI_SECOND = "ai_second"  # AI总结任务
-    EASTMONEY = "eastmoney"  # 东方财富任务
+    CN_5MIN = "cn_5min"
+    GLOBAL_5MIN = "global_5min"
+    DAILY_CN = "daily_cn"
+    HOURLY = "hourly"
+    NEWS_HOURLY = "news_hourly"
+    AI_FIRST = "ai_first"
+    AI_SECOND = "ai_second"
+    EASTMONEY = "eastmoney"
+
+    def __lt__(self, other):
+        """使枚举支持排序"""
+        return self.value < other.value
 
 
 @dataclass
 class ScheduledTask:
-    """定时任务配置"""
     name: str
     func: Callable
     schedule_type: ScheduleType
-    times: List[time] = None  # 执行时间点
-    interval: int = None  # 执行间隔(秒)
-    require_cn_trading: bool = True  # 是否需要中国交易时间
-    description: str = ""  # 任务描述
+    times: List[time] = None
+    interval: int = None
+    require_cn_trading: bool = True
+    description: str = ""
 
 
 # ==== 装饰器 ====
 def log_task(name: str):
-    """通用任务装饰器：自动打日志"""
-
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -75,14 +81,25 @@ def log_task(name: str):
     return decorator
 
 
-class MarketDataScheduler:
-    """重构后的市场数据调度器"""
+class MarketDataAPScheduler:
+    """基于 APScheduler 的市场数据调度器"""
 
     def __init__(self):
+        # 使用更安全的配置
+        self.scheduler = AsyncIOScheduler(
+            timezone=ZoneInfo("Asia/Shanghai"),
+            job_defaults={
+                'misfire_grace_time': 300,  # 任务错过执行的宽限期
+                'coalesce': True,  # 合并多次错过的执行
+                'max_instances': 1  # 同一任务最多1个实例
+            }
+        )
+        self.jobs: Dict[str, Job] = {}
+        self.force_run_once = False
         self.running = False
         self.tasks: List[asyncio.Task] = []
-        self.force_run_once = False
         self._scheduled_tasks = self._initialize_tasks()
+        self._stop_event = asyncio.Event()
 
     def _initialize_tasks(self) -> List[ScheduledTask]:
         """初始化所有定时任务配置"""
@@ -325,12 +342,11 @@ class MarketDataScheduler:
             ),
         ]
 
+    # ==== 保持原有的公共方法接口 ====
     def get_tasks_by_schedule(self, schedule_type: ScheduleType) -> List[ScheduledTask]:
-        """根据调度类型获取任务"""
         return [task for task in self._scheduled_tasks if task.schedule_type == schedule_type]
 
     def get_all_tasks_info(self) -> List[dict]:
-        """获取所有任务的详细信息，用于监控和管理"""
         tasks_info = []
         for task in self._scheduled_tasks:
             info = {
@@ -344,8 +360,8 @@ class MarketDataScheduler:
             tasks_info.append(info)
         return tasks_info
 
-    # ==== 交易时间判断 ====
     def is_cn_trading_day(self) -> bool:
+        """保持原有的交易时间判断逻辑"""
         now = datetime.now(ZoneInfo("Asia/Shanghai"))
         current_date = now.date()
 
@@ -368,7 +384,7 @@ class MarketDataScheduler:
         now = datetime.now(ZoneInfo("America/New_York"))
         return now.weekday() < 5 and any(start <= now.time() < end for start, end in TradingSession.US_SESSIONS)
 
-    # ==== 任务方法定义 ====
+    # ==== 保持原有的任务方法定义 ====
     @log_task("全球市场指数信息")
     async def run_update_global_index_data(self):
         await fetch_realtime_market_data()
@@ -499,155 +515,221 @@ class MarketDataScheduler:
         await asyncio.sleep(5)
         await self.update_global_calendar()
 
-    # ==== 通用的任务运行方法 ====
-    async def _run_task_group(self, tasks: List[ScheduledTask]):
-        """运行一组任务"""
-        for task in tasks:
+    # ==== APScheduler 配置方法 ====
+    def _setup_interval_tasks(self):
+        """配置间隔任务"""
+        interval_tasks = [
+            task for task in self._scheduled_tasks
+            if task.interval is not None
+        ]
+
+        for task in interval_tasks:
+            job_id = f"interval_{task.schedule_type.value}_{task.name}"
+
+            # 使用闭包捕获当前 task 的值
+            current_task = task
+
+            async def wrapped_task():
+                if not current_task.require_cn_trading or self.is_cn_trading_day():
+                    logger.info(f"执行间隔任务: {current_task.name}")
+                    await current_task.func()
+
             try:
-                # 检查交易时间要求
-                if task.require_cn_trading and not self.is_cn_trading_day():
-                    continue
-
-                await task.func()
-                sleep_time = random.uniform(5, 10)
-                await asyncio.sleep(sleep_time)
+                self.jobs[job_id] = self.scheduler.add_job(
+                    wrapped_task,
+                    IntervalTrigger(seconds=current_task.interval),
+                    id=job_id,
+                    name=f"{current_task.name} - {current_task.description}",
+                    replace_existing=True
+                )
+                logger.debug(f"已添加间隔任务: {job_id}")
             except Exception as e:
-                logger.error(f"任务执行失败: {task.name} - {str(e)}")
+                logger.error(f"添加间隔任务失败 {job_id}: {e}")
 
-    async def _run_interval_tasks(self, tasks: List[ScheduledTask]):
-        """运行间隔任务"""
-        while self.running:
-            await self._run_task_group(tasks)
-            if self._shutdown_after_force_once():
-                break
-            await self._safe_sleep(tasks[0].interval if tasks else 300)
+    def _setup_cron_tasks(self):
+        """配置 Cron 定时任务"""
+        # 手动按调度类型分组
+        tasks_by_schedule = {}
+        for task in self._scheduled_tasks:
+            if task.times is not None:
+                schedule_type = task.schedule_type
+                if schedule_type not in tasks_by_schedule:
+                    tasks_by_schedule[schedule_type] = []
+                tasks_by_schedule[schedule_type].append(task)
 
-    async def _run_scheduled_tasks(self, tasks: List[ScheduledTask]):
-        """运行定时任务"""
-        if not tasks:
-            return
-
-        times = tasks[0].times  # 所有任务共享相同的时间表
-        require_cn_trading = tasks[0].require_cn_trading
-
-        while self.running:
-            now = datetime.now(ZoneInfo("Asia/Shanghai"))
-            today = now.date()
-
-            # 计算下一个执行时间
-            next_run = min(
-                (datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai"))
-                 for t in times
-                 if datetime.combine(today, t, tzinfo=ZoneInfo("Asia/Shanghai")) > now),
-                default=datetime.combine(today + timedelta(days=1), times[0], tzinfo=ZoneInfo("Asia/Shanghai"))
-            )
-
-            sleep_sec = (next_run - now).total_seconds()
-            logger.info(f"{tasks[0].schedule_type.value} 任务将在 {sleep_sec:.0f} 秒后执行")
-            await self._safe_sleep(sleep_sec)
-
-            if not self.running:
-                break
-
-            # 检查交易时间条件
-            if require_cn_trading and not self.is_cn_trading_day():
+        # 按调度类型处理任务组
+        for schedule_type, tasks_list in tasks_by_schedule.items():
+            if not tasks_list:
                 continue
 
-            await self._run_task_group(tasks)
-            if self._shutdown_after_force_once():
-                break
+            # 每个组的所有任务共享相同的时间表
+            first_task = tasks_list[0]
+            times = first_task.times
+            require_cn_trading = first_task.require_cn_trading
 
-    # ==== 调度循环 ====
-    async def _scheduler_loop_5min_cn(self):
-        """中国交易时间5分钟任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.CN_5MIN)
-        await self._run_interval_tasks(tasks)
+            for time_point in times:
+                job_id = f"cron_{schedule_type.value}_{time_point.strftime('%H%M')}"
 
-    async def _scheduler_loop_5min_global(self):
-        """全球指数5分钟任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.GLOBAL_5MIN)
-        await self._run_interval_tasks(tasks)
+                # 使用闭包捕获当前变量
+                current_tasks_list = tasks_list
+                current_require_cn_trading = require_cn_trading
+                current_schedule_type = schedule_type
+                current_time_point = time_point
 
-    async def _scheduler_loop_daily_cn(self):
-        """中国每日任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.DAILY_CN)
-        await self._run_scheduled_tasks(tasks)
+                async def run_task_group():
+                    if not current_require_cn_trading or self.is_cn_trading_day():
+                        logger.info(
+                            f"执行定时任务组: {current_schedule_type.value} - {current_time_point.strftime('%H:%M')}")
+                        for task in current_tasks_list:
+                            try:
+                                await task.func()
+                                await asyncio.sleep(random.uniform(2, 5))
+                            except Exception as e:
+                                logger.error(f"任务执行失败: {task.name} - {str(e)}")
 
-    async def _scheduler_loop_hourly(self):
-        """小时任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.HOURLY)
-        await self._run_scheduled_tasks(tasks)
+                try:
+                    self.jobs[job_id] = self.scheduler.add_job(
+                        run_task_group,
+                        CronTrigger(hour=time_point.hour, minute=time_point.minute),
+                        id=job_id,
+                        name=f"{schedule_type.value} - {time_point.strftime('%H:%M')}",
+                        replace_existing=True
+                    )
+                    logger.debug(f"已添加定时任务: {job_id}")
+                except Exception as e:
+                    logger.error(f"添加定时任务失败 {job_id}: {e}")
 
-    async def _scheduler_news_loop_hourly(self):
-        """新闻小时任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.NEWS_HOURLY)
-        await self._run_scheduled_tasks(tasks)
+    def _setup_special_tasks(self):
+        """配置特殊任务"""
+        # 胡润排行榜 - 每年一次
+        hurun_task = next((task for task in self._scheduled_tasks if task.name == "胡润排行榜"), None)
+        if hurun_task:
+            try:
+                self.jobs['hurun_yearly'] = self.scheduler.add_job(
+                    hurun_task.func,
+                    CronTrigger(day=1, month=1, hour=7),
+                    id='hurun_yearly',
+                    name="胡润排行榜年度更新",
+                    replace_existing=True
+                )
+                logger.debug("已添加胡润排行榜任务")
+            except Exception as e:
+                logger.error(f"添加胡润排行榜任务失败: {e}")
 
-    async def _scheduler_ai_first(self):
-        """AI早间任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.AI_FIRST)
-        await self._run_scheduled_tasks(tasks)
+    def setup_all_schedules(self):
+        """配置所有调度任务"""
+        logger.info("正在配置 APScheduler 任务...")
 
-    async def _scheduler_ai_second(self):
-        """AI总结任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.AI_SECOND)
-        await self._run_scheduled_tasks(tasks)
-
-    async def _scheduler_eastmoney(self):
-        """东方财富任务"""
-        tasks = self.get_tasks_by_schedule(ScheduleType.EASTMONEY)
-        await self._run_scheduled_tasks(tasks)
-
-    # ==== 工具方法 ====
-    def _shutdown_after_force_once(self):
-        """当 force_run_once 启用时，运行一次后关闭"""
-        if self.force_run_once:
-            logger.info("force_run_once 模式：任务已执行一次，调度器即将退出")
-            self.running = False
-            return True
-        return False
-
-    async def _safe_sleep(self, seconds: float):
-        """安全 sleep，支持取消"""
         try:
-            await asyncio.sleep(seconds)
-        except asyncio.CancelledError:
-            pass
+            self._setup_interval_tasks()
+            self._setup_cron_tasks()
+            self._setup_special_tasks()
 
-    # ==== 调度器控制 ====
+            logger.info(f"✅ 已配置 {len(self.jobs)} 个 APScheduler 任务")
+        except Exception as e:
+            logger.error(f"配置调度任务失败: {e}")
+            raise
+
+    # ==== 调度器控制方法 ====
     async def start_scheduler(self, force_run_once: bool = False):
+        """启动调度器"""
         if self.running:
             logger.warning("调度器已在运行中")
             return
 
-        self.running = True
         self.force_run_once = force_run_once
-        logger.info("市场数据调度器启动")
+        self.running = True
 
-        # 打印任务概览
-        self.print_task_overview()
+        if force_run_once:
+            logger.info("force_run_once 模式：立即执行所有任务一次")
+            try:
+                for task in self._scheduled_tasks:
+                    if not task.require_cn_trading or self.is_cn_trading_day():
+                        try:
+                            await task.func()
+                            await asyncio.sleep(1)
+                        except Exception as e:
+                            logger.error(f"任务执行失败: {task.name} - {str(e)}")
+            finally:
+                self.running = False
+            return
 
-        self.tasks = [
-            asyncio.create_task(self._scheduler_loop_5min_cn()),
-            asyncio.create_task(self._scheduler_loop_5min_global()),
-            asyncio.create_task(self._scheduler_loop_daily_cn()),
-            asyncio.create_task(self._scheduler_loop_hourly()),
-            asyncio.create_task(self._scheduler_news_loop_hourly()),
-            asyncio.create_task(self._scheduler_ai_first()),
-            asyncio.create_task(self._scheduler_ai_second()),
-            asyncio.create_task(self._scheduler_eastmoney()),
-        ]
+        # 正常启动 APScheduler
+        try:
+            self.setup_all_schedules()
+
+            if not self.scheduler.running:
+                self.scheduler.start()
+                logger.info("✅ APScheduler 已启动")
+
+            # 启动保活任务
+            self._stop_event.clear()
+            self.tasks = [asyncio.create_task(self._keep_alive())]
+
+            logger.info("✅ APScheduler 市场数据调度器启动完成")
+            self.print_task_overview()
+
+            # 打印任务状态
+            for job_id, job in self.jobs.items():
+                if job.next_run_time:
+                    logger.info(f"任务: {job.name} -> 下次运行: {job.next_run_time}")
+                else:
+                    logger.info(f"任务: {job.name} -> 等待调度")
+
+        except Exception as e:
+            logger.error(f"启动调度器失败: {e}")
+            self.running = False
+            raise
+
+    async def _keep_alive(self):
+        """保持调度器运行的背景任务"""
+        try:
+            await self._stop_event.wait()
+        except asyncio.CancelledError:
+            logger.debug("保活任务被取消")
+        except Exception as e:
+            logger.error(f"保活任务异常: {e}")
 
     async def stop_scheduler(self):
+        """停止调度器"""
         if not self.running:
             logger.warning("调度器未运行")
             return
 
+        logger.info("正在停止调度器...")
         self.running = False
-        for task in self.tasks:
-            task.cancel()
-        await asyncio.gather(*self.tasks, return_exceptions=True)
-        logger.info("✅ 调度器已停止")
+
+        try:
+            # 先设置停止事件
+            self._stop_event.set()
+
+            # 取消保活任务
+            for task in self.tasks:
+                if not task.done():
+                    task.cancel()
+
+            if self.tasks:
+                await asyncio.gather(*self.tasks, return_exceptions=True)
+
+            # 停止 APScheduler
+            if hasattr(self, 'scheduler') and self.scheduler.running:
+                self.scheduler.shutdown(wait=False)
+
+            self.jobs.clear()
+            self.tasks.clear()
+
+            logger.info("✅ APScheduler 调度器已停止")
+
+        except Exception as e:
+            logger.error(f"停止调度器时发生错误: {e}")
+            # 强制清理
+            self.jobs.clear()
+            self.tasks.clear()
+            if hasattr(self, 'scheduler'):
+                try:
+                    self.scheduler.shutdown(wait=False)
+                except:
+                    pass
 
     def print_task_overview(self):
         """打印任务概览"""
@@ -661,10 +743,40 @@ class MarketDataScheduler:
                     trading_info = "需交易时间" if task.require_cn_trading else "全天运行"
                     logger.info(f"  • {task.name}: {time_info} | {trading_info}")
 
+    # ==== 新增的管理功能 ====
+    def get_job_status(self) -> Dict[str, dict]:
+        """获取所有作业状态"""
+        status = {}
+        for job_id, job in self.jobs.items():
+            status[job_id] = {
+                'name': job.name,
+                'next_run': job.next_run_time.isoformat() if job.next_run_time else None,
+                'pending': job.pending,
+            }
+        return status
+
+    def pause_job(self, job_id: str):
+        """暂停特定作业"""
+        if job_id in self.jobs:
+            self.jobs[job_id].pause()
+            logger.info(f"已暂停作业: {job_id}")
+
+    def resume_job(self, job_id: str):
+        """恢复特定作业"""
+        if job_id in self.jobs:
+            self.jobs[job_id].resume()
+            logger.info(f"已恢复作业: {job_id}")
+
+    def trigger_job(self, job_id: str):
+        """立即触发特定作业"""
+        if job_id in self.jobs:
+            self.jobs[job_id].modify(next_run_time=datetime.now())
+            logger.info(f"已触发作业: {job_id}")
+
 
 # ==== 使用示例和测试 ====
 if __name__ == "__main__":
-    scheduler = MarketDataScheduler()
+    scheduler = MarketDataAPScheduler()
 
     # 打印所有任务信息
     print("是否在中国交易时间:", scheduler.is_cn_trading_day())

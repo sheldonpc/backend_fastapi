@@ -14,7 +14,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.exceptions import PermissionDenied
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData
 from app.routers.root import _build_homepage_data
-from app.services.scheduler_market_data import MarketDataScheduler
+from app.services.scheduler_market_data import MarketDataAPScheduler
 from app.utils.logger import init_logger, get_logger
 from app.database import init_db, close_db
 from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
     # 简化后的初始化，移除了 important_to_console 参数
     init_logger(console_output=console_output)
 
-    market_scheduler = MarketDataScheduler()
+    market_scheduler = MarketDataAPScheduler()
     await init_db()
 
     try:
