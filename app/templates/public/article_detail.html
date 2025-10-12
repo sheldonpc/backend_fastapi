@@ -313,6 +313,33 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
+    /* 回复表单样式 */
+    .reply-form {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        display: none;
+    }
+
+    .reply-form.active {
+        display: block;
+    }
+
+    /* 子评论样式 */
+    .reply-list {
+        margin-left: 2rem;
+        margin-top: 1rem;
+    }
+
+    .reply-item {
+        padding: 0.8rem;
+        margin-bottom: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 3px solid var(--primary-color);
+    }
+
     /* 响应式调整 */
     @media (max-width: 768px) {
         .article-hero {
@@ -340,6 +367,10 @@
             width: 60px;
             height: 60px;
             font-size: 1.1rem;
+        }
+
+        .reply-list {
+            margin-left: 1rem;
         }
     }
 
@@ -369,6 +400,10 @@
         .meta-compact {
             flex-wrap: wrap;
             gap: 0.8rem;
+        }
+
+        .reply-list {
+            margin-left: 0.5rem;
         }
     }
 
@@ -562,7 +597,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="bi bi-chat"></i>
-                                <span>{{ comment_count }}</span>
+                                <span>{{ article.comment_count }}</span>
                             </div>
                             <div class="d-flex align-items-center gap-1">
                                 <i class="bi bi-clock"></i>
@@ -619,7 +654,7 @@
                     </div>
                     <div class="d-flex align-items-center gap-1">
                         <i class="bi bi-chat"></i>
-                        <span>{{ comment_count }}</span>
+                        <span>{{ article.comment_count }}</span>
                     </div>
                     <div class="d-flex align-items-center gap-1">
                         <i class="bi bi-clock"></i>
@@ -706,9 +741,9 @@
                                             <span class="text-muted">文章 · 128篇</span>
                                             <span class="text-muted">粉丝 · 2.4万</span>
                                         </div>
-                                        <button class="follow-btn btn btn-primary">
-                                            关注作者
-                                        </button>
+<!--                                        <button class="follow-btn btn btn-primary">-->
+<!--                                            关注作者-->
+<!--                                        </button>-->
                                     </div>
                                 </div>
                             </div>
@@ -777,64 +812,92 @@
                     <!-- 评论区 -->
                     <div class="content-card bg-white" id="comments">
                         <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                            <h5 class="text-dark mb-0">评论 ({{ comment_count }})</h5>
+                            <h5 class="text-dark mb-0">评论 ({{ article.comment_count }})</h5>
                             <div class="d-flex gap-2">
-                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill active">
+                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill active" data-sort="newest">
                                     最新
                                 </button>
-                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill">
+                                <button class="sort-btn btn btn-sm btn-outline-secondary rounded-pill" data-sort="hottest">
                                     最热
                                 </button>
                             </div>
                         </div>
 
                         <!-- 评论表单 -->
+                        {% if current_user %}
                         <div class="comment-form-card mb-4">
-                            <div class="row g-3 align-items-start">
-                                <div class="col-auto">
-                                    <div class="avatar-small bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center">
-                                        访
+                            <form id="comment-form" method="post" action="/article_addcomment/{{ article.id }}">
+                                <input type="hidden" name="article_id" value="{{ article.id }}">
+                                <input type="hidden" name="parent_id" id="parent-id" value="">
+                                <div class="row g-3 align-items-start">
+                                    <div class="col-auto">
+                                        <div class="avatar-small bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                                            {% if current_user.avatar_url %}
+                                            <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}"
+                                                 class="w-100 h-100 object-fit-cover">
+                                            {% else %}
+                                            {{ current_user.username[:1].upper() }}
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col">
-                                    <textarea class="form-control border-0 bg-white rounded"
-                                              placeholder="写下您的精彩评论..." rows="3"></textarea>
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <div class="d-flex gap-2">
-                                            <button type="button"
-                                                    class="format-btn btn btn-sm btn-outline-secondary rounded">
-                                                B
-                                            </button>
-                                            <button type="button"
-                                                    class="format-btn btn btn-sm btn-outline-secondary rounded">
-                                                I
+                                    <div class="col">
+                                        <textarea class="form-control border-0 bg-white rounded" name="content"
+                                                  placeholder="写下您的精彩评论..." rows="3" required></textarea>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="d-flex gap-2">
+                                                <button type="button"
+                                                        class="format-btn btn btn-sm btn-outline-secondary rounded">
+                                                    B
+                                                </button>
+                                                <button type="button"
+                                                        class="format-btn btn btn-sm btn-outline-secondary rounded">
+                                                    I
+                                                </button>
+                                            </div>
+                                            <button type="submit" class="comment-submit-btn btn btn-primary">
+                                                发表评论
                                             </button>
                                         </div>
-                                        <button class="comment-submit-btn btn btn-primary">
-                                            发表评论
-                                        </button>
                                     </div>
                                 </div>
+                            </form>
+                        </div>
+                        {% else %}
+                        <div class="comment-form-card mb-4">
+                            <div class="alert alert-info">
+                                请<a href="/auth/login" class="alert-link">登录</a>后发表评论
                             </div>
                         </div>
+                        {% endif %}
 
                         <!-- 评论列表 -->
-                        <div class="comments-list">
+                        <div class="comments-list" id="comments-container">
                             {% for comment in comments %}
-                            <div class="comment-card">
+                            <div class="comment-card" data-comment-id="{{ comment.id }}">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="avatar-small bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
-                                            {{ comment.user[:1] }}
+                                            {% if comment.author.avatar_url %}
+                                            <img src="{{ comment.author.avatar_url }}" alt="{{ comment.author.username }}"
+                                                 class="w-100 h-100 object-fit-cover">
+                                            {% else %}
+                                            {{ comment.author.username[:1].upper() }}
+                                            {% endif %}
                                         </div>
                                         <div>
-                                            <div class="fw-semibold text-dark">{{ comment.user }}</div>
-                                            <div class="text-muted small">{{ comment.time }}</div>
+                                            <div class="fw-semibold text-dark">
+                                                {% if comment.author.pen_name %}
+                                                {{ comment.author.pen_name }}
+                                                {% else %}
+                                                {{ comment.author.username }}
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-muted small">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
                                         </div>
                                     </div>
                                     <button class="comment-like-btn btn btn-sm btn-outline-danger rounded-pill d-flex align-items-center gap-1">
                                         <i class="bi bi-heart"></i>
-                                        <span>{{ comment.likes }}</span>
+                                        <span>0</span>
                                     </button>
                                 </div>
 
@@ -842,13 +905,74 @@
                                     {{ comment.content|safe }}
                                 </div>
 
-                                <button class="reply-btn btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1">
-                                    <i class="bi bi-reply"></i>
-                                    <span>回复</span>
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <button class="reply-btn btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1"
+                                            data-comment-id="{{ comment.id }}" data-author="{{ comment.author.username }}">
+                                        <i class="bi bi-reply"></i>
+                                        <span>回复</span>
+                                    </button>
+                                </div>
+
+                                <!-- 回复表单 -->
+                                <div class="reply-form" id="reply-form-{{ comment.id }}">
+                                    <form method="post" action="/article_addcomment/{{ article.id }}">
+                                        <input type="hidden" name="article_id" value="{{ article.id }}">
+                                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                        <div class="d-flex gap-2">
+                                            <textarea class="form-control" name="content" placeholder="回复 {{ comment.author.username }}..." rows="2" required></textarea>
+                                            <button type="submit" class="btn btn-primary btn-sm">回复</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- 回复列表 -->
+                                {% if comment.replies %}
+                                <div class="reply-list">
+                                    {% for reply in comment.replies %}
+                                    <div class="reply-item">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="avatar-small bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                                    {% if reply.author.avatar_url %}
+                                                    <img src="{{ reply.author.avatar_url }}" alt="{{ reply.author.username }}"
+                                                         class="w-100 h-100 object-fit-cover">
+                                                    {% else %}
+                                                    {{ reply.author.username[:1].upper() }}
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold text-dark">
+                                                        {% if reply.author.pen_name %}
+                                                        {{ reply.author.pen_name }}
+                                                        {% else %}
+                                                        {{ reply.author.username }}
+                                                        {% endif %}
+                                                        <span class="text-muted">回复</span>
+                                                        <span class="text-primary">@{{ comment.author.username }}</span>
+                                                    </div>
+                                                    <div class="text-muted small">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="comment-content text-dark">
+                                            {{ reply.content|safe }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             </div>
                             {% endfor %}
                         </div>
+
+                        <!-- 加载更多按钮 -->
+                        {% if comments|length >= 10 %}
+                        <div class="text-center mt-4">
+                            <button id="load-more-comments" class="btn btn-outline-primary rounded-pill">
+                                加载更多评论
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -949,6 +1073,420 @@
                     this.classList.add('btn-secondary');
                 }
             });
+        }
+
+        // 评论回复功能
+        const replyBtns = document.querySelectorAll('.reply-btn');
+        replyBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                const author = this.getAttribute('data-author');
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+
+                // 切换回复表单的显示状态
+                replyForm.classList.toggle('active');
+
+                // 如果显示表单，则聚焦到文本框
+                if (replyForm.classList.contains('active')) {
+                    const textarea = replyForm.querySelector('textarea');
+                    textarea.focus();
+                    textarea.value = `@${author} `;
+                }
+            });
+        });
+
+        // 评论排序功能
+        const sortBtns = document.querySelectorAll('.sort-btn');
+        sortBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                // 更新按钮状态
+                sortBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                // 获取排序类型
+                const sortType = this.getAttribute('data-sort');
+
+                // 发送AJAX请求获取排序后的评论
+                fetch(`/article/{{ article.id }}/comments?sort=${sortType}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // 更新评论列表
+                        updateCommentsList(data.comments);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+
+        // 加载更多评论
+        const loadMoreBtn = document.getElementById('load-more-comments');
+        if (loadMoreBtn) {
+            let page = 2; // 从第二页开始加载
+
+            loadMoreBtn.addEventListener('click', function () {
+                fetch(`/article/{{ article.id }}/comments?page=${page}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // 添加新评论到列表
+                        appendComments(data.comments);
+
+                        // 如果没有更多评论，隐藏加载按钮
+                        if (data.comments.length < 10) {
+                            this.style.display = 'none';
+                        }
+
+                        // 增加页码
+                        page++;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        }
+
+        // 评论表单提交
+        const commentForm = document.getElementById('comment-form');
+        if (commentForm) {
+            commentForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const content = formData.get('content');
+
+                if (!content.trim()) {
+                    alert('评论内容不能为空');
+                    return;
+                }
+
+                fetch('/article_addcomment/{{ article.id }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // 清空表单
+                        this.reset();
+
+                        // 添加新评论到列表
+                        prependComment(data.comment);
+
+                        // 更新评论计数
+                        updateCommentCount(1);
+                    } else {
+                        alert(data.message || '评论提交失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('评论提交失败');
+                });
+            });
+        }
+
+        // 处理所有回复表单提交
+        const replyForms = document.querySelectorAll('.reply-form form');
+        replyForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const content = formData.get('content');
+
+                if (!content.trim()) {
+                    alert('回复内容不能为空');
+                    return;
+                }
+
+                fetch('/article_addcomment/{{ article.id }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // 清空表单
+                        this.reset();
+
+                        // 隐藏回复表单
+                        this.parentElement.classList.remove('active');
+
+                        // 添加新回复到列表
+                        const parentId = formData.get('parent_id');
+                        addReplyToComment(parentId, data.comment);
+
+                        // 更新评论计数
+                        updateCommentCount(1);
+                    } else {
+                        alert(data.message || '回复提交失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('回复提交失败');
+                });
+            });
+        });
+
+        // 更新评论列表
+        function updateCommentsList(comments) {
+            const container = document.getElementById('comments-container');
+            container.innerHTML = '';
+
+            comments.forEach(comment => {
+                container.appendChild(createCommentElement(comment));
+            });
+        }
+
+        // 添加评论到列表
+        function appendComments(comments) {
+            const container = document.getElementById('comments-container');
+
+            comments.forEach(comment => {
+                container.appendChild(createCommentElement(comment));
+            });
+        }
+
+        // 在列表开头添加评论
+        function prependComment(comment) {
+            const container = document.getElementById('comments-container');
+            const newComment = createCommentElement(comment);
+            container.insertBefore(newComment, container.firstChild);
+        }
+
+        // 添加回复到评论
+        function addReplyToComment(parentId, reply) {
+            const parentComment = document.querySelector(`[data-comment-id="${parentId}"]`);
+            if (!parentComment) return;
+
+            // 检查是否已有回复列表
+            let replyList = parentComment.querySelector('.reply-list');
+            if (!replyList) {
+                replyList = document.createElement('div');
+                replyList.className = 'reply-list';
+                parentComment.appendChild(replyList);
+            }
+
+            // 创建回复元素
+            const replyElement = createReplyElement(reply, parentId);
+            replyList.appendChild(replyElement);
+        }
+
+        // 创建评论元素
+        function createCommentElement(comment) {
+            const div = document.createElement('div');
+            div.className = 'comment-card';
+            div.setAttribute('data-comment-id', comment.id);
+
+            // 构建评论HTML
+            let repliesHtml = '';
+            if (comment.replies && comment.replies.length > 0) {
+                repliesHtml = '<div class="reply-list">';
+                comment.replies.forEach(reply => {
+                    repliesHtml += createReplyHtml(reply, comment.id);
+                });
+                repliesHtml += '</div>';
+            }
+
+            div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-small bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                            ${comment.author.avatar_url ?
+                                `<img src="${comment.author.avatar_url}" alt="${comment.author.username}" class="w-100 h-100 object-fit-cover">` :
+                                comment.author.username.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="fw-semibold text-dark">
+                                ${comment.author.pen_name || comment.author.username}
+                            </div>
+                            <div class="text-muted small">${comment.created_at}</div>
+                        </div>
+                    </div>
+                    <button class="comment-like-btn btn btn-sm btn-outline-danger rounded-pill d-flex align-items-center gap-1">
+                        <i class="bi bi-heart"></i>
+                        <span>0</span>
+                    </button>
+                </div>
+
+                <div class="comment-content text-dark mb-3">
+                    ${comment.content}
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="reply-btn btn btn-sm btn-outline-primary rounded-pill d-flex align-items-center gap-1"
+                            data-comment-id="${comment.id}" data-author="${comment.author.username}">
+                        <i class="bi bi-reply"></i>
+                        <span>回复</span>
+                    </button>
+                </div>
+
+                <!-- 回复表单 -->
+                <div class="reply-form" id="reply-form-${comment.id}">
+                    <form method="post" action="/article_addcomment/{{ article.id }}">
+                        <input type="hidden" name="article_id" value="{{ article.id }}">
+                        <input type="hidden" name="parent_id" value="${comment.id}">
+                        <div class="d-flex gap-2">
+                            <textarea class="form-control" name="content" placeholder="回复 ${comment.author.username}..." rows="2" required></textarea>
+                            <button type="submit" class="btn btn-primary btn-sm">回复</button>
+                        </div>
+                    </form>
+                </div>
+
+                ${repliesHtml}
+            `;
+
+            // 重新绑定回复按钮事件
+            const replyBtn = div.querySelector('.reply-btn');
+            replyBtn.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                const author = this.getAttribute('data-author');
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+
+                // 切换回复表单的显示状态
+                replyForm.classList.toggle('active');
+
+                // 如果显示表单，则聚焦到文本框
+                if (replyForm.classList.contains('active')) {
+                    const textarea = replyForm.querySelector('textarea');
+                    textarea.focus();
+                    textarea.value = `@${author} `;
+                }
+            });
+
+            // 绑定回复表单提交事件
+            const replyForm = div.querySelector('.reply-form form');
+            replyForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const content = formData.get('content');
+
+                if (!content.trim()) {
+                    alert('回复内容不能为空');
+                    return;
+                }
+
+                fetch('/article_addcomment/{{ article.id }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // 清空表单
+                        this.reset();
+
+                        // 隐藏回复表单
+                        this.parentElement.classList.remove('active');
+
+                        // 添加新回复到列表
+                        const parentId = formData.get('parent_id');
+                        addReplyToComment(parentId, data.comment);
+
+                        // 更新评论计数
+                        updateCommentCount(1);
+                    } else {
+                        alert(data.message || '回复提交失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('回复提交失败');
+                });
+            });
+
+            return div;
+        }
+
+        // 创建回复HTML
+        function createReplyHtml(reply, parentUsername) {
+            return `
+                <div class="reply-item">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-small bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                ${reply.author.avatar_url ?
+                                    `<img src="${reply.author.avatar_url}" alt="${reply.author.username}" class="w-100 h-100 object-fit-cover">` :
+                                    reply.author.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="fw-semibold text-dark">
+                                    ${reply.author.pen_name || reply.author.username}
+                                    <span class="text-muted">回复</span>
+                                    <span class="text-primary">@${parentUsername}</span>
+                                </div>
+                                <div class="text-muted small">${reply.created_at}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comment-content text-dark">
+                        ${reply.content}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 创建回复元素
+        function createReplyElement(reply, parentUsername) {
+            const div = document.createElement('div');
+            div.className = 'reply-item';
+            div.innerHTML = createReplyHtml(reply, parentUsername);
+            return div;
+        }
+
+        // 更新评论计数
+        function updateCommentCount(change) {
+            // 更新页面顶部的评论数
+            const commentCountElements = document.querySelectorAll('.bi-chat').forEach(icon => {
+                const countSpan = icon.nextElementSibling;
+                if (countSpan) {
+                    const currentCount = parseInt(countSpan.textContent);
+                    countSpan.textContent = currentCount + change;
+                }
+            });
+
+            // 更新评论标题中的计数
+            const commentTitle = document.querySelector('#comments h5');
+            if (commentTitle) {
+                const currentCount = parseInt(commentTitle.textContent.match(/\d+/)[0]);
+                commentTitle.textContent = `评论 (${currentCount + change})`;
+            }
         }
     });
 </script>

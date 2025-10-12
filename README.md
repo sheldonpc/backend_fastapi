@@ -1,18 +1,3 @@
-# 🌟 Smart Financial Blog Platform
-
-<div align="center">
-
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green.svg)
-![Vue.js](https://img.shields.io/badge/Vue.js-3.x-brightgreen.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-
-[English](#english) | [中文](#chinese)
-
-</div>
-
----
-
 ## English
 
 ### 📋 Project Overview
@@ -73,7 +58,7 @@ Smart Financial Blog Platform is a modern, AI-powered financial information aggr
 - MySQL/PostgreSQL
 - Redis
 
-#### Installation
+#### Installation (Traditional)
 
 1. **Clone the repository**
 ```bash
@@ -88,8 +73,8 @@ pip install -r requirements.txt
 
 3. **Configure environment**
 ```bash
-cp .env.example .env
-# Edit .env with your database and API configurations
+cp .env.bac.example .env.bac
+# Edit .env.bac with your database and API configurations
 ```
 
 4. **Run database migrations**
@@ -103,6 +88,30 @@ uvicorn app.main:app --reload
 ```
 
 The application will be available at `http://localhost:8000`
+
+#### Installation (Docker - Recommended)
+
+For easier deployment and better environment consistency, you can use Docker:
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd myBlog
+```
+
+2. **Build and start services**
+```bash
+docker-compose up -d
+```
+
+3. **Run database migrations**
+```bash
+docker-compose exec app aerich upgrade
+```
+
+The application will be available at `http://localhost:8000`
+
+See [README.DOCKER.md](README.DOCKER.md) for detailed Docker deployment instructions.
 
 ### 📚 API Documentation
 
@@ -213,7 +222,7 @@ This project is licensed under the MIT License.
 - MySQL/PostgreSQL
 - Redis
 
-#### 安装步骤
+#### 安装步骤 (传统方式)
 
 1. **克隆仓库**
 ```bash
@@ -228,7 +237,7 @@ pip install -r requirements.txt
 
 3. **配置环境**
 ```bash
-cp .env.example .env
+cp .env.bac.example .env.bac
 # 编辑.env文件，配置数据库和API参数
 ```
 
@@ -242,60 +251,51 @@ aerich upgrade
 uvicorn app.main:app --reload
 ```
 
-应用将在 `http://localhost:8000` 可用
+应用将在 `http://localhost:8000` 可访问
 
-### 📚 API文档
+#### 安装步骤 (Docker方式 - 推荐)
 
-#### 认证接口
-- `POST /auth/register` - 用户注册
-- `POST /auth/login` - 用户登录
-- `POST /auth/refresh` - 令牌刷新
+为了更简单的部署和更好的环境一致性，您可以使用Docker:
 
-#### 市场数据API
-- `GET /api/index/` - 实时市场指数
-- `GET /api/index/risedown` - 市场涨跌统计
-- `GET /api/index/vix` - VIX恐慌指数数据
-- `GET /api/board/{board_type}/{period}` - 金融排行榜
+1. **克隆仓库**
+```bash
+git clone <repository-url>
+cd myBlog
+```
 
-#### 内容管理
-- `GET /api/articles/` - 文章列表，支持分页
-- `POST /api/articles/` - 创建新文章
-- `PUT /api/articles/{id}` - 更新文章
-- `DELETE /api/articles/{id}` - 删除文章
+2. **构建并启动服务**
+```bash
+docker-compose up -d
+```
 
-#### 管理面板
-- `GET /admin/api/stats` - 仪表板统计
-- `GET /admin/api/users` - 用户管理
-- `GET /admin/api/roles` - 角色管理
+3. **运行数据库迁移**
+```bash
+docker-compose exec app aerich upgrade
+```
 
-### 🔧 配置
+应用将在 `http://localhost:8000` 可访问
 
-`app/config.py`中的关键配置选项：
+详细Docker部署说明请查看 [README.DOCKER.md](README.DOCKER.md)。
+
+### 🔧 配置说明
+
+`app/config.py` 中的关键配置选项:
 
 ```python
 DATABASE_URL = "mysql://user:password@localhost/dbname"
 REDIS_URL = "redis://localhost:6379"
 SECRET_KEY = "your-secret-key"
-OPENAI_API_KEY = "your-openai-key"  # AI分析功能所需
+OPENAI_API_KEY = "your-openai-key"  # 用于AI分析功能
 ```
 
-### 🌟 项目亮点
+### 🌟 亮点特性
 
-1. **实时性能**: 亚秒级市场数据更新，配合Redis缓存
-2. **AI集成**: OpenAI驱动的市场分析和情绪检测
-3. **可扩展架构**: 面向微服务的设计，关注点清晰分离
+1. **实时性能**: 基于Redis缓存的亚秒级市场数据更新
+2. **AI集成**: 基于OpenAI的市场分析和情绪检测
+3. **可扩展架构**: 微服务就绪的设计，关注点清晰分离
 4. **生产就绪**: 全面的错误处理、日志记录和监控
 5. **多语言支持**: 内置国际化框架
 
 ### 📄 许可证
 
-本项目采用MIT许可证。
-
----
-
-<div align="center">
-
-**[⬆ Back to top](#-smart-financial-blog-platform)**
-
-</div>
-```
+该项目基于MIT许可证开源。

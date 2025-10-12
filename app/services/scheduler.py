@@ -3,8 +3,9 @@ import logging
 from datetime import datetime, time, timezone, timedelta
 from typing import Optional
 from app.services.market_service import MarketDataService
+from app.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger("scheduler")
 BEIJING_TZ = timezone(timedelta(hours=8))
 
 

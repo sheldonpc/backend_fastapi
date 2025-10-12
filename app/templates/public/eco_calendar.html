@@ -221,6 +221,79 @@
         font-size: 0.85em;
     }
 
+    /* 分页样式 */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .pagination-info {
+        margin-right: 16px;
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 4px;
+    }
+
+    .page-btn {
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        color: #495057;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85em;
+        transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(.active):not(:disabled) {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+
+    .page-btn.active {
+        background: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+
+    .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .page-size-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 16px;
+        font-size: 0.9em;
+    }
+
+    /* 修复下拉选择器样式 */
+    .page-size-selector .form-select {
+        min-width: 60px;
+        padding-right: 24px !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 4px center;
+        background-size: 16px 12px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
     /* 紧凑的页面标题区域 */
     .page-header {
         margin-bottom: 16px;
@@ -277,6 +350,23 @@
         .form-select, .form-control {
             width: 100% !important;
         }
+
+        .pagination-container {
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .pagination-info {
+            width: 100%;
+            text-align: center;
+            margin-right: 0;
+        }
+
+        .page-size-selector {
+            width: 100%;
+            justify-content: center;
+            margin-left: 0;
+        }
     }
 
     @media (max-width: 480px) {
@@ -291,6 +381,12 @@
         .event-meta {
             flex-wrap: wrap;
             gap: 4px;
+        }
+
+        .page-btn {
+            min-width: 28px;
+            height: 28px;
+            font-size: 0.8em;
         }
     }
 </style>
@@ -410,6 +506,26 @@
                     {% endif %}
                 </div>
 
+                <!-- 分页控件 -->
+                {% if total_pages > 1 %}
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        显示 {{ start_item }}-{{ end_item }} 条，共 {{ total_count }} 条
+                    </div>
+                    <div class="pagination" id="pagination">
+                        <!-- 分页按钮将通过JavaScript动态生成 -->
+                    </div>
+                    <div class="page-size-selector">
+                        <label for="page-size-select" class="form-label mb-0">每页显示:</label>
+                        <select class="form-select form-select-sm" id="page-size-select">
+                            <option value="10" {% if page_size==10 %}selected{% endif %}>10</option>
+                            <option value="20" {% if page_size==20 %}selected{% endif %}>20</option>
+                            <option value="50" {% if page_size==50 %}selected{% endif %}>50</option>
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- 加载状态 -->
                 <div id="loading-spinner" class="loading-spinner">
                     <div class="spinner-border text-primary" role="status">
@@ -421,12 +537,28 @@
         </div>
     </div>
 </div>
+
+<!-- 隐藏的数据存储，用于JavaScript初始化 -->
+<div id="app-data"
+     data-current-date="{{ current_date }}"
+     data-current-page="{{ page }}"
+     data-page-size="{{ page_size }}"
+     data-total-pages="{{ total_pages }}"
+     data-total-count="{{ total_count }}"
+     style="display: none;"></div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        let currentDate = '{{ current_date }}';
+        // 从隐藏的div中获取初始数据
+        const appData = document.getElementById('app-data');
+        let currentDate = appData.dataset.currentDate;
+        let currentPage = parseInt(appData.dataset.currentPage);
+        let pageSize = parseInt(appData.dataset.pageSize);
+        let totalPages = parseInt(appData.dataset.totalPages);
+        let totalCount = parseInt(appData.dataset.totalCount);
+
         const loadingSpinner = document.getElementById('loading-spinner');
         const eventsContainer = document.getElementById('events-container');
 
@@ -444,24 +576,30 @@
 
         // 应用筛选
         document.getElementById('apply-filters').addEventListener('click', function () {
-            applyFilters();
+            currentPage = 1; // 重置页码
+            updateEvents();
         });
 
         // 回车键搜索
         document.getElementById('search-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                applyFilters();
+                currentPage = 1; // 重置页码
+                updateEvents();
             }
+        });
+
+        // 每页显示数量变化
+        document.getElementById('page-size-select').addEventListener('change', function () {
+            pageSize = parseInt(this.value);
+            currentPage = 1; // 重置页码
+            updateEvents();
         });
 
         function navigateDate(days) {
             const date = new Date(currentDate);
             date.setDate(date.getDate() + days);
             currentDate = formatDate(date);
-            updateEvents();
-        }
-
-        function applyFilters() {
+            currentPage = 1; // 重置页码
             updateEvents();
         }
 
@@ -475,22 +613,49 @@
 
             // 构建查询参数
             const params = new URLSearchParams({
-                date: currentDate
+                date: currentDate,
+                page: currentPage,
+                page_size: pageSize
             });
             if (region) params.append('region', region);
             if (importance) params.append('importance', importance);
             if (search) params.append('search', search);
 
-            // AJAX请求获取数据
-            fetch(`/api/calendar/events?${params.toString()}`)
+            // AJAX请求获取数据 - 修改API路径
+            fetch(`/calendar?${params.toString()}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
-                    return response.json();
+                    return response.text(); // 先获取文本，再解析为HTML
                 })
-                .then(data => {
-                    updateEventsDisplay(data);
+                .then(html => {
+                    // 创建一个临时DOM元素来解析返回的HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+
+                    // 提取事件列表
+                    const newEventsContainer = tempDiv.querySelector('#events-container');
+                    if (newEventsContainer) {
+                        eventsContainer.innerHTML = newEventsContainer.innerHTML;
+                    }
+
+                    // 提取分页信息
+                    const newAppData = tempDiv.querySelector('#app-data');
+                    if (newAppData) {
+                        const newPage = parseInt(newAppData.dataset.currentPage);
+                        const newTotalPages = parseInt(newAppData.dataset.totalPages);
+                        const newTotalCount = parseInt(newAppData.dataset.totalCount);
+
+                        updatePagination(newPage, newTotalPages, newTotalCount);
+                    }
+
+                    // 更新最后更新时间
+                    const newLastUpdated = tempDiv.querySelector('#last-updated');
+                    if (newLastUpdated) {
+                        document.getElementById('last-updated').textContent = newLastUpdated.textContent;
+                    }
+
                     updateCurrentDate(currentDate);
                     updateURL(params.toString());
                 })
@@ -504,58 +669,76 @@
                 });
         }
 
-        function updateEventsDisplay(events) {
-            const container = document.getElementById('events-container');
+        function updatePagination(page, total_pages, total_count) {
+            currentPage = page;
+            totalPages = total_pages;
+            totalCount = total_count;
 
-            if (events.length === 0) {
-                container.innerHTML = `
-                <div class="empty-state">
-                    <i class="bi bi-calendar-x display-4 text-muted"></i>
-                    <h5 class="mt-2">暂无事件数据</h5>
-                    <p class="text-muted small">当前筛选条件下没有找到相关财经事件</p>
-                </div>
-            `;
-                return;
+            // 计算显示范围
+            const startItem = (page - 1) * pageSize + 1;
+            const endItem = Math.min(page * pageSize, total_count);
+
+            // 更新分页信息
+            const paginationInfo = document.querySelector('.pagination-info');
+            if (paginationInfo) {
+                paginationInfo.textContent = `显示 ${startItem}-${endItem} 条，共 ${total_count} 条`;
             }
 
+            // 生成分页按钮
+            const paginationContainer = document.getElementById('pagination');
+            if (!paginationContainer) return;
+
             let html = '';
-            events.forEach(event => {
-                const eventDate = new Date(event.datetime);
-                const hasPreviousValue = event.previous_value && event.previous_value !== 'None';
 
-                html += `
-                <div class="event-card ${event.importance}-importance"
-                     data-region="${event.region}"
-                     data-importance="${event.importance}"
-                     data-name="${event.name}">
-                    <div class="event-header">
-                        <div class="event-title">${event.name}</div>
-                        <div class="event-meta">
-                            <span class="event-region">${event.region}</span>
-                            <span class="importance-badge importance-${event.importance}">
-                                ${event.importance}重要性
-                            </span>
-                        </div>
-                    </div>
+            // 上一页按钮
+            html += `<button class="page-btn" ${page <= 1 ? 'disabled' : ''} data-page="${page - 1}">
+                <i class="bi bi-chevron-left"></i>
+            </button>`;
 
-                    <div class="event-time">
-                        <i class="bi bi-clock me-1"></i>
-                        ${eventDate.toLocaleString('zh-CN')}
-                    </div>
+            // 页码按钮
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(total_pages, startPage + maxVisiblePages - 1);
 
-                    ${hasPreviousValue ? `
-                    <div class="event-data">
-                        <div class="event-value">
-                            <span class="label">前值:</span>
-                            <span class="value">${event.previous_value}</span>
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            // 第一页和省略号
+            if (startPage > 1) {
+                html += `<button class="page-btn" data-page="1">1</button>`;
+                if (startPage > 2) {
+                    html += `<span class="page-btn" disabled>...</span>`;
+                }
+            }
+
+            // 页码
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="page-btn ${i === page ? 'active' : ''}" data-page="${i}">${i}</button>`;
+            }
+
+            // 最后一页和省略号
+            if (endPage < total_pages) {
+                if (endPage < total_pages - 1) {
+                    html += `<span class="page-btn" disabled>...</span>`;
+                }
+                html += `<button class="page-btn" data-page="${total_pages}">${total_pages}</button>`;
+            }
+
+            // 下一页按钮
+            html += `<button class="page-btn" ${page >= total_pages ? 'disabled' : ''} data-page="${page + 1}">
+                <i class="bi bi-chevron-right"></i>
+            </button>`;
+
+            paginationContainer.innerHTML = html;
+
+            // 添加点击事件
+            paginationContainer.querySelectorAll('.page-btn:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    currentPage = parseInt(this.dataset.page);
+                    updateEvents();
+                });
             });
-
-            container.innerHTML = html;
         }
 
         function updateCurrentDate(dateStr) {
@@ -577,6 +760,11 @@
 
         // 初始化页面状态
         updateCurrentDate(currentDate);
+
+        // 初始化分页
+        if (totalPages > 1) {
+            updatePagination(currentPage, totalPages, totalCount);
+        }
     });
 </script>
 {% endblock %}

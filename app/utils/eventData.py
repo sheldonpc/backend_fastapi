@@ -10,7 +10,9 @@ import logging
 import datetime  # 添加缺失的datetime导入
 
 # 配置日志
-logger = logging.getLogger(__name__)
+from app.utils.logger import get_logger
+
+logger = get_logger("eventData")
 
 class EventDataScraper:
     def __init__(self):

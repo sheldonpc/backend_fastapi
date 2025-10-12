@@ -1,7 +1,6 @@
 import markdown
 from markdown.extensions import Extension
 from markdown.treeprocessors import Treeprocessor
-import xml.etree.ElementTree as etree
 
 
 class ArticleStyleExtension(Extension):

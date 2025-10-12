@@ -259,26 +259,29 @@
         }
     }
 
-    /* 分页样式 */
-    .pagination .page-link {
-        color: var(--primary-color);
-        border: 1px solid #e2e8f0;
-        padding: 0.75rem 1rem;
-        margin: 0 0.25rem;
-        border-radius: 8px;
+    /* 分页样式优化 */
+    .pagination-custom .page-link {
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        margin: 0 0.2rem;
+        color: #64748b;
+        font-weight: 500;
         transition: all 0.3s ease;
+        background: #f8fafc;
     }
 
-    .pagination .page-link:hover {
+    .pagination-custom .page-link:hover {
         background: var(--primary-color);
-        border-color: var(--primary-color);
         color: white;
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
-    .pagination .page-item.active .page-link {
-        background: var(--primary-gradient);
-        border-color: var(--primary-color);
+    .pagination-custom .page-item.active .page-link {
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
     /* 响应式调整 */
@@ -597,8 +600,6 @@
         box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
     }
-
-
 </style>
 {% endblock %}
 
@@ -622,7 +623,6 @@
             </button>
         </div>
     </div>
-
 
     <!-- 两栏布局 -->
     <div class="row g-4">
@@ -672,36 +672,23 @@
                 {% endif %}  <!-- 这里添加了缺失的 endif -->
             </div>
 
-            <!-- 添加分页-->
-            {% if pagination and pagination.total_pages > 1 %}
-            <nav class="pagination_nav" aria-label="Page navigation example" style="font-size: small;">
-                <ul class="pagination justify-content-end">
-                    {# 首页 #}
-                    <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
-                        <a class="page-link"
-                           href="{% if pagination.page != 1 %}?page=1&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
-                           aria-label="First"
-                        >
-                            首页
+            <!-- 修改后的分页 -->
+            {% if pagination and pagination.pages > 1 %}
+            <nav class="mt-4">
+                <ul class="pagination pagination-custom justify-content-center">
+                    {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.url.include_query_params(page=pagination.prev_num) }}">
+                            <i class="bi bi-chevron-left me-1"></i>上一页
                         </a>
                     </li>
+                    {% endif %}
 
-                    {# 上一页 #}
-                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-                        <a class="page-link"
-                           href="{% if pagination.has_prev %}?page={{ pagination.prev_num }}&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
-                           aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-
-                    {# 页码数字 #}
                     {% for page_num in pagination.iter_pages() %}
                     {% if page_num %}
                     <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
-                        <a class="page-link" href="?page={{ page_num }}&per_page={{ pagination.per_page }}">
-                            {{ page_num }}
-                        </a>
+                        <a class="page-link" href="{{ request.url.include_query_params(page=page_num) }}">{{ page_num
+                            }}</a>
                     </li>
                     {% else %}
                     <li class="page-item disabled">
@@ -710,26 +697,15 @@
                     {% endif %}
                     {% endfor %}
 
-                    {# 下一页 #}
-                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                        <a class="page-link"
-                           href="{% if pagination.has_next %}?page={{ pagination.next_num }}&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
-                           aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
+                    {% if pagination.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ request.url.include_query_params(page=pagination.next_num) }}">
+                            下一页<i class="bi bi-chevron-right ms-1"></i>
                         </a>
                     </li>
-
-                    {# 尾页 #}
-                    <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
-                        <a class="page-link"
-                           href="{% if pagination.page != pagination.total_pages %}?page={{ pagination.total_pages }}&per_page={{ pagination.per_page }}{% else %}#{% endif %}"
-                           aria-label="Last">
-                            尾页
-                        </a>
-                    </li>
+                    {% endif %}
                 </ul>
             </nav>
-
             {% endif %}
         </div>
 

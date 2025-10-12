@@ -9,7 +9,10 @@ from app.schemas import StrategyCreate, StrategyResponse
 from app.models import Strategy, User
 
 router = APIRouter(prefix="/admin/api", tags=["strategy"])
-logger = logging.getLogger(__name__)
+
+from app.utils.logger import get_logger
+
+logger = get_logger("api_strategy")
 
 
 @router.post("/strategies", response_model=StrategyResponse)

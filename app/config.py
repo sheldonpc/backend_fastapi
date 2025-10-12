@@ -27,16 +27,6 @@ CHROMEDRIVER_PATH = os.getenv("CHROMEDRIVER_PATH", "chromedriver.exe")
 CRAWLER_HEADLESS = os.getenv("CRAWLER_HEADLESS", "true").lower() == "true"
 CRAWLER_INTERVAL_SECONDS = int(os.getenv("CRAWLER_INTERVAL_SECONDS", 300))
 
-# TORTOISE_ORM = {
-#     "connections" : {"default": DB_URL},
-#     "apps" : {
-#         "models" : {
-#             "models" : ["app.models", "aerich.models"],
-#             "default_connection" : "default"
-#         }
-#     }
-# }
-
 TORTOISE_ORM = {
     "connections" : {
         "default": {

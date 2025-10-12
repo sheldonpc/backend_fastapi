@@ -419,16 +419,18 @@
                     <ul class="pagination pagination-custom justify-content-center">
                         {% if pagination.has_prev %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ pagination.prev_num }}">
+                            <a class="page-link"
+                               href="{{ request.url.include_query_params(page=pagination.prev_num) }}">
                                 <i class="bi bi-chevron-left me-1"></i>上一页
                             </a>
                         </li>
                         {% endif %}
 
-                        {% for page in pagination.iter_pages() %}
-                        {% if page %}
-                        <li class="page-item {% if page == pagination.page %}active{% endif %}">
-                            <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                        {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ request.url.include_query_params(page=page_num) }}">{{
+                                page_num }}</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled">
@@ -439,7 +441,8 @@
 
                         {% if pagination.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ pagination.next_num }}">
+                            <a class="page-link"
+                               href="{{ request.url.include_query_params(page=pagination.next_num) }}">
                                 下一页<i class="bi bi-chevron-right ms-1"></i>
                             </a>
                         </li>

@@ -5,7 +5,10 @@ from fastapi import APIRouter, Request
 from app.core.templates import templates
 
 router = APIRouter(prefix="/strategy", tags=["strategy"])
-logger = logging.getLogger(__name__)
+
+from app.utils.logger import get_logger
+
+logger = get_logger("strategy_user")
 
 @router.get("/create")
 async def strategy(request: Request):

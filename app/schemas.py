@@ -193,7 +193,7 @@ class CommentWithReplies(Comment):
 
 
 # 解决前向引用问题
-CommentWithReplies.model_rebuild()
+CommentWithReplies.update_forward_refs()
 
 
 class ArticleBase(BaseModel):

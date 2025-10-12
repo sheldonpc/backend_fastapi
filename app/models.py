@@ -1,7 +1,6 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from scripts.regsetup import description
 from tortoise import fields, models
 from tortoise.contrib.pydantic import pydantic_model_creator
 

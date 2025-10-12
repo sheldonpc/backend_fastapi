@@ -1,16 +1,19 @@
 import re
 from datetime import datetime, timedelta
 from math import ceil
+from typing import Optional
 
-from flask import url_for, request
-from tortoise.expressions import Q
-from fastapi import APIRouter, Query, HTTPException, Depends
 from fastapi import Request
+from urllib.parse import urljoin  # 如果还需要 urljoin
+# from flask import url_for, request
+from tortoise.expressions import Q
+from fastapi import APIRouter, Query, HTTPException, Depends, Form, Request
+from fastapi.responses import RedirectResponse, JSONResponse
 
-from app.deps import optional_auth_cookie
+from app.deps import optional_auth_cookie, require_auth_cookie
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
     StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData, Article2, \
-    Strategy, Comment2
+    Strategy, Comment2, User
 from app.core.templates import templates
 import markdown
 
@@ -216,17 +219,40 @@ async def news(
                  results_news2]
 
     total_pages = ceil(total_news / per_page) if total_news > 0 else 1
+
+    # 生成分页页码列表，不包含最后一页
+    def iter_pages():
+        # 简单的分页逻辑，显示当前页前后各2页
+        start = max(1, page - 2)
+        end = min(total_pages - 1, page + 2)  # 修改这里，不包含最后一页
+
+        # 如果开始页大于1，添加第一页和省略号
+        if start > 1:
+            yield 1
+            if start > 2:
+                yield None
+
+        # 添加中间页码
+        for p in range(start, end + 1):
+            yield p
+
+        # 如果结束页小于总页数-1，添加省略号
+        if end < total_pages - 1:
+            yield None
+
+        # 不再添加最后一页
+
+    # 创建分页对象
     pagination_info = {
         "page": page,
-        "per_page": per_page,  # 注意这里是 per_page，不是 size
+        "per_page": per_page,
         "total": total_news,
-        "total_pages": total_pages,
+        "pages": total_pages,
         "has_prev": page > 1,
         "has_next": page < total_pages,
         "prev_num": page - 1 if page > 1 else None,
         "next_num": page + 1 if page < total_pages else None,
-        "iter_pages": lambda left_edge=2, left_current=2, right_current=3, right_edge=2:
-        generate_page_range(page, total_pages, left_edge, left_current, right_current, right_edge)
+        "iter_pages": iter_pages
     }
 
     results_news3 = await News3.all().order_by("-publish_time").limit(20)
@@ -366,6 +392,8 @@ async def calendar_page(
         region: str = Query(None, description="地区筛选"),
         importance: str = Query(None, description="重要性筛选"),
         search: str = Query(None, description="搜索关键词"),
+        page: int = Query(1, ge=1, description="页码"),
+        page_size: int = Query(10, ge=1, le=100, description="每页数量"),
         current_user=Depends(optional_auth_cookie),
 ):
     """财经日历页面"""
@@ -397,19 +425,35 @@ async def calendar_page(
     if search:
         events = [event for event in events if search.lower() in event.name.lower()]
 
+    # 计算分页
+    total_count = len(events)
+    total_pages = (total_count + page_size - 1) // page_size
+    offset = (page - 1) * page_size
+    paginated_events = events[offset:offset + page_size]
+
+    # 计算显示范围
+    start_item = (page - 1) * page_size + 1
+    end_item = min(page * page_size, total_count)
+
     # 获取最新数据更新时间
     latest_event = await EventData.all().order_by("-scraped_at").first()
     last_updated = latest_event.scraped_at if latest_event else None
 
     return templates.TemplateResponse("public/eco_calendar.html", {
         "request": request,
-        "events": events,
+        "events": paginated_events,
         "current_date": date,
         "selected_region": region,
         "selected_importance": importance,
         "search_keyword": search or "",
         "last_updated": last_updated,
         "current_user": current_user,
+        "page": page,
+        "page_size": page_size,
+        "total_count": total_count,
+        "total_pages": total_pages,
+        "start_item": start_item,
+        "end_item": end_item,
     })
 
 
@@ -419,6 +463,8 @@ async def get_calendar_events_api(
         region: str = Query(None, description="地区筛选"),
         importance: str = Query(None, description="重要性筛选"),
         search: str = Query(None, description="搜索关键词"),
+        page: int = Query(1, ge=1, description="页码"),
+        page_size: int = Query(10, ge=1, le=100, description="每页数量"),
         current_user=Depends(optional_auth_cookie),
 ):
     """财经日历API接口，供AJAX调用"""
@@ -446,9 +492,15 @@ async def get_calendar_events_api(
     if search:
         events = [event for event in events if search.lower() in event.name.lower()]
 
+    # 计算分页
+    total_count = len(events)
+    total_pages = (total_count + page_size - 1) // page_size
+    offset = (page - 1) * page_size
+    paginated_events = events[offset:offset + page_size]
+
     # 序列化事件数据
     events_data = []
-    for event in events:
+    for event in paginated_events:
         events_data.append({
             "id": event.id,
             "region": event.region,
@@ -459,14 +511,26 @@ async def get_calendar_events_api(
             "scraped_at": event.scraped_at.isoformat() if event.scraped_at else None,
         })
 
-    return events_data
+    # 返回包含分页信息的响应
+    return {
+        "events": events_data,
+        "page": page,
+        "page_size": page_size,
+        "total_count": total_count,
+        "total_pages": total_pages
+    }
 
 
 @router.get("/article")
-async def home_page(request: Request, current_user=Depends(optional_auth_cookie)):
+async def home_page(request: Request, page: int = 1, per_page: int = 5, current_user=Depends(optional_auth_cookie)):
     """首页"""
+    # 计算偏移量
+    offset = (page - 1) * per_page
+
+    # 获取精选文章
     featured_articles = []
-    featured = await Article2.all().filter(is_featured=True).order_by("-published_at").limit(3).prefetch_related("tags", "author")
+    featured = await Article2.all().filter(is_featured=True).order_by("-published_at").limit(3).prefetch_related("tags",
+                                                                                                                 "author")
     for article in featured:
         featured_articles.append({
             "id": article.id,
@@ -476,6 +540,7 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
             "feature_image": article.cover
         })
 
+    # 获取推荐文章
     recommended_articles = []
     reco = await Article2.all().filter(is_top=True).order_by("-published_at").limit(5)
     for article in reco:
@@ -485,6 +550,7 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
             "publish_time": article.published_at.strftime("%Y-%m-%d"),
         })
 
+    # 获取热门文章
     hot = await Article2.all().order_by("-views").limit(5)
     hot_articles = []
     for article in hot:
@@ -494,6 +560,7 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
             "views": article.views
         })
 
+    # 获取最新评论
     recent_comments = []
     comments = await Comment2.all().order_by("-created_at").limit(10).prefetch_related("author")
     for comment in comments:
@@ -503,29 +570,60 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
             "time": comment.created_at.strftime("%Y-%m-%d %H:%M")
         })
 
+    # 获取文章总数
+    total_articles = await Article2.all().filter(status="published").count()
 
-    # 模拟分页数据
+    # 计算分页信息
+    total_pages = (total_articles + per_page - 1) // per_page  # 向上取整
+    has_prev = page > 1
+    has_next = page < total_pages
+    prev_num = page - 1 if has_prev else None
+    next_num = page + 1 if has_next else None
+
+    # 生成分页页码列表
+    def iter_pages():
+        # 简单的分页逻辑，显示当前页前后各2页
+        start = max(1, page - 2)
+        end = min(total_pages, page + 2)
+
+        # 如果开始页大于1，添加第一页和省略号
+        if start > 1:
+            yield 1
+            if start > 2:
+                yield None
+
+        # 添加中间页码
+        for p in range(start, end + 1):
+            yield p
+
+        # 如果结束页小于总页数，添加省略号和最后一页
+        if end < total_pages:
+            if end < total_pages - 1:
+                yield None
+            yield total_pages
+
+    # 创建分页对象
     pagination = {
-        "page": 1,
-        "per_page": 10,
-        "total": 45,
-        "pages": 5,
-        "has_prev": False,
-        "has_next": True,
-        "prev_num": None,
-        "next_num": 2,
-        "iter_pages": lambda: [1, 2, 3, 4, 5]
+        "page": page,
+        "per_page": per_page,
+        "total": total_articles,
+        "pages": total_pages,
+        "has_prev": has_prev,
+        "has_next": has_next,
+        "prev_num": prev_num,
+        "next_num": next_num,
+        "iter_pages": iter_pages
     }
 
+    # 获取当前页的文章
     articles = []
     pen_name = ""
     response = await (Article2.all().filter(status="published").
-                      order_by("-published_at").limit(10).prefetch_related("tags", "author"))
+                      order_by("-published_at").offset(offset).limit(per_page).prefetch_related("tags", "author"))
     for article in response:
         if article.author:
             author = article.author.username
             pen_name = article.author.pen_name
-            print(author)
         else:
             author = "未知作者"
         articles.append({
@@ -552,7 +650,7 @@ async def home_page(request: Request, current_user=Depends(optional_auth_cookie)
     })
 
 
-def process_image_urls(html_content):
+def process_image_urls(html_content, request: Request):
     """处理图片URL，将相对路径转换为绝对路径"""
     from urllib.parse import urljoin
 
@@ -561,11 +659,19 @@ def process_image_urls(html_content):
         img_url = match.group(2)
 
         # 如果是相对路径，转换为绝对路径
+        # if img_url.startswith('/'):
+        #     img_url = urljoin(request.host_url, img_url)
+        # elif not img_url.startswith(('http://', 'https://')):
+        #     # 假设图片存储在 /static/uploads/ 目录
+        #     img_url = url_for('static', filename=f'uploads/{img_url}')
+
         if img_url.startswith('/'):
-            img_url = urljoin(request.host_url, img_url)
+            # 构建完整的 URL
+            base_url = str(request.base_url)
+            img_url = urljoin(base_url, img_url.lstrip('/'))
         elif not img_url.startswith(('http://', 'https://')):
-            # 假设图片存储在 /static/uploads/ 目录
-            img_url = url_for('static', filename=f'uploads/{img_url}')
+            # 对于静态文件，构建正确的 URL
+            img_url = str(request.base_url) + f"static/uploads/{img_url}"
 
         return f'<img src="{img_url}" alt="{alt_text}">'
 
@@ -574,22 +680,197 @@ def process_image_urls(html_content):
     return re.sub(pattern, replace_image_url, html_content)
 
 
+@router.post("/article_addcomment/{article_id}")
+async def submit_comment(
+        request: Request,
+        article_id: int,
+        content: str = Form(...),
+        parent_id: Optional[str] = Form(None),
+        current_user: User = Depends(require_auth_cookie)
+):
+    """提交评论"""
+    try:
+        # 验证文章是否存在
+        article = await Article2.get_or_none(id=article_id)
+        if not article:
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JSONResponse(
+                    status_code=404,
+                    content={"success": False, "message": "文章不存在"}
+                )
+            raise HTTPException(status_code=404, detail="文章不存在")
+
+        # 处理parent_id
+        parent_id_int = None
+        if parent_id and parent_id.strip():  # 确保不是空字符串
+            try:
+                parent_id_int = int(parent_id)
+            except ValueError:
+                if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                    return JSONResponse(
+                        status_code=400,
+                        content={"success": False, "message": "无效的父评论ID"}
+                    )
+                raise HTTPException(status_code=400, detail="无效的父评论ID")
+
+        # 如果是回复评论，验证父评论是否存在
+        parent_comment = None
+        if parent_id_int:
+            parent_comment = await Comment2.get_or_none(id=parent_id_int, article_id=article_id)
+            if not parent_comment:
+                if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                    return JSONResponse(
+                        status_code=404,
+                        content={"success": False, "message": "父评论不存在"}
+                    )
+                raise HTTPException(status_code=404, detail="父评论不存在")
+
+        # 创建评论
+        comment = await Comment2.create(
+            content=content,
+            author_id=current_user.id,
+            article_id=article_id,
+            parent_id=parent_id_int,
+            is_approved=True  # 如果需要审核，可以设置为False
+        )
+
+        # 更新文章评论数
+        article.comment_count += 1
+        await article.save()
+
+        # 获取完整的评论信息
+        comment = await Comment2.get(id=comment.id).prefetch_related('author')
+
+        # 如果是AJAX请求，返回JSON
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JSONResponse(content={
+                "success": True,
+                "comment": {
+                    "id": comment.id,
+                    "content": comment.content,
+                    "created_at": comment.created_at.strftime('%Y-%m-%d %H:%M'),
+                    "author": {
+                        "id": comment.author.id,
+                        "username": comment.author.username,
+                        "pen_name": comment.author.pen_name if hasattr(comment.author,
+                                                                       'pen_name') else comment.author.username,
+                        "avatar_url": comment.author.avatar_url if hasattr(comment.author, 'avatar_url') else None,
+                    }
+                }
+            })
+
+        # 否则重定向回文章详情页
+        return RedirectResponse(url=f"/article/{article_id}#comments", status_code=303)
+
+    except Exception as e:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JSONResponse(
+                status_code=500,
+                content={"success": False, "message": f"评论提交失败: {str(e)}"}
+            )
+        raise HTTPException(status_code=500, detail=f"评论提交失败: {str(e)}")
+
+
+@router.get("/article/{article_id}/comments")
+async def get_comments(
+        request: Request,
+        article_id: int,
+        page: int = 1,
+        sort: str = "newest"
+):
+    """获取评论列表（AJAX）"""
+    try:
+        # 验证文章是否存在
+        article = await Article2.get_or_none(id=article_id)
+        if not article:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "message": "文章不存在"}
+            )
+
+        # 构建查询
+        query = Comment2.filter(article_id=article_id, parent=None, is_approved=True)
+
+        # 排序
+        if sort == "hottest":
+            # 假设你有一个点赞字段，如果没有，可以使用创建时间
+            query = query.order_by("-created_at")
+        else:  # newest
+            query = query.order_by("-created_at")
+
+        # 分页
+        per_page = 10
+        offset = (page - 1) * per_page
+        comments = await query.prefetch_related('author', 'replies__author').offset(offset).limit(per_page)
+
+        # 转换为字典格式
+        comments_data = []
+        for comment in comments:
+            comment_dict = {
+                "id": comment.id,
+                "content": comment.content,
+                "created_at": comment.created_at.strftime('%Y-%m-%d %H:%M'),
+                "author": {
+                    "id": comment.author.id,
+                    "username": comment.author.username,
+                    "pen_name": comment.author.pen_name if hasattr(comment.author,
+                                                                   'pen_name') else comment.author.username,
+                    "avatar_url": comment.author.avatar_url if hasattr(comment.author, 'avatar_url') else None,
+                },
+                "replies": []
+            }
+
+            # 添加回复
+            for reply in comment.replies:
+                if reply.is_approved:
+                    comment_dict["replies"].append({
+                        "id": reply.id,
+                        "content": reply.content,
+                        "created_at": reply.created_at.strftime('%Y-%m-%d %H:%M'),
+                        "author": {
+                            "id": reply.author.id,
+                            "username": reply.author.username,
+                            "pen_name": reply.author.pen_name if hasattr(reply.author,
+                                                                         'pen_name') else reply.author.username,
+                            "avatar_url": reply.author.avatar_url if hasattr(reply.author, 'avatar_url') else None,
+                        }
+                    })
+
+            comments_data.append(comment_dict)
+
+        return JSONResponse(content={"comments": comments_data})
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": f"获取评论失败: {str(e)}"}
+        )
+
+
 @router.get("/article/{article_id}")
-async def article_detail_page(request: Request, article_id: int, current_user=Depends(optional_auth_cookie), ):
+async def article_detail_page(request: Request, article_id: int, current_user=Depends(optional_auth_cookie)):
     """文章详情页"""
-    # 模拟根据article_id获取文章数据
+    # 获取文章数据
     article = await Article2.filter(id=article_id).first().prefetch_related("tags", "author")
 
     if not article:
         raise HTTPException(status_code=404, detail="文章不存在")
 
     if article.content_type == "markdown":
-        # article.content = markdown.markdown(
-        #     article.content,
-        #     extensions=['extra', 'codehilite', 'toc']
-        # )
         article.content = process_markdown(article.content)
-        article.content = process_image_urls(article.content)
+        article.content = process_image_urls(article.content, request)
+
+    # 获取文章评论
+    comments = await Comment2.filter(article_id=article_id, parent=None, is_approved=True).order_by(
+        "-created_at").prefetch_related("author", "replies__author")
+
+    # 获取评论总数
+    comment_count = await Comment2.filter(article_id=article_id, is_approved=True).count()
+
+    # 更新文章的评论数
+    if article.comment_count != comment_count:
+        article.comment_count = comment_count
+        await article.save()
 
     # 模拟相关推荐文章
     recommended_articles = [
@@ -648,40 +929,6 @@ async def article_detail_page(request: Request, article_id: int, current_user=De
         }
     ]
 
-    # 模拟评论数据（评论区用）
-    comments = [
-        {
-            "user": "价值投资者",
-            "time": "2024-01-16 14:30",
-            "content": "从长期来看，AI确实会改变很多行业，但短期要注意估值风险。作者的分析比较客观，既看到了机遇也提示了风险。",
-            "likes": 24
-        },
-        {
-            "user": "科技爱好者",
-            "time": "2024-01-16 12:15",
-            "content": "表格数据很有参考价值，特别是对各板块的预期分析。希望后续能看到更详细的个股推荐。",
-            "likes": 18
-        },
-        {
-            "user": "量化交易员",
-            "time": "2024-01-16 09:45",
-            "content": "AI在量化投资中的应用也是重要方向，期待作者后续能专门写一篇相关文章。",
-            "likes": 15
-        },
-        {
-            "user": "行业研究员",
-            "time": "2024-01-15 16:20",
-            "content": "对AI产业链的分析很到位，特别是上游算力需求的判断很有前瞻性。",
-            "likes": 12
-        },
-        {
-            "user": "个人投资者",
-            "time": "2024-01-15 11:10",
-            "content": "文章提到的核心-卫星策略很实用，已经在实际投资中应用了，效果不错。",
-            "likes": 8
-        }
-    ]
-
     # 模拟上一篇下一篇
     prev_next_data = {
         1: {
@@ -734,7 +981,7 @@ async def article_detail_page(request: Request, article_id: int, current_user=De
         "hot_articles": hot_articles,
         "recent_comments": recent_comments,
         "comments": comments,
-        "comment_count": len(comments),
+        "comment_count": comment_count,
         "prev_article": prev_next["prev"],
         "next_article": prev_next["next"],
         "popular_tags": popular_tags,
@@ -743,7 +990,7 @@ async def article_detail_page(request: Request, article_id: int, current_user=De
 
 
 @router.get("/strategy")
-async def strategy(request: Request, current_user = Depends(optional_auth_cookie)):
+async def strategy(request: Request, current_user=Depends(optional_auth_cookie)):
     """
     策略页面
     """
@@ -762,8 +1009,9 @@ async def strategy_data(request: Request):
     results = await Strategy.filter(review=True)
     return {"message": "策略数据获取成功", "data": results}
 
+
 @router.get("/profile")
-async def profile(request: Request, current_user = Depends(optional_auth_cookie)):
+async def profile(request: Request, current_user=Depends(optional_auth_cookie)):
     """
     个人中心
     """

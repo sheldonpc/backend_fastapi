@@ -11,7 +11,9 @@ router = APIRouter(
     tags=["fetch_test"],
 )
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import get_logger
+
+logger = get_logger("api_fetch_data")
 
 @router.post("/market-data")
 async def trigger_market_data_fetch(background_tasks: BackgroundTasks):

@@ -8,7 +8,9 @@ from app.utils.redis_client import cache_set
 
 _background_task: Optional[asyncio.Task] = None
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import get_logger
+
+logger = get_logger("warm_up_tasks")
 
 async def _warm_homepage_cache():
     """后台定时刷新首页缓存"""

@@ -1,5 +1,7 @@
 import time
+import os
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
@@ -9,17 +11,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.exceptions import PermissionDenied
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData
 from app.routers.root import _build_homepage_data
-from app.services.scheduler_market_data import NewMarketScheduler
-from app.utils.logger import init_logger, logger
+from app.services.scheduler_market_data import MarketDataScheduler
+from app.utils.logger import init_logger, get_logger
 from app.database import init_db, close_db
 from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
     financial, market, api_fetch_data, api_index, root, board, strategy, upload, api_strategy, api_profile, \
-    strategy_user
-from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler
+    strategy_user, error
+from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler, \
+    permission_denied_handler
 from app.utils.redis_client import cache_set
 from app.utils.warm_up_tasks import start_cache_warmup, stop_cache_warmup
+
+# 获取logger
+logger = get_logger("main")
+load_dotenv()
 
 # 缓存配置
 HOMEPAGE_CACHE_KEY = "homepage_data"
@@ -28,29 +36,37 @@ HOMEPAGE_CACHE_TTL = 60  # 5分钟
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    market_scheduler = NewMarketScheduler()
-    init_logger()
+    # 初始化日志 - 根据环境变量决定输出策略
+    console_output = os.getenv("MYBLOG_CONSOLE_LOG", "false").lower() == "true"
+
+    # 简化后的初始化，移除了 important_to_console 参数
+    init_logger(console_output=console_output)
+
+    market_scheduler = MarketDataScheduler()
     await init_db()
 
     try:
         await market_scheduler.start_scheduler()
-        logger.info("启动市场数据调度器")
+        logger.info("✅ 启动市场数据调度器")
     except Exception as e:
-        logger.error(f"启动市场数据调度器出错: {e}")
+        logger.error(f"❌ 启动市场数据调度器出错: {e}")
 
     await start_cache_warmup()
+
+    logger.info("✅ FastAPI应用启动完成")
 
     yield
 
     try:
         await market_scheduler.stop_scheduler()
-        logger.info("停止市场数据调度器")
+        logger.info("✅ 停止市场数据调度器")
     except Exception as e:
-        logger.error(f"停止市场数据调度器出错: {e}")
+        logger.error(f"❌ 停止市场数据调度器出错: {e}")
 
     await stop_cache_warmup()
-
     await close_db()
+
+    logger.info("✅ FastAPI应用关闭完成")
 app = FastAPI(
     lifespan=lifespan,
     swagger_ui_oauth2_redirect_url="/docs/oauth2-redirect",
@@ -85,6 +101,7 @@ async def add_process_time_header(request: Request, call_next):
 
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(PermissionDenied, permission_denied_handler)
 app.add_exception_handler(Exception, all_exception_handler)
 
 app.mount("/upload", StaticFiles(directory="upload"), name="upload")
@@ -112,4 +129,10 @@ app.include_router(upload.router)
 app.include_router(api_strategy.router)
 app.include_router(api_profile.router)
 app.include_router(strategy_user.router)
+app.include_router(error.router)
+
+# 健康检查端点
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": time.time()}
 

@@ -4,13 +4,24 @@ from passlib.context import CryptContext
 from app import config
 from app.models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# 使用Argon2作为主要哈希算法，bcrypt作为备选
+pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
+    """
+    使用Argon2哈希密码，没有长度限制
+    """
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    """
+    使用Argon2验证密码，没有长度限制
+    """
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except (ValueError, TypeError) as e:
+        print(f"密码验证错误: {e}")
+        return False
 
 def create_access_token(data: dict, expires_delta: int = config.JWT_EXPIRE_MINUTES):
     to_encode = data.copy()
@@ -29,7 +40,7 @@ async def authenticate_user(email: str, password: str):
     user = await User.get_or_none(email=email)
     if not user:
         return None
-    if not user.is_active:  # ✅ 禁用用户不能登录
+    if not user.is_active:
         return None
     if not verify_password(password, user.hashed_password):
         return None

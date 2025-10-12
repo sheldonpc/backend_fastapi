@@ -3,10 +3,10 @@ from typing import Dict, Any
 import asyncio
 import logging
 import aiohttp
-import requests
-import json
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import get_logger
+
+logger = get_logger("ai_market")
 
 def calculate_market_temperature(risedown_data: Dict[str, Any]) -> float:
     """
