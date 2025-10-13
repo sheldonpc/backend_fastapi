@@ -28,7 +28,9 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import get_logger
+
+logger = get_logger("market_service")
 
 class FinancialDataCrawler:
     def __init__(self, headless: bool = True):

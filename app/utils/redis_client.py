@@ -6,11 +6,7 @@ from datetime import datetime, date
 import redis.asyncio as redis
 from app import config
 
-
 def json_dumps(obj: Any) -> str:
-    """
-    安全地将 Python 对象转为 JSON 字符串，支持 Decimal、datetime、date。
-    """
     def default(o):
         if isinstance(o, Decimal):
             return float(o)  # 或 str(o) 如果需要保留精度

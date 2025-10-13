@@ -9,7 +9,6 @@ from app import models
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-
 async def _get_user_by_token(token: str):
     """统一的根据token获取用户的核心函数"""
     if not token:

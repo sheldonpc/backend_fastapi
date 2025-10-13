@@ -13,7 +13,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.exceptions import PermissionDenied
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData
-from app.routers.root import _build_homepage_data
 from app.services.scheduler_market_data import MarketDataAPScheduler
 from app.utils.logger import init_logger, get_logger
 from app.database import init_db, close_db
@@ -28,11 +27,6 @@ from app.utils.warm_up_tasks import start_cache_warmup, stop_cache_warmup
 # 获取logger
 logger = get_logger("main")
 load_dotenv()
-
-# 缓存配置
-HOMEPAGE_CACHE_KEY = "homepage_data"
-HOMEPAGE_CACHE_TTL = 60  # 5分钟
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
