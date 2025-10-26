@@ -1161,8 +1161,9 @@
                 const xhr = new window.XMLHttpRequest();
                 xhr.upload.addEventListener("progress", function (evt) {
                     if (evt.lengthComputable) {
+                        // 不再显示每个百分比的toast，只使用进度条
                         const percentComplete = evt.loaded / evt.total * 100;
-                        showToast(`上传进度: ${Math.round(percentComplete)}%`, 'info', 3000);
+                        // 这里可以添加进度条更新逻辑，如果需要的话
                     }
                 }, false);
                 return xhr;
@@ -1376,8 +1377,9 @@
                     const xhr = new window.XMLHttpRequest();
                     xhr.upload.addEventListener("progress", function (evt) {
                         if (evt.lengthComputable) {
+                            // 不再显示每个百分比的toast，只使用进度条
                             const percentComplete = evt.loaded / evt.total * 100;
-                            showToast(`上传进度: ${Math.round(percentComplete)}%`, 'info', 3000);
+                            // 这里可以添加进度条更新逻辑，如果需要的话
                         }
                     }, false);
                     return xhr;

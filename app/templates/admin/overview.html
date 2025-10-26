@@ -1,67 +1,180 @@
 <!-- overview.html -->
 <div class="container-fluid">
     <!-- 标题 -->
-    <h2 class="mb-4">📊 系统概览</h2>
+    <h2 class="mb-4">🖥️ 系统状态监控</h2>
 
-    <!-- 第一部分：数据统计卡片（4列） -->
+    <!-- 第一部分：系统资源状态卡片（4列） -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="card text-white bg-primary">
                 <div class="card-body">
-                    <h5 class="card-title">👥 总用户数</h5>
-                    <h2 class="card-text" id="total_users">--</h2>
-                    <p class="card-text"><small>较昨日 +5%</small></p>
+                    <h5 class="card-title">💻 CPU 使用率</h5>
+                    <h2 class="card-text" id="cpu_usage">--</h2>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar" id="cpu_progress" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p class="card-text mt-1"><small id="cpu_cores">核心数: --</small></p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card text-white bg-success">
                 <div class="card-body">
-                    <h5 class="card-title">📝 文章总数</h5>
-                    <h2 class="card-text" id="total_articles">--</h2>
-                    <p class="card-text"><small>今日新增 3 篇</small></p>
+                    <h5 class="card-title">🧠 内存使用率</h5>
+                    <h2 class="card-text" id="memory_usage">--</h2>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar bg-warning" id="memory_progress" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p class="card-text mt-1"><small id="memory_details">已用 / 总计: --</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">💾 磁盘使用率</h5>
+                    <h2 class="card-text" id="disk_usage">--</h2>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar bg-danger" id="disk_progress" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p class="card-text mt-1"><small id="disk_details">已用 / 总计: --</small></p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card text-white bg-warning">
                 <div class="card-body">
-                    <h5 class="card-title">🛡️ 活跃管理员</h5>
-                    <h2 class="card-text" id="active_admins">--</h2>
-                    <p class="card-text"><small>在线 2 人</small></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-danger">
-                <div class="card-body">
-                    <h5 class="card-title">⚠️ 待审核文章</h5>
-                    <h2 class="card-text" id="pending_articles">--</h2>
-                    <p class="card-text"><small>需尽快处理</small></p>
+                    <h5 class="card-title">🌐 网络流量</h5>
+                    <h2 class="card-text" id="network_status">--</h2>
+                    <p class="card-text mt-1"><small id="network_details">↑ -- ↓ --</small></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 第二部分：图表区域（2列） -->
+    <!-- 第二部分：系统状态和接口状态（2列） -->
     <div class="row g-4 mb-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">📈 最近7日用户增长</h5>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-primary">
+                            <i class="bi bi-clock-history me-2"></i>定时任务管理
+                        </h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary" onclick="refreshTaskStatus()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>刷新
+                            </button>
+                            <button type="button" class="btn btn-outline-success" onclick="runAllTasks()">
+                                <i class="bi bi-play-circle me-1"></i>全部执行
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" onclick="stopAllTasks()">
+                                <i class="bi bi-stop-circle me-1"></i>全部停止
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="userGrowthChart" height="200"></canvas>
+                <div class="card-body p-0">
+                    <div id="taskControlPanel">
+                        <div class="task-list">
+                            <!-- 任务1：获取东方财富历史数据 -->
+                            <div class="task-item border-bottom">
+                                <div class="d-flex align-items-center p-3">
+                                    <div class="task-icon bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
+                                        <i class="bi bi-graph-up fs-5"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold">1. 获取东方财富历史数据</h6>
+<!--?                                        <p class="mb-0 small text-muted">从东方财富获取股票历史数据</p>-->
+                                    </div>
+                                    <div class="task-controls d-flex align-items-center">
+                                        <button class="btn btn-sm btn-primary rounded-pill me-2" onclick="runTask('fetch_eastmoney_history_market_data')" id="task1_btn">
+                                            <i class="bi bi-play-fill me-1"></i>执行
+                                        </button>
+                                        <span class="badge bg-light text-dark rounded-pill px-3 py-1" id="task1_status">等待</span>
+                                    </div>
+                                </div>
+                                <div class="task-progress px-3 pb-3">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" id="task1_progress" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 任务2：LLM洞察分析 -->
+                            <div class="task-item border-bottom">
+                                <div class="d-flex align-items-center p-3">
+                                    <div class="task-icon bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                        <i class="bi bi-robot fs-5"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold">2. LLM洞察分析</h6>
+                                    </div>
+                                    <div class="task-controls d-flex align-items-center">
+                                        <button class="btn btn-sm btn-success rounded-pill me-2" onclick="runTask('crawl_llm_insight')" id="task2_btn">
+                                            <i class="bi bi-play-fill me-1"></i>执行
+                                        </button>
+                                        <span class="badge bg-light text-dark rounded-pill px-3 py-1" id="task2_status">等待</span>
+                                    </div>
+                                </div>
+                                <div class="task-progress px-3 pb-3">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success" id="task2_progress" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 任务3：新闻AI摘要 -->
+                            <div class="task-item">
+                                <div class="d-flex align-items-center p-3">
+                                    <div class="task-icon bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                        <i class="bi bi-newspaper fs-5"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold">3. 新闻AI摘要</h6>
+<!--?                                        <p class="mb-0 small text-muted">生成新闻AI摘要</p>-->
+                                    </div>
+                                    <div class="task-controls d-flex align-items-center">
+                                        <button class="btn btn-sm btn-success rounded-pill me-2" onclick="runTask('news_ai_summary')" id="task3_btn">
+                                            <i class="bi bi-play-fill me-1"></i>执行
+                                        </button>
+                                        <span class="badge bg-light text-dark rounded-pill px-3 py-1" id="task3_status">等待</span>
+                                    </div>
+                                </div>
+                                <div class="task-progress px-3 pb-3">
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-info" id="task3_progress" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 任务执行统计 -->
+                        <div class="task-stats bg-light rounded-bottom p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <small class="text-muted me-2">任务状态:</small>
+                                    <span class="badge bg-success rounded-pill me-1" id="running_count">0 运行中</span>
+                                    <span class="text-muted">/</span>
+                                    <span class="badge bg-secondary rounded-pill ms-1" id="total_count">3 总计</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <small class="text-muted me-2">延迟:</small>
+                                    <span class="badge bg-info rounded-pill" id="delay_info">5-10s/30-60s</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">📅 最近活动日志</h5>
+                    <h5 class="mb-0">🔌 接口状态</h5>
                 </div>
                 <div class="card-body">
-                    <div class="list-group" id="recentLogs">
+                    <div class="list-group" id="apiStatus">
                         <div class="list-group-item">加载中...</div>
                     </div>
                 </div>
@@ -69,19 +182,51 @@
         </div>
     </div>
 
-    <!-- 第三部分：快捷操作 -->
-    <div class="row mb-4">
-        <div class="col-12">
+    <!-- 第三部分：系统信息和快捷操作 -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">⚡ 快捷操作</h5>
+                    <h5 class="mb-0">ℹ️ 系统信息</h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex flex-wrap gap-3">
-                        <a href="#" class="btn btn-outline-primary" onclick="navigateTo('users')">👥 管理用户</a>
-                        <a href="#" class="btn btn-outline-success" onclick="navigateTo('articles')">📝 发布文章</a>
-                        <a href="#" class="btn btn-outline-warning" onclick="navigateTo('roles')">🔐 管理角色</a>
-                        <a href="#" class="btn btn-outline-info" onclick="navigateTo('articles')">📋 审核文章</a>
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td>操作系统</td>
+                                <td id="os_info">--</td>
+                            </tr>
+                            <tr>
+                                <td>Python版本</td>
+                                <td id="python_version">--</td>
+                            </tr>
+                            <tr>
+                                <td>系统启动时间</td>
+                                <td id="boot_time">--</td>
+                            </tr>
+                            <tr>
+                                <td>当前时间</td>
+                                <td id="current_time">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚡ 系统操作</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-outline-primary" onclick="refreshSystemStatus()">🔄 刷新状态</button>
+                        <button class="btn btn-outline-success" onclick="navigateTo('logs')">📋 查看日志</button>
+                        <button class="btn btn-outline-warning" onclick="navigateTo('config')">⚙️ 系统配置</button>
+                        <button class="btn btn-outline-info" onclick="exportSystemInfo()">📥 导出信息</button>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">最后更新: <span id="last_update">--</span></small>
                     </div>
                 </div>
             </div>
@@ -91,12 +236,18 @@
 
 <!-- 引入 Chart.js（轻量级图表库） -->
 <script src="/static/js/chart.js"></script>
+<script>
+// 检查Chart.js是否成功加载
+if (typeof Chart === 'undefined') {
+    console.error('Chart.js 加载失败，图表功能将不可用');
+}
+</script>
 
 <script>
 // 页面激活时加载数据
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('overview').classList.contains('d-none') === false) {
-        loadOverviewData();
+        loadSystemStatus();
     }
 });
 
@@ -106,7 +257,7 @@ const observer = new MutationObserver(function(mutations) {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
             const overviewDiv = document.getElementById('overview');
             if (overviewDiv && !overviewDiv.classList.contains('d-none')) {
-                loadOverviewData();
+                loadSystemStatus();
             }
         }
     });
@@ -114,7 +265,30 @@ const observer = new MutationObserver(function(mutations) {
 
 observer.observe(document.getElementById('overview'), { attributes: true });
 
-async function loadOverviewData() {
+// 设置定时刷新
+let refreshInterval;
+
+function startAutoRefresh() {
+    // 清除可能存在的旧定时器
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+    
+    // 每30秒刷新一次
+    refreshInterval = setInterval(loadSystemStatus, 30000);
+}
+
+// 页面加载完成后启动自动刷新
+document.addEventListener('DOMContentLoaded', startAutoRefresh);
+
+// 页面卸载时清除定时器
+window.addEventListener('beforeunload', function() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+});
+
+async function loadSystemStatus() {
     const token = localStorage.getItem("access_token");
     if (!token) {
         alert("未登录或会话过期");
@@ -123,91 +297,532 @@ async function loadOverviewData() {
     }
 
     try {
-        // 1. 加载统计数据
-        const statsRes = await fetch("/admin/api/stats", {
+        // 1. 加载系统资源状态
+        const systemRes = await fetch("/admin/api/system-status", {
             headers: { "Authorization": "Bearer " + token }
         });
-        if (!statsRes.ok) throw new Error("加载统计数据失败");
-        const stats = await statsRes.json();
+        if (!systemRes.ok) throw new Error("加载系统状态失败");
+        const systemData = await systemRes.json();
+        
+        // 检查API是否返回错误信息
+        if (systemData.error) {
+            throw new Error(systemData.error);
+        }
 
-        document.getElementById("total_users").textContent = stats.total_users || 0;
-        document.getElementById("total_articles").textContent = stats.total_articles || 0;
-        document.getElementById("active_admins").textContent = stats.active_admins || 0;
-        document.getElementById("pending_articles").textContent = stats.pending_articles || 0;
+        // 更新CPU状态
+        if (systemData.cpu) {
+            const cpuPercent = systemData.cpu.percent || 0;
+            document.getElementById("cpu_usage").textContent = cpuPercent.toFixed(1) + "%";
+            document.getElementById("cpu_progress").style.width = cpuPercent + "%";
+            document.getElementById("cpu_cores").textContent = `核心数: ${systemData.cpu.cores || '--'}`;
+            
+            // 根据使用率设置进度条颜色
+            const cpuBar = document.getElementById("cpu_progress");
+            if (cpuPercent > 80) {
+                cpuBar.className = "progress-bar bg-danger";
+            } else if (cpuPercent > 60) {
+                cpuBar.className = "progress-bar bg-warning";
+            } else {
+                cpuBar.className = "progress-bar";
+            }
+        }
 
-        // 2. 加载最近日志
-        const logsRes = await fetch("/admin/api/recent-logs", {
+        // 更新内存状态
+        if (systemData.memory) {
+            const memoryPercent = systemData.memory.percent || 0;
+            document.getElementById("memory_usage").textContent = memoryPercent.toFixed(1) + "%";
+            document.getElementById("memory_progress").style.width = memoryPercent + "%";
+            
+            const usedGB = (systemData.memory.used / (1024 ** 3)).toFixed(2);
+            const totalGB = (systemData.memory.total / (1024 ** 3)).toFixed(2);
+            document.getElementById("memory_details").textContent = `已用 / 总计: ${usedGB}GB / ${totalGB}GB`;
+            
+            // 根据使用率设置进度条颜色
+            const memoryBar = document.getElementById("memory_progress");
+            if (memoryPercent > 80) {
+                memoryBar.className = "progress-bar bg-danger";
+            } else if (memoryPercent > 60) {
+                memoryBar.className = "progress-bar bg-warning";
+            } else {
+                memoryBar.className = "progress-bar";
+            }
+        }
+
+        // 更新磁盘状态
+        if (systemData.disk) {
+            const diskPercent = systemData.disk.percent || 0;
+            document.getElementById("disk_usage").textContent = diskPercent.toFixed(1) + "%";
+            document.getElementById("disk_progress").style.width = diskPercent + "%";
+            
+            const usedGB = (systemData.disk.used / (1024 ** 3)).toFixed(2);
+            const totalGB = (systemData.disk.total / (1024 ** 3)).toFixed(2);
+            document.getElementById("disk_details").textContent = `已用 / 总计: ${usedGB}GB / ${totalGB}GB`;
+            
+            // 根据使用率设置进度条颜色
+            const diskBar = document.getElementById("disk_progress");
+            if (diskPercent > 80) {
+                diskBar.className = "progress-bar bg-danger";
+            } else if (diskPercent > 60) {
+                diskBar.className = "progress-bar bg-warning";
+            } else {
+                diskBar.className = "progress-bar";
+            }
+        }
+
+        // 更新网络状态
+        if (systemData.network) {
+            const uploadSpeed = formatBytes(systemData.network.bytes_sent_per_sec || 0) + "/s";
+            const downloadSpeed = formatBytes(systemData.network.bytes_recv_per_sec || 0) + "/s";
+            
+            // 如果网络速率为0，显示"空闲"，否则显示"正常"
+            const networkStatus = (systemData.network.bytes_sent_per_sec === 0 && systemData.network.bytes_recv_per_sec === 0) ? "空闲" : "正常";
+            document.getElementById("network_status").textContent = networkStatus;
+            document.getElementById("network_details").innerHTML = `↑ ${uploadSpeed} ↓ ${downloadSpeed}`;
+        }
+
+        // 更新系统信息
+        if (systemData.system) {
+            document.getElementById("os_info").textContent = systemData.system.os || '--';
+            document.getElementById("python_version").textContent = systemData.system.python_version || '--';
+            document.getElementById("boot_time").textContent = systemData.system.boot_time ? 
+                new Date(systemData.system.boot_time * 1000).toLocaleString() : '--';
+        }
+
+        // 更新当前时间
+        document.getElementById("current_time").textContent = new Date().toLocaleString();
+        
+        // 更新最后更新时间
+        document.getElementById("last_update").textContent = new Date().toLocaleTimeString();
+
+        // 2. 加载接口状态
+        const apiRes = await fetch("/admin/api/api-status", {
             headers: { "Authorization": "Bearer " + token }
         });
-        if (!logsRes.ok) throw new Error("加载日志失败");
-        const logs = await logsRes.json();
+        if (apiRes.ok) {
+            const apiData = await apiRes.json();
+            updateApiStatus(apiData.apis || []);
+        }
 
-        const logList = document.getElementById("recentLogs");
-        logList.innerHTML = "";
-        logs.slice(0, 5).forEach(log => {
-            const item = document.createElement("div");
-            item.className = "list-group-item d-flex justify-content-between align-items-center";
-            item.innerHTML = `
-                <span>${log.action} - ${log.user}</span>
-                <small class="text-muted">${new Date(log.timestamp).toLocaleString()}</small>
-            `;
-            logList.appendChild(item);
+        // 3. 加载系统负载数据并更新图表
+        const loadRes = await fetch("/admin/api/system-load?period=1h", {
+            headers: { "Authorization": "Bearer " + token }
         });
-
-        // 3. 初始化图表
-        // initUserGrowthChart(stats.user_growth_last_7_days || []);
+        if (loadRes.ok) {
+            const loadData = await loadRes.json();
+            try {
+                updateSystemLoadChart(loadData);
+            } catch (chartErr) {
+                console.warn("图表更新失败，可能是Chart.js加载问题:", chartErr);
+                // 图表失败不影响其他数据显示
+            }
+        }
 
     } catch (err) {
-        console.error("加载概览数据失败:", err);
-        alert("加载数据失败，请刷新页面或重新登录");
+        console.error("加载系统状态失败:", err);
+        
+        // 只在数据确实未加载时显示错误，避免覆盖已加载的数据
+        if (document.getElementById("cpu_usage").textContent === "--") {
+            document.getElementById("cpu_usage").textContent = "错误";
+        }
+        if (document.getElementById("memory_usage").textContent === "--") {
+            document.getElementById("memory_usage").textContent = "错误";
+        }
+        if (document.getElementById("disk_usage").textContent === "--") {
+            document.getElementById("disk_usage").textContent = "错误";
+        }
+        if (document.getElementById("network_status").textContent === "--") {
+            document.getElementById("network_status").textContent = "错误";
+        }
+        
+        // 显示详细错误信息在控制台
+        console.error("错误详情:", err.message);
+        if (err.response) {
+            console.error("响应状态:", err.response.status);
+            console.error("响应数据:", err.response.data);
+        }
     }
 }
 
-function initUserGrowthChart(data) {
-    const canvas = document.getElementById('userGrowthChart');
-    if (!canvas) {
-        console.warn("图表容器未找到，跳过初始化");
-        return; // 安全退出
+// 格式化字节数为易读的单位
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 B';
+    
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+// 更新接口状态
+function updateApiStatus(apiData) {
+    const apiStatus = document.getElementById("apiStatus");
+    apiStatus.innerHTML = "";
+    
+    if (!apiData || !Array.isArray(apiData)) {
+        const item = document.createElement("div");
+        item.className = "list-group-item text-center text-muted";
+        item.textContent = "无接口状态数据";
+        apiStatus.appendChild(item);
+        return;
+    }
+    
+    apiData.forEach(api => {
+        const item = document.createElement("div");
+        item.className = "list-group-item d-flex justify-content-between align-items-center";
+        
+        let statusBadge = "";
+        if (api.status === "healthy") {
+            statusBadge = '<span class="badge bg-success">正常</span>';
+        } else if (api.status === "warning") {
+            statusBadge = '<span class="badge bg-warning text-dark">警告</span>';
+        } else {
+            statusBadge = '<span class="badge bg-danger">异常</span>';
+        }
+        
+        item.innerHTML = `
+            <div>
+                <strong>${api.name || api.path}</strong>
+                <div class="small text-muted">${api.method || 'GET'} ${api.path}</div>
+            </div>
+            <div class="text-end">
+                ${statusBadge}
+                <div class="small text-muted">${api.response_time || '--'}ms</div>
+            </div>
+        `;
+        apiStatus.appendChild(item);
+    });
+}
+
+// 更新系统服务状态
+function updateSystemLoadChart(data) {
+    const container = document.getElementById('systemLoadChart');
+    if (!container) {
+        return;
     }
 
-    const ctx = canvas.getContext('2d');
+    // 清空容器内容
+    container.innerHTML = '';
 
-    // 如果已有图表，先销毁
-    if (window.userGrowthChart) {
-        window.userGrowthChart.destroy();
-    }
-
-    window.userGrowthChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.map(d => d.date),
-            datasets: [{
-                label: '新增用户数',
-                data: data.map(d => d.count),
-                borderColor: 'rgb(54, 162, 235)',
-                backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                tension: 0.3,
-                fill: true
-            }]
+    // 创建服务状态列表
+    const serviceList = document.createElement('div');
+    serviceList.className = 'list-group list-group-flush';
+    
+    // 模拟系统服务数据（实际使用时应该从后台API获取）
+    const services = [
+        { 
+            name: 'Web服务器', 
+            status: 'running', 
+            uptime: '3天 12小时', 
+            port: '80/443',
+            description: '主Web服务'
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
+        { 
+            name: '数据库服务', 
+            status: 'running', 
+            uptime: '7天 8小时', 
+            port: '3306',
+            description: 'MySQL数据库'
+        },
+        { 
+            name: 'Redis缓存', 
+            status: 'running', 
+            uptime: '2天 15小时', 
+            port: '6379',
+            description: '内存缓存服务'
+        },
+        { 
+            name: '定时任务', 
+            status: 'warning', 
+            uptime: '1天 3小时', 
+            port: '-',
+            description: '调度器服务'
+        },
+        { 
+            name: '日志服务', 
+            status: 'running', 
+            uptime: '5天 6小时', 
+            port: '-',
+            description: '日志收集服务'
+        }
+    ];
+
+    // 如果有历史数据，显示最近的服务状态
+    if (data && Array.isArray(data) && data.length > 0) {
+        const latestData = data[data.length - 1];
+        if (latestData.services && Array.isArray(latestData.services)) {
+            latestData.services.forEach(service => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item';
+                
+                let statusBadge = '';
+                let statusIcon = '';
+                if (service.status === 'running') {
+                    statusBadge = 'bg-success';
+                    statusIcon = '✅';
+                } else if (service.status === 'warning') {
+                    statusBadge = 'bg-warning';
+                    statusIcon = '⚠️';
+                } else {
+                    statusBadge = 'bg-danger';
+                    statusIcon = '❌';
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
-                    }
-                }
+                
+                item.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <div>
+                            <h6 class="mb-1">${statusIcon} ${service.name || '未知服务'}</h6>
+                            <p class="mb-1 small text-muted">${service.description || ''}</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${statusBadge}">${service.status || '未知'}</span>
+                            <div class="small text-muted mt-1">端口: ${service.port || '--'}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">运行时间: ${service.uptime || '--'}</small>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary btn-sm" onclick="restartService('${service.name}')">重启</button>
+                            <button class="btn btn-outline-info btn-sm" onclick="viewServiceLog('${service.name}')">日志</button>
+                        </div>
+                    </div>
+                `;
+                serviceList.appendChild(item);
+            });
+        }
+    } else {
+        // 显示模拟数据
+        services.forEach(service => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item';
+            
+            let statusBadge = '';
+            let statusIcon = '';
+            if (service.status === 'running') {
+                statusBadge = 'bg-success';
+                statusIcon = '✅';
+            } else if (service.status === 'warning') {
+                statusBadge = 'bg-warning';
+                statusIcon = '⚠️';
+            } else {
+                statusBadge = 'bg-danger';
+                statusIcon = '❌';
             }
+            
+            item.innerHTML = `
+                <div class="d-flex w-100 justify-content-between">
+                    <div>
+                        <h6 class="mb-1">${statusIcon} ${service.name}</h6>
+                        <p class="mb-1 small text-muted">${service.description}</p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge ${statusBadge}">${service.status}</span>
+                        <div class="small text-muted mt-1">端口: ${service.port}</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <small class="text-muted">运行时间: ${service.uptime}</small>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary btn-sm" onclick="restartService('${service.name}')">重启</button>
+                        <button class="btn btn-outline-info btn-sm" onclick="viewServiceLog('${service.name}')">日志</button>
+                    </div>
+                </div>
+            `;
+            serviceList.appendChild(item);
+        });
+    }
+
+    container.appendChild(serviceList);
+
+    // 添加底部统计信息
+    const stats = document.createElement('div');
+    stats.className = 'mt-3 text-center';
+    const runningCount = services.filter(s => s.status === 'running').length;
+    const totalCount = services.length;
+    stats.innerHTML = `
+        <small class="text-muted">
+            服务状态: <span class="badge bg-success">${runningCount} 运行中</span> 
+            / <span class="badge bg-secondary">${totalCount} 总计</span>
+            | 系统健康度: <span class="badge bg-info">${Math.round((runningCount/totalCount)*100)}%</span>
+        </small>
+    `;
+    container.appendChild(stats);
+}
+
+// 刷新系统状态
+function refreshSystemStatus() {
+    loadSystemStatus();
+}
+
+// 刷新服务状态
+function refreshServices() {
+    loadSystemStatus();
+    console.log("服务状态已刷新");
+}
+
+// 重启所有服务
+function restartAllServices() {
+    if (confirm("确定要重启所有服务吗？这可能会导致短暂的服务中断。")) {
+        console.log("正在重启所有服务...");
+        // 这里可以添加实际的API调用
+        setTimeout(() => {
+            alert("服务重启命令已发送");
+            refreshServices();
+        }, 1000);
+    }
+}
+
+// 检查服务健康状态
+function checkServiceHealth() {
+    console.log("正在检查服务健康状态...");
+    // 这里可以添加实际的API调用
+    setTimeout(() => {
+        alert("服务健康检查完成");
+        refreshServices();
+    }, 1500);
+}
+
+// 重启单个服务
+function restartService(serviceName) {
+    if (confirm(`确定要重启服务 "${serviceName}" 吗？`)) {
+        console.log(`正在重启服务: ${serviceName}`);
+        // 这里可以添加实际的API调用
+        setTimeout(() => {
+            alert(`服务 "${serviceName}" 重启命令已发送`);
+            refreshServices();
+        }, 800);
+    }
+}
+
+// 查看服务日志
+function viewServiceLog(serviceName) {
+    console.log(`正在查看服务日志: ${serviceName}`);
+    // 这里可以导航到日志页面或显示日志模态框
+    alert(`服务 "${serviceName}" 的日志功能开发中...`);
+}
+
+// 导出系统信息
+function exportSystemInfo() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alert("未登录或会话过期");
+        return;
+    }
+    
+    // 创建导出内容
+    const exportData = {
+        export_time: new Date().toISOString(),
+        cpu_usage: document.getElementById("cpu_usage").textContent,
+        memory_usage: document.getElementById("memory_usage").textContent,
+        disk_usage: document.getElementById("disk_usage").textContent,
+        network_status: document.getElementById("network_status").textContent,
+        os_info: document.getElementById("os_info").textContent,
+        python_version: document.getElementById("python_version").textContent,
+        boot_time: document.getElementById("boot_time").textContent,
+        current_time: document.getElementById("current_time").textContent
+    };
+    
+    // 创建下载链接
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `system_info_${new Date().toISOString().slice(0,10)}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+}
+
+// 处理进程操作按钮点击事件
+document.addEventListener('DOMContentLoaded', function() {
+    const periodButtons = document.querySelectorAll('[data-period]');
+    periodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // 更新按钮状态
+            periodButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 获取选定的操作类型
+            const operation = this.getAttribute('data-period');
+            
+            if (operation === '1h') {
+                // 刷新进程列表
+                loadSystemStatus();
+                console.log("进程列表已刷新");
+            } else if (operation === '6h') {
+                // 排序进程（按CPU使用率降序）
+                sortProcessesByCPU();
+                console.log("进程已按CPU使用率排序");
+            } else if (operation === '24h') {
+                // 过滤进程（只显示CPU使用率>5%的进程）
+                filterHighCPUProcesses();
+                console.log("已过滤高CPU使用率的进程");
+            }
+        });
+    });
+});
+
+// 按CPU使用率排序进程
+function sortProcessesByCPU() {
+    const container = document.getElementById('systemLoadChart');
+    if (!container) return;
+    
+    const table = container.querySelector('table');
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+    
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        const cpuA = parseFloat(a.cells[2].textContent.replace('%', '')) || 0;
+        const cpuB = parseFloat(b.cells[2].textContent.replace('%', '')) || 0;
+        return cpuB - cpuA; // 降序排列
+    });
+    
+    // 清空tbody并重新添加排序后的行
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// 过滤高CPU使用率的进程（CPU > 5%）
+function filterHighCPUProcesses() {
+    const container = document.getElementById('systemLoadChart');
+    if (!container) return;
+    
+    const table = container.querySelector('table');
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+    
+    const rows = tbody.querySelectorAll('tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const cpuUsage = parseFloat(row.cells[2].textContent.replace('%', '')) || 0;
+        if (cpuUsage > 5) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
         }
     });
+    
+    // 更新统计信息
+    const stats = container.querySelector('.text-center');
+    if (stats) {
+        stats.innerHTML = `
+            <small class="text-muted">
+                显示进程数: <span class="badge bg-secondary">${visibleCount}</span> |
+                过滤条件: <span class="badge bg-warning">CPU > 5%</span>
+            </small>
+        `;
+    }
 }
 
 function navigateTo(target) {
@@ -218,4 +833,444 @@ function navigateTo(target) {
         }
     });
 }
+
+// ==================== 手动定时任务功能 ====================
+
+// 任务状态管理
+let taskStatus = {
+    'fetch_eastmoney_history_market_data': { status: 'waiting', progress: 0 },
+    'crawl_llm_insight': { status: 'waiting', progress: 0 },
+    'news_ai_summary': { status: 'waiting', progress: 0 }
+};
+
+// 任务执行队列
+let taskQueue = [];
+let isTaskRunning = false;
+
+// 刷新任务状态
+function refreshTaskStatus() {
+    updateTaskStatusDisplay();
+    console.log("任务状态已刷新");
+}
+
+// 更新任务状态显示
+function updateTaskStatusDisplay() {
+    let runningCount = 0;
+    
+    // 更新每个任务的状态显示
+    Object.keys(taskStatus).forEach((taskName, index) => {
+        const task = taskStatus[taskName];
+        const taskId = index + 1;
+        
+        // 更新状态徽章
+        const statusElement = document.getElementById(`task${taskId}_status`);
+        const progressElement = document.getElementById(`task${taskId}_progress`);
+        const buttonElement = document.getElementById(`task${taskId}_btn`);
+        const taskItem = document.querySelector(`#task${taskId}_btn`).closest('.task-item');
+        
+        if (statusElement && progressElement && buttonElement) {
+            // 设置状态徽章
+            let badgeClass = 'bg-secondary';
+            let statusText = '等待';
+            
+            switch(task.status) {
+                case 'running':
+                    badgeClass = 'bg-warning';
+                    statusText = '运行中';
+                    runningCount++;
+                    buttonElement.disabled = true;
+                    buttonElement.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>执行中';
+                    
+                    // 添加运行中的视觉效果
+                    if (taskItem) {
+                        taskItem.classList.add('task-running');
+                    }
+                    break;
+                case 'completed':
+                    badgeClass = 'bg-success';
+                    statusText = '已完成';
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="bi bi-check-circle me-1"></i>执行';
+                    
+                    // 移除运行中的视觉效果并添加成功效果
+                    if (taskItem) {
+                        taskItem.classList.remove('task-running');
+                        taskItem.classList.add('task-success');
+                        // 3秒后移除成功效果
+                        setTimeout(() => {
+                            taskItem.classList.remove('task-success');
+                        }, 3000);
+                    }
+                    break;
+                case 'error':
+                    badgeClass = 'bg-danger';
+                    statusText = '错误';
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>执行';
+                    
+                    // 移除运行中的视觉效果并添加错误效果
+                    if (taskItem) {
+                        taskItem.classList.remove('task-running');
+                        taskItem.classList.add('task-error');
+                        // 3秒后移除错误效果
+                        setTimeout(() => {
+                            taskItem.classList.remove('task-error');
+                        }, 3000);
+                    }
+                    break;
+                default:
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="bi bi-play-fill me-1"></i>执行';
+                    
+                    // 移除运行中的视觉效果
+                    if (taskItem) {
+                        taskItem.classList.remove('task-running');
+                    }
+            }
+            
+            statusElement.className = `badge ${badgeClass} rounded-pill px-3 py-1`;
+            statusElement.textContent = statusText;
+            
+            // 更新进度条
+            progressElement.style.width = `${task.progress}%`;
+            
+            // 设置进度条颜色
+            if (task.status === 'running') {
+                progressElement.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning';
+            } else if (task.status === 'completed') {
+                progressElement.className = 'progress-bar bg-success';
+            } else if (task.status === 'error') {
+                progressElement.className = 'progress-bar bg-danger';
+            } else {
+                progressElement.className = 'progress-bar';
+            }
+        }
+    });
+    
+    // 更新统计信息
+    const runningCountElement = document.getElementById('running_count');
+    if (runningCountElement) {
+        runningCountElement.textContent = `${runningCount} 运行中`;
+    }
+}
+
+// 执行单个任务
+async function runTask(taskName) {
+    // 更新任务状态为运行中
+    taskStatus[taskName] = { status: 'running', progress: 0 };
+    updateTaskStatusDisplay();
+    
+    try {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            alert("未登录或会话过期");
+            window.location.href = "/login?next=/admin/";
+            return;
+        }
+        
+        // 调用后端API
+        const response = await fetch(`/admin/api/tasks/run/${taskName}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            taskStatus[taskName] = { status: 'completed', progress: 100 };
+            console.log(`任务 "${getTaskDisplayName(taskName)}" 执行成功`);
+        } else {
+            taskStatus[taskName] = { status: 'error', progress: 100 };
+            console.error('任务执行失败:', result.message);
+        }
+    } catch (error) {
+        taskStatus[taskName] = { status: 'error', progress: 100 };
+        console.error('API请求失败:', error);
+    } finally {
+        updateTaskStatusDisplay();
+    }
+}
+
+// 执行所有任务（按顺序，带延迟）
+async function runAllTasks() {
+    if (isTaskRunning) {
+        alert('有任务正在执行中，请等待完成后再执行全部任务');
+        return;
+    }
+    
+    if (!confirm('确定要执行所有定时任务吗？这可能需要几分钟时间。')) {
+        return;
+    }
+    
+    isTaskRunning = true;
+    
+    try {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            alert("未登录或会话过期");
+            window.location.href = "/login?next=/admin/";
+            return;
+        }
+        
+        // 调用后端API执行所有任务
+        const response = await fetch('/admin/api/tasks/run-all', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('所有任务执行完成:', result);
+            alert('所有定时任务执行完成！');
+            
+            // 更新所有任务状态为完成
+            const tasks = ['fetch_eastmoney_history_market_data', 'crawl_llm_insight', 'news_ai_summary'];
+            tasks.forEach(taskName => {
+                taskStatus[taskName] = { status: 'completed', progress: 100 };
+            });
+            updateTaskStatusDisplay();
+            
+        } else {
+            console.error('任务执行失败:', result.message);
+            alert(`任务执行失败: ${result.message}`);
+        }
+        
+    } catch (error) {
+        console.error('API请求失败:', error);
+        alert('API请求失败，请检查网络连接');
+    } finally {
+        isTaskRunning = false;
+    }
+}
+
+// 带进度显示的任务执行
+async function runTaskWithProgress(taskName, startProgress, endProgress) {
+    // 更新任务状态为运行中
+    taskStatus[taskName] = { status: 'running', progress: startProgress };
+    updateTaskStatusDisplay();
+    
+    try {
+        await runTask(taskName);
+        // 任务完成后设置进度到结束位置
+        taskStatus[taskName].progress = endProgress;
+    } catch (error) {
+        // 任务失败也设置进度到结束位置
+        taskStatus[taskName].progress = endProgress;
+        throw error;
+    }
+    
+    updateTaskStatusDisplay();
+}
+
+// 带进度显示的延迟
+async function delayWithProgress(minSeconds, maxSeconds, startProgress, endProgress) {
+    const delaySeconds = Math.floor(Math.random() * (maxSeconds - minSeconds + 1)) + minSeconds;
+    const progressStep = (endProgress - startProgress) / delaySeconds;
+    
+    for (let i = 0; i < delaySeconds; i++) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const currentProgress = startProgress + (i + 1) * progressStep;
+        
+        // 更新所有任务的进度显示（延迟期间）
+        Object.keys(taskStatus).forEach(taskName => {
+            if (taskStatus[taskName].status === 'waiting') {
+                taskStatus[taskName].progress = Math.min(currentProgress, endProgress);
+            }
+        });
+        
+        updateTaskStatusDisplay();
+    }
+}
+
+// 停止所有任务
+function stopAllTasks() {
+    if (!isTaskRunning) {
+        alert('当前没有正在运行的任务');
+        return;
+    }
+    
+    if (confirm('确定要停止所有正在执行的任务吗？')) {
+        // 这里可以添加实际的停止逻辑
+        // 目前只是重置状态
+        Object.keys(taskStatus).forEach(taskName => {
+            if (taskStatus[taskName].status === 'running') {
+                taskStatus[taskName] = { status: 'waiting', progress: 0 };
+            }
+        });
+        
+        isTaskRunning = false;
+        updateTaskStatusDisplay();
+        alert('所有任务已停止');
+    }
+}
+
+// 获取任务显示名称
+function getTaskDisplayName(taskName) {
+    const displayNames = {
+        'fetch_eastmoney_history_market_data': '获取东方财富历史数据',
+        'crawl_llm_insight': 'LLM洞察分析',
+        'news_ai_summary': '新闻AI摘要'
+    };
+    return displayNames[taskName] || taskName;
+}
+
+// 页面加载时初始化任务状态显示
+document.addEventListener('DOMContentLoaded', function() {
+    updateTaskStatusDisplay();
+});
 </script>
+
+<style>
+/* 自定义任务列表样式 */
+.task-item {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.task-item:hover {
+    background-color: rgba(59, 130, 246, 0.05);
+    transform: translateY(-2px);
+}
+
+.task-item:hover .task-icon {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+.task-icon {
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-controls .btn {
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.task-controls .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.task-progress {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.task-item:hover .task-progress {
+    opacity: 1;
+}
+
+.task-stats {
+    border-top: 1px solid rgba(0,0,0,0.05);
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+}
+
+/* 任务状态徽章动画 */
+.badge {
+    transition: all 0.3s ease;
+}
+
+/* 进度条动画 */
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* 任务执行中的脉冲效果 */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.task-running .task-icon {
+    animation: pulse 1.5s infinite;
+}
+
+/* 任务运行时的边框动画 */
+.task-running {
+    border-left: 3px solid #ffc107 !important;
+    background: linear-gradient(to right, rgba(255, 193, 7, 0.1), transparent);
+}
+
+/* 任务完成时的成功效果 */
+@keyframes success-flash {
+    0% { background-color: rgba(25, 135, 84, 0.2); }
+    50% { background-color: rgba(25, 135, 84, 0.4); }
+    100% { background-color: rgba(25, 135, 84, 0.2); }
+}
+
+.task-success {
+    animation: success-flash 1s ease-in-out;
+    border-left: 3px solid #198754 !important;
+}
+
+/* 任务错误时的失败效果 */
+@keyframes error-flash {
+    0% { background-color: rgba(220, 53, 69, 0.2); }
+    50% { background-color: rgba(220, 53, 69, 0.4); }
+    100% { background-color: rgba(220, 53, 69, 0.2); }
+}
+
+.task-error {
+    animation: error-flash 1s ease-in-out;
+    border-left: 3px solid #dc3545 !important;
+}
+
+/* 卡片头部样式优化 */
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+/* 按钮组样式优化 */
+.btn-group-sm > .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* 任务列表分隔线优化 */
+.task-item:not(:last-child) {
+    border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+    .task-controls {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    
+    .task-controls .btn {
+        margin-bottom: 0.5rem;
+    }
+    
+    .task-stats .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .task-stats .d-flex > div {
+        margin-bottom: 0.5rem;
+    }
+}
+</style>

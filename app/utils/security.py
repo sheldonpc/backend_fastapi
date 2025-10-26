@@ -32,8 +32,9 @@ def create_access_token(data: dict, expires_delta: int = config.JWT_EXPIRE_MINUT
 def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, config.JWT_SECRET, algorithms=[config.JWT_ALGORITHM])
-        return payload.get("sub")
-    except JWTError:
+        sub = payload.get("sub")
+        return sub
+    except JWTError as e:
         return None
 
 async def authenticate_user(email: str, password: str):

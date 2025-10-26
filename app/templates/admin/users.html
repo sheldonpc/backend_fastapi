@@ -27,15 +27,15 @@
         </div>
         <!-- 操作按钮 -->
         <div class="col-md-5 text-end">
-            <button class="btn btn-success me-2" onclick="openCreateUserModal()">
+            <button class="btn btn-success me-2" onclick="window.UserManager.openCreateUserModal()">
                 ➕ 新增用户
             </button>
-            <button class="btn btn-outline-secondary me-2" onclick="exportUsers()">
+            <button class="btn btn-outline-secondary me-2" onclick="window.UserManager.exportUsers()">
                 📥 导出 Excel
             </button>
-            <button class="btn btn-outline-primary" onclick="applyFilter()">
-                🔍 查询
-            </button>
+            <button class="btn btn-outline-primary" onclick="window.UserManager.applyFilter()">
+                        🔍 查询
+                    </button>
         </div>
     </div>
 
@@ -119,330 +119,457 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" onclick="saveUser()">保存</button>
+                <button type="button" class="btn btn-primary" onclick="window.UserManager.saveUser()">保存</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 全局变量
-    let currentPage = 1;
-    let totalPages = 1;
-    let users = [];
+    // 早期初始化 - 确保UserManager立即可用
+    (function() {
+        // 创建基础用户管理器对象
+        window.UserManager = {
+            isInitialized: false,
+            initCallbacks: [],
+            
+            // 添加初始化回调
+            onInit: function(callback) {
+                if (this.isInitialized) {
+                    callback();
+                } else {
+                    this.initCallbacks.push(callback);
+                }
+            },
+            
+            // 触发初始化回调
+            triggerInit: function() {
+                this.isInitialized = true;
+                this.initCallbacks.forEach(callback => callback());
+                this.initCallbacks = [];
+            }
+        };
+        
+        // 创建兼容的loadUsers函数
+        window.loadUsers = function(page = 1) {
+            if (window.UserManager && window.UserManager.loadUsers) {
+                return window.UserManager.loadUsers(page);
+            } else {
+                console.warn('UserManager not fully initialized yet, page:', page);
+                // 延迟重试
+                setTimeout(() => {
+                    if (window.UserManager && window.UserManager.loadUsers) {
+                        window.UserManager.loadUsers(page);
+                    }
+                }, 100);
+            }
+        };
+        
+        console.log('Early UserManager and loadUsers setup complete');
+    })();
+</script>
 
-    // 页面激活时加载数据
-    document.addEventListener('DOMContentLoaded', function () {
-        if (document.getElementById('users').classList.contains('d-none') === false) {
-            loadUsers();
-        }
-    });
+<script>
+    // 完整的用户管理器实现
+    // 扩展之前创建的基础UserManager对象
+    Object.assign(window.UserManager, {
+        currentPage: 1,
+        totalPages: 1,
+        users: [],
+        
+        // 初始化函数
+        init: function() {
+            if (this.isInitialized) return;
+            this.isInitialized = true;
+            console.log('UserManager initialized');
+            
+            // 设置页面监听器
+            this.setupPageListener();
+            
+            // 如果页面当前可见，立即加载数据
+            this.checkAndLoadData();
+        },
+        
+        // 检查页面是否可见并加载数据
+        checkAndLoadData: function() {
+            const usersDiv = document.getElementById('users');
+            if (usersDiv && !usersDiv.classList.contains('d-none')) {
+                console.log("用户页面已激活，开始加载数据");
+                this.loadUsers();
+            }
+        },
+        
+        // 设置页面监听器
+        setupPageListener: function() {
+            const usersDiv = document.getElementById('users');
+            if (!usersDiv) return;
+            
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        if (!usersDiv.classList.contains('d-none')) {
+                            // 页面变为可见，延迟加载数据
+                            console.log("检测到用户页面切换，准备加载数据");
+                            setTimeout(() => this.loadUsers(), 100);
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(usersDiv, {attributes: true});
+        },
 
-    // 监听导航切换
-    const usersObserver = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const usersDiv = document.getElementById('users');
-                if (usersDiv && !usersDiv.classList.contains('d-none')) {
-                    loadUsers();
+        // 加载用户数据（带分页、筛选）
+        loadUsers: async function(page = 1) {
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                alert("登录已过期，请重新登录");
+                window.location.href = "/login?next=/admin/";
+                return;
+            }
+
+            // 检查必要的DOM元素是否存在
+            const searchInput = document.getElementById("searchInput");
+            const statusFilter = document.getElementById("statusFilter");
+            const roleFilter = document.getElementById("roleFilter");
+            const usersTableBody = document.getElementById("usersTableBody");
+            
+            if (!searchInput || !statusFilter || !roleFilter || !usersTableBody) {
+                console.error("用户管理页面DOM元素未完全加载，稍后重试");
+                setTimeout(() => this.loadUsers(page), 500);
+                return;
+            }
+
+            const search = searchInput.value.trim();
+            const status = statusFilter.value;
+            const role = roleFilter.value;
+
+            try {
+                const params = new URLSearchParams({
+                    page: page,
+                    page_size: 10,
+                    ...(search && {search}),
+                    ...(status && {status}),
+                    ...(role && {role})
+                });
+
+                const res = await fetch(`/admin/api/user-management?${params.toString()}`, {
+                    headers: {"Authorization": "Bearer " + token}
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                this.users = data.items || [];
+                this.currentPage = data.page || 1;
+                this.totalPages = data.total_pages || 1;
+
+                console.log("用户列表:", this.users); // 添加调试日志
+
+                this.renderUsersTable();
+                this.renderPagination();
+                this.updatePageInfo();
+
+            } catch (err) {
+                console.error("加载用户失败:", err);
+                if (usersTableBody) {
+                    usersTableBody.innerHTML = `
+                    <tr><td colspan="9" class="text-center text-danger">加载失败，请重试</td></tr>
+                `;
                 }
             }
-        });
-    });
-    usersObserver.observe(document.getElementById('users'), {attributes: true});
+        },
 
-    // 加载用户数据（带分页、筛选）
-    async function loadUsers(page = 1) {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            alert("登录已过期，请重新登录");
-            window.location.href = "/login?next=/admin/";
-            return;
-        }
+        // 渲染用户表格
+        renderUsersTable: function() {
+            console.log("开始渲染用户表格，用户数量:", this.users.length); // 添加调试日志
+            console.log("用户数据详情:", this.users); // 添加详细数据日志
+            
+            const tbody = document.getElementById("usersTableBody");
+            if (!tbody) {
+                console.error("找不到usersTableBody元素");
+                return;
+            }
+            
+            if (this.users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center">暂无用户数据</td></tr>`;
+                return;
+            }
 
-        const search = document.getElementById("searchInput").value.trim();
-        const status = document.getElementById("statusFilter").value;
-        const role = document.getElementById("roleFilter").value;
-
-        try {
-            const params = new URLSearchParams({
-                page: page,
-                page_size: 10,
-                ...(search && {search}),
-                ...(status && {status}),
-                ...(role && {role})
-            });
-
-            const res = await fetch(`/admin/api/users?${params.toString()}`, {
-                headers: {"Authorization": "Bearer " + token}
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-            users = data.items || [];
-            currentPage = data.page || 1;
-            totalPages = data.total_pages || 1;
-
-            renderUsersTable();
-            renderPagination();
-            updatePageInfo();
-
-        } catch (err) {
-            console.error("加载用户失败:", err);
-            document.getElementById("usersTableBody").innerHTML = `
-            <tr><td colspan="9" class="text-center text-danger">加载失败，请重试</td></tr>
-        `;
-        }
-    }
-
-    // 渲染用户表格
-    function renderUsersTable() {
-        const tbody = document.getElementById("usersTableBody");
-        if (users.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center">暂无用户数据</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = users.map(user => `
+            try {
+                tbody.innerHTML = this.users.map(user => {
+                    // 兼容不同的状态字段名
+                    const status = user.status || (user.is_active ? 'active' : 'disabled');
+                    
+                    console.log("渲染用户:", user.username, "状态:", status, "ID:", user.id); // 添加调试日志
+                    
+                    return `
         <tr>
             <td><input type="checkbox" class="user-checkbox" value="${user.id}" /></td>
             <td>${user.id}</td>
-            <td>${escapeHtml(user.username)}</td>
-            <td>${escapeHtml(user.email)}</td>
+            <td>${this.escapeHtml(user.username)}</td>
+            <td>${this.escapeHtml(user.email)}</td>
             <td><span class="badge bg-secondary">${user.role}</span></td>
             <td>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox"
-                           ${user.status === 'active' ? 'checked' : ''}
-                           onchange="toggleUserStatus(${user.id}, this)" />
+                           ${status === 'active' ? 'checked' : ''}
+                           onchange="window.UserManager.toggleUserStatus(${user.id}, this)" />
                 </div>
             </td>
-            <td>${formatDate(user.created_at)}</td>
-            <td>${user.last_login ? formatDate(user.last_login) : '从未登录'}</td>
+            <td>${this.formatDate(user.created_at)}</td>
+            <td>${user.last_login ? this.formatDate(user.last_login) : '从未登录'}</td>
             <td>
                 <button class="btn btn-sm btn-outline-primary me-1"
-                        onclick="editUser(${user.id})">编辑</button>
+                        onclick="window.UserManager.editUser(${user.id})">编辑</button>
                 <button class="btn btn-sm btn-outline-danger"
-                        onclick="deleteUser(${user.id})">删除</button>
+                        onclick="window.UserManager.deleteUser(${user.id})">删除</button>
             </td>
         </tr>
-    `).join('');
-    }
+    `;
+                }).join('');
+                
+                console.log("用户列表渲染成功，共", this.users.length, "个用户"); // 添加调试日志
+                console.log("表格HTML内容:", tbody.innerHTML); // 添加表格内容日志
+            } catch (error) {
+                console.error("渲染用户表格时出错:", error);
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger">渲染失败: ${error.message}</td></tr>`;
+            }
+        },
 
-    // 渲染分页
-    function renderPagination() {
-        const pagination = document.getElementById("pagination");
-        pagination.innerHTML = '';
+        // 渲染分页
+        renderPagination: function() {
+            const pagination = document.getElementById("pagination");
+            if (!pagination) {
+                console.error("找不到pagination元素");
+                return;
+            }
+            
+            pagination.innerHTML = '';
 
-        // 上一页
-        const prevItem = document.createElement("li");
-        prevItem.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-        prevItem.innerHTML = `<a class="page-link" href="#">«</a>`;
-        prevItem.onclick = (e) => {
-            e.preventDefault();
-            if (currentPage > 1) loadUsers(currentPage - 1);
-        };
-        pagination.appendChild(prevItem);
-
-        // 页码（最多显示5个）
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, startPage + 4);
-
-        for (let i = startPage; i <= endPage; i++) {
-            const item = document.createElement("li");
-            item.className = `page-item ${i === currentPage ? 'active' : ''}`;
-            item.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            item.onclick = (e) => {
+            // 上一页
+            const prevItem = document.createElement("li");
+            prevItem.className = `page-item ${this.currentPage === 1 ? 'disabled' : ''}`;
+            prevItem.innerHTML = `<a class="page-link" href="#">«</a>`;
+            prevItem.onclick = (e) => {
                 e.preventDefault();
-                loadUsers(i);
+                if (this.currentPage > 1) this.loadUsers(this.currentPage - 1);
             };
-            pagination.appendChild(item);
-        }
+            pagination.appendChild(prevItem);
 
-        // 下一页
-        const nextItem = document.createElement("li");
-        nextItem.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-        nextItem.innerHTML = `<a class="page-link" href="#">»</a>`;
-        nextItem.onclick = (e) => {
-            e.preventDefault();
-            if (currentPage < totalPages) loadUsers(currentPage + 1);
-        };
-        pagination.appendChild(nextItem);
-    }
+            // 页码（最多显示5个）
+            const startPage = Math.max(1, this.currentPage - 2);
+            const endPage = Math.min(this.totalPages, startPage + 4);
 
-    // 更新页码信息
-    function updatePageInfo() {
-        document.getElementById("pageInfo").textContent = `第 ${currentPage} 页，共 ${totalPages} 页`;
-    }
-
-    // 应用筛选
-    function applyFilter() {
-        loadUsers(1); // 重置到第一页
-    }
-
-    // 全选/取消全选
-    function toggleSelectAll(checkbox) {
-        document.querySelectorAll('.user-checkbox').forEach(cb => {
-            cb.checked = checkbox.checked;
-        });
-    }
-
-    // 切换用户状态
-    async function toggleUserStatus(userId, checkbox) {
-        const token = localStorage.getItem("access_token");
-        const newStatus = checkbox.checked ? 'active' : 'disabled';
-
-        try {
-            const res = await fetch(`/admin/api/users/${userId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    "Authorization": "Bearer " + token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({status: newStatus})
-            });
-
-            if (!res.ok) throw new Error("更新状态失败");
-
-            alert(`用户状态已${newStatus === 'active' ? '启用' : '禁用'}`);
-        } catch (err) {
-            console.error(err);
-            checkbox.checked = !checkbox.checked; // 回滚
-            alert("操作失败，请重试");
-        }
-    }
-
-    // 编辑用户
-    function editUser(userId) {
-        const user = users.find(u => u.id === userId);
-        if (!user) return;
-
-        document.getElementById("userId").value = user.id;
-        document.getElementById("username").value = user.username;
-        document.getElementById("email").value = user.email;
-        document.getElementById("role").value = user.role;
-        document.getElementById("password").value = ""; // 密码留空
-        document.getElementById("status").checked = user.status === 'active';
-
-        document.getElementById("userModalLabel").textContent = "编辑用户";
-        new bootstrap.Modal(document.getElementById("userModal")).show();
-    }
-
-    // 打开新增用户模态框
-    function openCreateUserModal() {
-        document.getElementById("userId").value = "";
-        document.getElementById("username").value = "";
-        document.getElementById("email").value = "";
-        document.getElementById("role").value = "user";
-        document.getElementById("password").value = "";
-        document.getElementById("status").checked = true;
-
-        document.getElementById("userModalLabel").textContent = "新增用户";
-        new bootstrap.Modal(document.getElementById("userModal")).show();
-    }
-
-    // 保存用户（新增或编辑）
-    async function saveUser() {
-        const token = localStorage.getItem("access_token");
-        const userId = document.getElementById("userId").value;
-        const username = document.getElementById("username").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const role = document.getElementById("role").value;
-        const password = document.getElementById("password").value;
-        const status = document.getElementById("status").checked ? 'active' : 'disabled';
-
-        if (!username || !email) {
-            alert("用户名和邮箱不能为空");
-            return;
-        }
-
-        try {
-            let url = "/admin/api/users";
-            let method = "POST";
-            let body = {username, email, role, status};
-
-            if (password) body.password = password;
-            if (userId) {
-                url += `/${userId}`;
-                method = "PUT";
+            for (let i = startPage; i <= endPage; i++) {
+                const item = document.createElement("li");
+                item.className = `page-item ${i === this.currentPage ? 'active' : ''}`;
+                item.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                item.onclick = (e) => {
+                    e.preventDefault();
+                    this.loadUsers(i);
+                };
+                pagination.appendChild(item);
             }
 
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    "Authorization": "Bearer " + token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
+            // 下一页
+            const nextItem = document.createElement("li");
+            nextItem.className = `page-item ${this.currentPage === this.totalPages ? 'disabled' : ''}`;
+            nextItem.innerHTML = `<a class="page-link" href="#">»</a>`;
+            nextItem.onclick = (e) => {
+                e.preventDefault();
+                if (this.currentPage < this.totalPages) this.loadUsers(this.currentPage + 1);
+            };
+            pagination.appendChild(nextItem);
+        },
+
+        // 更新页码信息
+        updatePageInfo: function() {
+            const pageInfo = document.getElementById("pageInfo");
+            if (!pageInfo) {
+                console.error("找不到pageInfo元素");
+                return;
+            }
+            pageInfo.textContent = `第 ${this.currentPage} 页，共 ${this.totalPages} 页`;
+        },
+
+        // 应用筛选
+        applyFilter: function() {
+            this.loadUsers(1); // 重置到第一页
+        },
+
+        // 全选/取消全选
+        toggleSelectAll: function(checkbox) {
+            document.querySelectorAll('.user-checkbox').forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        },
+
+        // 切换用户状态
+        toggleUserStatus: async function(userId, checkbox) {
+            const token = localStorage.getItem("access_token");
+            const newStatus = checkbox.checked;
+
+            try {
+                const res = await fetch(`/admin/api/user-management/${userId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({is_active: newStatus})
+                });
+
+                if (!res.ok) throw new Error("更新状态失败");
+
+                alert(`用户状态已${newStatus ? '启用' : '禁用'}`);
+            } catch (err) {
+                console.error(err);
+                checkbox.checked = !checkbox.checked; // 回滚
+                alert("操作失败，请重试");
+            }
+        },
+
+        // 编辑用户
+        editUser: function(userId) {
+            const user = this.users.find(u => u.id === userId);
+            if (!user) return;
+
+            // 兼容不同的状态字段名
+            const status = user.status || (user.is_active ? 'active' : 'disabled');
+
+            document.getElementById("userId").value = user.id;
+            document.getElementById("username").value = user.username;
+            document.getElementById("email").value = user.email;
+            document.getElementById("role").value = user.role;
+            document.getElementById("password").value = ""; // 密码留空
+            document.getElementById("status").checked = status === 'active';
+
+            document.getElementById("userModalLabel").textContent = "编辑用户";
+            new bootstrap.Modal(document.getElementById("userModal")).show();
+        },
+
+        // 打开新增用户模态框
+        openCreateUserModal: function() {
+            document.getElementById("userId").value = "";
+            document.getElementById("username").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("role").value = "user";
+            document.getElementById("password").value = "";
+            document.getElementById("status").checked = true;
+
+            document.getElementById("userModalLabel").textContent = "新增用户";
+            new bootstrap.Modal(document.getElementById("userModal")).show();
+        },
+
+        // 保存用户（新增或编辑）
+        saveUser: async function() {
+            const token = localStorage.getItem("access_token");
+            const userId = document.getElementById("userId").value;
+            const username = document.getElementById("username").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const role = document.getElementById("role").value;
+            const password = document.getElementById("password").value;
+            const isActive = document.getElementById("status").checked;
+
+            if (!username || !email) {
+                alert("用户名和邮箱不能为空");
+                return;
+            }
+
+            try {
+                let url = "/admin/api/user-management";
+                let method = "POST";
+                let body = {username, email, role, is_active: isActive};
+
+                if (password) body.password = password;
+                if (userId) {
+                    url += `/${userId}`;
+                    method = "PUT";
+                }
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                alert(userId ? "用户更新成功" : "用户创建成功");
+                bootstrap.Modal.getInstance(document.getElementById("userModal")).hide();
+                this.loadUsers(this.currentPage); // 刷新当前页
+            } catch (err) {
+                console.error("保存用户失败:", err);
+                alert("操作失败，请检查输入或重试");
+            }
+        },
+
+        // 删除用户
+        deleteUser: async function(userId) {
+            if (!confirm("确定要删除此用户吗？此操作不可恢复！")) return;
+
+            const token = localStorage.getItem("access_token");
+
+            try {
+                const res = await fetch(`/admin/api/user-management/${userId}`, {
+                    method: 'DELETE',
+                    headers: {"Authorization": "Bearer " + token}
+                });
+
+                if (!res.ok) throw new Error("删除失败");
+
+                alert("用户删除成功");
+                this.loadUsers(this.currentPage);
+            } catch (err) {
+                console.error(err);
+                alert("删除失败，请重试");
+            }
+        },
+
+        // 导出用户
+        exportUsers: function() {
+            const token = localStorage.getItem("access_token");
+            const search = document.getElementById("searchInput").value.trim();
+            const status = document.getElementById("statusFilter").value;
+            const role = document.getElementById("roleFilter").value;
+
+            const params = new URLSearchParams({
+                ...(search && {search}),
+                ...(status && {status}),
+                ...(role && {role}),
+                export: 'excel'
             });
 
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            window.open(`/admin/api/user-management/export?${params.toString()}`, '_blank');
+        },
 
-            alert(userId ? "用户更新成功" : "用户创建成功");
-            bootstrap.Modal.getInstance(document.getElementById("userModal")).hide();
-            loadUsers(currentPage); // 刷新当前页
-        } catch (err) {
-            console.error("保存用户失败:", err);
-            alert("操作失败，请检查输入或重试");
+        // 工具函数
+        escapeHtml: function(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        },
+
+        formatDate: function(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return isNaN(date) ? '' : date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(/\//g, '-');
         }
-    }
-
-    // 删除用户
-    async function deleteUser(userId) {
-        if (!confirm("确定要删除此用户吗？此操作不可恢复！")) return;
-
-        const token = localStorage.getItem("access_token");
-
-        try {
-            const res = await fetch(`/admin/api/users/${userId}`, {
-                method: 'DELETE',
-                headers: {"Authorization": "Bearer " + token}
-            });
-
-            if (!res.ok) throw new Error("删除失败");
-
-            alert("用户删除成功");
-            loadUsers(currentPage);
-        } catch (err) {
-            console.error(err);
-            alert("删除失败，请重试");
-        }
-    }
-
-    // 导出用户
-    function exportUsers() {
-        const token = localStorage.getItem("access_token");
-        const search = document.getElementById("searchInput").value.trim();
-        const status = document.getElementById("statusFilter").value;
-        const role = document.getElementById("roleFilter").value;
-
-        const params = new URLSearchParams({
-            ...(search && {search}),
-            ...(status && {status}),
-            ...(role && {role}),
-            export: 'excel'
-        });
-
-        window.open(`/admin/api/users/export?${params.toString()}`, '_blank');
-    }
-
-    // 工具函数
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    function formatDate(dateStr) {
-        if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return isNaN(date) ? '' : date.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }).replace(/\//g, '-');
-    }
+    });
+    
+    // 初始化UserManager
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing UserManager');
+        window.UserManager.init();
+    });
 </script>

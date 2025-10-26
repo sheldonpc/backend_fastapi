@@ -90,203 +90,255 @@
 <link rel="stylesheet" href="/static/css/bootstrap.css">
 <script src="/static/js/bootstrap.bundle.min.js"></script>
 <script>
-    // 全局变量
-    let articles = [];
-
-    function createNewArticle() {
-        window.location.href = "/admin/articles/new";
-    }
-
-    // 页面激活时加载数据
-    document.addEventListener('DOMContentLoaded', function () {
-        if (document.getElementById('articles').classList.contains('d-none') === false) {
-            loadArticles();
+    // 文章管理器对象
+    window.ArticleManager = {
+        isInitialized: false,
+        articles: [],
+    
+        // 初始化文章管理器
+        init: function() {
+            if (this.isInitialized) return;
+            
+            console.log('初始化文章管理器...');
+            this.isInitialized = true;
+            
+            // 如果页面当前可见，立即加载数据
+            if (this.isPageVisible()) {
+                this.loadArticles();
+            }
+        },
+    
+        // 检查文章页面是否可见
+        isPageVisible: function() {
+            const articlesDiv = document.getElementById('articles');
+            return articlesDiv && !articlesDiv.classList.contains('d-none');
+        },
+    
+        // 加载文章列表
+        loadArticles: async function() {
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                alert("登录已过期，请重新登录");
+                window.location.href = "/login?next=/admin/";
+                return;
+            }
+    
+            try {
+                const res = await fetch("/admin/api/articles/", {
+                    headers: {"Authorization": "Bearer " + token}
+                });
+    
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+                const data = await res.json();
+                this.articles = data.items || [];
+    
+                this.renderArticlesTable();
+    
+            } catch (err) {
+                console.error("加载文章失败:", err);
+                document.getElementById("articlesTableBody").innerHTML = `
+                <tr><td colspan="7" class="text-center text-danger">加载失败，请重试</td></tr>
+            `;
+            }
+        },
+    
+        // 渲染文章表格
+        renderArticlesTable: function() {
+            const tbody = document.getElementById("articlesTableBody");
+            if (this.articles.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center">暂无文章数据</td></tr>`;
+                return;
+            }
+    
+            tbody.innerHTML = this.articles.map(article => {
+                const statusBadge = article.status === 'published'
+                    ? '<span class="badge bg-success">已发布</span>'
+                    : '<span class="badge bg-secondary">草稿</span>';
+                const deleteOnclick = article.status === 'published' ? '' : `ArticleManager.deleteArticle('${article.id}', '${escapeHtml(article.title)}')`;
+                const deleteAttrs = article.status === 'published' ? 'disabled title="发布中的文章不可删除"' : '';
+                return `
+            <tr>
+                <td><strong>${escapeHtml(article.title)}</strong></td>
+                <td>${escapeHtml(article.author || '-')}</td>
+                <td>${statusBadge}</td>
+                <td><span class="badge bg-info">${escapeHtml(article.category || '-')}</span></td>
+                <td>${formatDate(article.created_at)}</td>
+                <td><span class="badge bg-primary">${article.views || 0} 次</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1"
+                            onclick="ArticleManager.editArticle('${article.id}')">编辑</button>
+                    <button class="btn btn-sm btn-outline-danger ${article.status === 'published' ? 'disabled' : ''}"
+                            onclick="${deleteOnclick}"
+                            ${deleteAttrs}>
+                        删除
+                    </button>
+                </td>
+            </tr>
+        `;
+            }).join('');
+        },
+    
+        // 编辑文章
+        editArticle: function(articleId) {
+            const article = this.articles.find(a => a.id === articleId);
+            if (!article) return;
+    
+            document.getElementById("articleId").value = article.id;
+            document.getElementById("articleTitle").value = article.title;
+            document.getElementById("articleAuthor").value = article.author || "";
+            document.getElementById("articleCategory").value = article.category || "";
+            document.getElementById("articleStatus").value = article.status || "draft";
+            document.getElementById("articleTags").value = article.tags ? article.tags.join(', ') : "";
+            document.getElementById("articleContent").value = article.content || "";
+    
+            document.getElementById("articleModalLabel").textContent = "编辑文章";
+            new bootstrap.Modal(document.getElementById("articleModal")).show();
+        },
+    
+        // 保存文章（新增或编辑）
+        saveArticle: async function() {
+            const token = localStorage.getItem("access_token");
+            const articleId = document.getElementById("articleId").value;
+            const title = document.getElementById("articleTitle").value.trim();
+            const author = document.getElementById("articleAuthor").value.trim();
+            const category = document.getElementById("articleCategory").value.trim();
+            const status = document.getElementById("articleStatus").value;
+            const tagsInput = document.getElementById("articleTags").value.trim();
+            const content = document.getElementById("articleContent").value.trim();
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+    
+            if (!title || !author || !category || !content) {
+                alert("标题、作者、分类和内容不能为空");
+                return;
+            }
+    
+            try {
+                let url = "/admin/api/articles";
+                let method = "POST";
+                let body = {title, author, category, status, tags, content};
+    
+                if (articleId) {
+                    url += `/${articleId}`;
+                    method = "PUT";
+                }
+    
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(body)
+                });
+    
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.detail || `HTTP ${res.status}`);
+                }
+    
+                alert(articleId ? "文章更新成功" : "文章创建成功");
+                bootstrap.Modal.getInstance(document.getElementById("articleModal")).hide();
+                this.loadArticles(); // 刷新列表
+            } catch (err) {
+                console.error("保存文章失败:", err);
+                alert("操作失败：" + err.message);
+            }
+        },
+    
+        // 删除文章
+        deleteArticle: async function(articleId, articleTitle) {
+            if (!confirm(`确定要删除文章「${articleTitle}」吗？\n此操作不可恢复！`)) {
+                return;
+            }
+    
+            const token = localStorage.getItem("access_token");
+    
+            try {
+                const res = await fetch(`/admin/api/articles/${articleId}`, {
+                    method: 'DELETE',
+                    headers: {"Authorization": "Bearer " + token}
+                });
+    
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.detail || `HTTP ${res.status}`);
+                }
+    
+                alert("文章删除成功");
+                this.loadArticles();
+            } catch (err) {
+                console.error(err);
+                alert("删除失败：" + err.message);
+            }
         }
+    };
+    
+    // 兼容函数，用于处理ArticleManager未完全初始化的情况
+    window.loadArticles = function() {
+        if (window.ArticleManager && window.ArticleManager.isInitialized) {
+            window.ArticleManager.loadArticles();
+        } else {
+            console.log('文章管理器尚未初始化，延迟加载...');
+            setTimeout(() => {
+                if (window.ArticleManager && window.ArticleManager.isInitialized) {
+                    window.ArticleManager.loadArticles();
+                } else {
+                    console.log('文章管理器仍未初始化，等待页面加载完成...');
+                }
+            }, 500);
+        }
+    };
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // 延迟初始化，确保所有脚本都已加载
+        setTimeout(() => {
+            if (window.ArticleManager) {
+                window.ArticleManager.init();
+            }
+        }, 100);
     });
-
+    
     // 监听导航切换
     const articlesObserver = new MutationObserver(function (mutations) {
         mutations.forEach(function (mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                const articlesDiv = document.getElementById('articles');
-                if (articlesDiv && !articlesDiv.classList.contains('d-none')) {
-                    loadArticles();
+                if (window.ArticleManager && window.ArticleManager.isPageVisible()) {
+                    window.ArticleManager.loadArticles();
                 }
             }
         });
     });
-    articlesObserver.observe(document.getElementById('articles'), {attributes: true});
-
-    // 加载文章列表
-    async function loadArticles() {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            alert("登录已过期，请重新登录");
-            window.location.href = "/login?next=/admin/";
-            return;
+    
+    // 等待DOM加载完成后设置观察器
+    document.addEventListener('DOMContentLoaded', function() {
+        const articlesDiv = document.getElementById('articles');
+        if (articlesDiv) {
+            articlesObserver.observe(articlesDiv, {attributes: true});
         }
-
-        try {
-            const res = await fetch("/admin/api/articles", {
-                headers: {"Authorization": "Bearer " + token}
-            });
-
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-            const data = await res.json();
-            articles = data.items || [];
-
-            renderArticlesTable();
-
-        } catch (err) {
-            console.error("加载文章失败:", err);
-            document.getElementById("articlesTableBody").innerHTML = `
-            <tr><td colspan="7" class="text-center text-danger">加载失败，请重试</td></tr>
-        `;
-        }
+    });
+    
+    // 全局函数，用于按钮点击
+    function createNewArticle() {
+        window.location.href = "/admin/articles/new";
     }
-
-    // 渲染文章表格
-    function renderArticlesTable() {
-        const tbody = document.getElementById("articlesTableBody");
-        if (articles.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center">暂无文章数据</td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = articles.map(article => {
-            const statusBadge = article.status === 'published'
-                ? '<span class="badge bg-success">已发布</span>'
-                : '<span class="badge bg-secondary">草稿</span>';
-            const deleteOnclick = article.status === 'published' ? '' : `deleteArticle('${article.id}', '${escapeHtml(article.title)}')`;
-            const deleteAttrs = article.status === 'published' ? 'disabled title="发布中的文章不可删除"' : '';
-            return `
-        <tr>
-            <td><strong>${escapeHtml(article.title)}</strong></td>
-            <td>${escapeHtml(article.author || '-')}</td>
-            <td>${statusBadge}</td>
-            <td><span class="badge bg-info">${escapeHtml(article.category || '-')}</span></td>
-            <td>${formatDate(article.created_at)}</td>
-            <td><span class="badge bg-primary">${article.views || 0} 次</span></td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary me-1"
-                        onclick="editArticle('${article.id}')">编辑</button>
-                <button class="btn btn-sm btn-outline-danger ${article.status === 'published' ? 'disabled' : ''}"
-                        onclick="${deleteOnclick}"
-                        ${deleteAttrs}>
-                    删除
-                </button>
-            </td>
-        </tr>
-    `;
-        }).join('');
-    }
-
-    // 打开新增文章模态框
-    // function openCreateArticleModal() {
-    //     document.getElementById("articleId").value = "";
-    //     document.getElementById("articleTitle").value = "";
-    //     document.getElementById("articleAuthor").value = "";
-    //     document.getElementById("articleCategory").value = "";
-    //     document.getElementById("articleStatus").value = "draft";
-    //     document.getElementById("articleTags").value = "";
-    //     document.getElementById("articleContent").value = "";
-    //
-    //     document.getElementById("articleModalLabel").textContent = "新增文章";
-    //     new bootstrap.Modal(document.getElementById("articleModal")).show();
-    // }
-
-    // 编辑文章
+    
     function editArticle(articleId) {
-        const article = articles.find(a => a.id === articleId);
-        if (!article) return;
-
-        document.getElementById("articleId").value = article.id;
-        document.getElementById("articleTitle").value = article.title;
-        document.getElementById("articleAuthor").value = article.author || "";
-        document.getElementById("articleCategory").value = article.category || "";
-        document.getElementById("articleStatus").value = article.status || "draft";
-        document.getElementById("articleTags").value = article.tags ? article.tags.join(', ') : "";
-        document.getElementById("articleContent").value = article.content || "";
-
-        document.getElementById("articleModalLabel").textContent = "编辑文章";
-        new bootstrap.Modal(document.getElementById("articleModal")).show();
-    }
-
-    // 保存文章（新增或编辑）
-    async function saveArticle() {
-        const token = localStorage.getItem("access_token");
-        const articleId = document.getElementById("articleId").value;
-        const title = document.getElementById("articleTitle").value.trim();
-        const author = document.getElementById("articleAuthor").value.trim();
-        const category = document.getElementById("articleCategory").value.trim();
-        const status = document.getElementById("articleStatus").value;
-        const tagsInput = document.getElementById("articleTags").value.trim();
-        const content = document.getElementById("articleContent").value.trim();
-        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
-
-        if (!title || !author || !category || !content) {
-            alert("标题、作者、分类和内容不能为空");
-            return;
-        }
-
-        try {
-            let url = "/admin/api/articles";
-            let method = "POST";
-            let body = {title, author, category, status, tags, content};
-
-            if (articleId) {
-                url += `/${articleId}`;
-                method = "PUT";
-            }
-
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    "Authorization": "Bearer " + token,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-            });
-
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.detail || `HTTP ${res.status}`);
-            }
-
-            alert(articleId ? "文章更新成功" : "文章创建成功");
-            bootstrap.Modal.getInstance(document.getElementById("articleModal")).hide();
-            loadArticles(); // 刷新列表
-        } catch (err) {
-            console.error("保存文章失败:", err);
-            alert("操作失败：" + err.message);
+        if (window.ArticleManager) {
+            window.ArticleManager.editArticle(articleId);
         }
     }
-
-    // 删除文章
-    async function deleteArticle(articleId, articleTitle) {
-        if (!confirm(`确定要删除文章「${articleTitle}」吗？\n此操作不可恢复！`)) {
-            return;
+    
+    function saveArticle() {
+        if (window.ArticleManager) {
+            window.ArticleManager.saveArticle();
         }
-
-        const token = localStorage.getItem("access_token");
-
-        try {
-            const res = await fetch(`/admin/api/articles/${articleId}`, {
-                method: 'DELETE',
-                headers: {"Authorization": "Bearer " + token}
-            });
-
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.detail || `HTTP ${res.status}`);
-            }
-
-            alert("文章删除成功");
-            loadArticles();
-        } catch (err) {
-            console.error(err);
-            alert("删除失败：" + err.message);
+    }
+    
+    function deleteArticle(articleId, articleTitle) {
+        if (window.ArticleManager) {
+            window.ArticleManager.deleteArticle(articleId, articleTitle);
         }
     }
 

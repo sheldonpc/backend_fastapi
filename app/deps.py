@@ -9,27 +9,22 @@ from app import models
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+
 async def _get_user_by_token(token: str):
-    """统一的根据token获取用户的核心函数"""
     if not token:
         return None
-
     try:
         user_id_str = decode_access_token(token)  # 明确变量名，表示它是字符串
         if not user_id_str:
             return None
-
-        # 关键修复：将字符串ID转换为整数
         try:
             user_id = int(user_id_str)
         except (ValueError, TypeError):
-            # 如果转换失败（比如token被篡改，sub不是数字），则视为无效
             return None
 
-        # 使用整数ID进行查询
         user = await models.User.get_or_none(id=user_id)
         return user
-    except Exception:
+    except Exception as e:
         return None
 
 
@@ -52,6 +47,11 @@ async def get_current_user_from_cookie(request: Request):
     return await _get_user_by_token(token)
 
 
+async def get_current_user_from_token(token: str):
+    """从token字符串中获取用户（用于WebSocket认证）"""
+    return await _get_user_by_token(token)
+
+
 async def require_auth_cookie(current_user=Depends(get_current_user_from_cookie)):
     """页面使用的必须认证依赖"""
     if not current_user:
@@ -69,6 +69,11 @@ async def optional_auth_cookie(current_user=Depends(get_current_user_from_cookie
 # 角色验证 (兼容两种认证方式)
 async def get_current_admin(current_user=Depends(get_current_user)):
     """API管理员验证"""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="未认证"
+        )
     if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

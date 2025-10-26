@@ -417,6 +417,22 @@ class StrategyCreate(BaseModel):
             raise ValueError('持仓周期必须是短期、中期或长期')
         return v
 
+class MessageBroadcast(BaseModel):
+    """广播消息请求模型"""
+    title: str = Field(..., min_length=1, max_length=255, description="消息标题")
+    content: str = Field(..., min_length=1, description="消息内容")
+    message_type: str = Field("system", description="消息类型：system/transaction/important")
+    scope: str = Field("all", description="发送范围：all/active/new")
+
+
+class MessageSend(BaseModel):
+    """发送消息请求模型"""
+    user_id: int = Field(..., description="接收消息的用户ID")
+    title: str = Field(..., min_length=1, max_length=255, description="消息标题")
+    content: str = Field(..., min_length=1, description="消息内容")
+    message_type: str = Field("system", description="消息类型：system/transaction/important")
+
+
 class StrategyResponse(BaseModel):
     id: int
     name: str

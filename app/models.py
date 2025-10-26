@@ -790,7 +790,7 @@ class MarketIndexData(models.Model):
     # 价格数据
     last_price = fields.DecimalField(max_digits=12, decimal_places=3, description="最新价")
     change = fields.DecimalField(max_digits=10, decimal_places=4, description="涨跌幅")
-    change_amount = fields.DecimalField(max_digits=10, decimal_places=3, description="涨跌额")
+    change_amount = fields.DecimalField(max_digits=10, decimal_places=3, description="涨跌额", null=True, default=0.0)
 
     # 涨跌家数
     up_num = fields.IntField(description="上涨家数")
@@ -2008,4 +2008,35 @@ class ImageModel(models.Model):
     def __str__(self):
         return self.original_name
 
+class Suggestion(models.Model):
+    id = fields.IntField(pk=True)
+    name = fields.CharField(max_length=255, description="留言者姓名")
+    email = fields.CharField(max_length=255, description="留言者邮箱")
+    theme = fields.CharField(max_length=255, description="留言者主题")
+    content = fields.CharField(max_length=4096, description="留言内容")
+    created_at = fields.DatetimeField(auto_now_add=True)
 
+    class Meta:
+        table = 'suggestion'
+
+
+class Message(models.Model):
+    """消息模型"""
+    id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField("models.User", related_name="messages", description="接收用户")
+    title = fields.CharField(max_length=255, description="消息标题")
+    content = fields.TextField(description="消息内容")
+    message_type = fields.CharField(max_length=50, description="消息类型：system/transaction/important")
+    is_read = fields.BooleanField(default=False, description="是否已读")
+    created_at = fields.DatetimeField(auto_now_add=True, description="创建时间")
+    read_at = fields.DatetimeField(null=True, description="阅读时间")
+    
+    class Meta:
+        table = "message"
+
+    def __str__(self):
+        return f"{self.title} - {self.user.username}"
+
+
+Message_Pydantic = pydantic_model_creator(Message, name="Message")
+MessageIn_Pydantic = pydantic_model_creator(Message, name="MessageIn", exclude_readonly=True)

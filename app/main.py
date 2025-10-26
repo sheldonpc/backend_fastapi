@@ -2,8 +2,8 @@ import time
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Request, WebSocket
+from fastapi.middleware.gzip import GZipMiddleware
 from contextlib import asynccontextmanager
 
 from fastapi.exceptions import RequestValidationError
@@ -13,12 +13,13 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.exceptions import PermissionDenied
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData
-from app.services.scheduler_market_data import MarketDataAPScheduler
+from app.routers.root import _build_homepage_data
+from app.services.scheduler_market_data import MarketDataScheduler
 from app.utils.logger import init_logger, get_logger
 from app.database import init_db, close_db
 from app.routers import users, auth, articles, comments, likes, admin, api_users, roles, api_articles, api_config, \
     financial, market, api_fetch_data, api_index, root, board, strategy, upload, api_strategy, api_profile, \
-    strategy_user, error
+    strategy_user, error, messages, messages_page, admin_messages
 from app.middlewares.error_handler import http_exception_handler, validation_exception_handler, all_exception_handler, \
     permission_denied_handler
 from app.utils.redis_client import cache_set
@@ -28,6 +29,11 @@ from app.utils.warm_up_tasks import start_cache_warmup, stop_cache_warmup
 logger = get_logger("main")
 load_dotenv()
 
+# 缓存配置
+HOMEPAGE_CACHE_KEY = "homepage_data"
+HOMEPAGE_CACHE_TTL = 60  # 5分钟
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 初始化日志 - 根据环境变量决定输出策略
@@ -36,7 +42,7 @@ async def lifespan(app: FastAPI):
     # 简化后的初始化，移除了 important_to_console 参数
     init_logger(console_output=console_output)
 
-    market_scheduler = MarketDataAPScheduler()
+    market_scheduler = MarketDataScheduler()
     await init_db()
 
     try:
@@ -67,7 +73,7 @@ app = FastAPI(
     openapi_tags=[
         {"name": "auth", "description": "用户认证相关接口"},
         {"name": "users", "description": "用户管理接口"}
-    ]
+    ],
 )
 
 app.add_middleware(
@@ -77,6 +83,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -124,9 +131,36 @@ app.include_router(api_strategy.router)
 app.include_router(api_profile.router)
 app.include_router(strategy_user.router)
 app.include_router(error.router)
+app.include_router(messages.router)
+app.include_router(messages_page.router)
+app.include_router(admin_messages.router)
+# router.include_router(admin_messages.router, prefix="/messages", tags=["admin_messages"])
+
+# WebSocket路由
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, token: str = None):
+    from app.routers.websocket import websocket_endpoint as ws_endpoint
+    await ws_endpoint(websocket, token)
 
 # 健康检查端点
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": time.time()}
 
+from fastapi import FastAPI, HTTPException, Request, WebSocket
+from fastapi.responses import JSONResponse
+
+class CustomException(Exception):
+    def __init__(self, name):
+        self.name = name
+
+@app.exception_handler(CustomException)
+async def custom_exception_handler(request: Request, exc: CustomException):
+    return JSONResponse(
+        status_code=418,
+        content={"message": f"Oops! {exc.name} did something wrong."},
+    )
+
+@app.get("/fdhsh")
+async def get_exception():
+    raise CustomException(name="CustomException")

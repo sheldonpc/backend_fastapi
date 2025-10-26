@@ -617,7 +617,6 @@
     });
 
     // 加载策略列表
-    // 加载策略列表
     async function loadStrategies() {
         const token = localStorage.getItem("access_token");
         if (!token) {
@@ -697,11 +696,7 @@
                         onclick="viewStrategy('${strategy.id}')">查看</button>
                 <button class="btn btn-sm btn-outline-primary me-1"
                         onclick="editStrategy('${strategy.id}')">编辑</button>
-                <button class="btn btn-sm btn-outline-danger ${strategy.publish ? 'disabled' : ''}"
-                        onclick="${deleteOnclick}"
-                        ${deleteAttrs}>
-                    删除
-                </button>
+
             </td>
         </tr>
     `;

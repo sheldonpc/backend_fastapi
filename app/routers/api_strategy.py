@@ -1,7 +1,8 @@
 import logging
+import os
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Depends, HTTPException, status, UploadFile, File
 
 from app.core.templates import templates
 from app.deps import get_current_user, get_current_registered_user
@@ -146,9 +147,11 @@ async def get_strategies(
     获取当前用户的策略列表
     """
     try:
-        strategies = await Strategy.filter(
-            author_id=current_user.id  # 使用 author_id 而不是 owner_id
-        ).offset(skip).limit(limit).all()
+        # strategies = await Strategy.filter(
+        #     author_id=current_user.id  # 使用 author_id 而不是 owner_id
+        # ).offset(skip).limit(limit).all()
+
+        strategies = await Strategy.all()
 
         return strategies
     except Exception as e:

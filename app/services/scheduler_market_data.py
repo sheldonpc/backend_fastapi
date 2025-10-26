@@ -25,7 +25,7 @@ from app.services.market_data_service import (
 logger = logging.getLogger(__name__)
 
 # ==== 交易时间配置 ====
-CN_SESSIONS = [(time(9, 30), time(11, 30)), (time(13, 0), time(23, 0))]
+CN_SESSIONS = [(time(6, 00), time(11, 30)), (time(13, 0), time(23, 0))]
 US_SESSIONS = [(time(9, 30), time(17, 0))]
 
 
@@ -47,7 +47,7 @@ def log_task(name: str):
     return decorator
 
 
-class MarketDataAPScheduler:
+class MarketDataScheduler:
     """市场数据定时调度器"""
 
     def __init__(self):
@@ -210,6 +210,7 @@ class MarketDataAPScheduler:
             self.update_vix_index,
             self.update_rise_down_data,
             self.update_notice_rise_down,
+            self.update_foreign_commodity_data
         ]
 
         for task in tasks:
@@ -226,26 +227,25 @@ class MarketDataAPScheduler:
 
     async def run_cn_daily_tasks(self):
         tasks = [
-            self.update_index_history_data(),
-            self.update_fx_history_data(),
-            self.update_bond_data(),
-            self.update_industry_data(),
-            self.update_stock_data(),
-            self.update_concept_data(),
-            self.update_lhb_data(),
-            self.update_hot_rank_data(),
-            self.update_hot_up_data(),
-            self.update_hot_search_baidu(),
-            self.update_zt_pool(),
-            self.update_zt_pool_previous(),
-            self.update_zt_pool_strong(),
-            self.update_zt_pool_down(),
-            self.update_foreign_commodity_data()
+            self.update_index_history_data,
+            self.update_fx_history_data,
+            self.update_bond_data,
+            self.update_industry_data,
+            self.update_stock_data,
+            self.update_concept_data,
+            self.update_lhb_data,
+            self.update_hot_rank_data,
+            self.update_hot_up_data,
+            self.update_hot_search_baidu,
+            self.update_zt_pool,
+            self.update_zt_pool_previous,
+            self.update_zt_pool_strong,
+            self.update_zt_pool_down,
         ]
 
         for task in tasks:
             try:
-                await task
+                await task()
                 sleep_time = random.uniform(5, 10)
                 await asyncio.sleep(sleep_time)
             except Exception as e:
@@ -253,16 +253,16 @@ class MarketDataAPScheduler:
 
     async def run_news_hourly_tasks(self):
         tasks = [
-            self.update_eastmoney_news(),
-            self.update_news_one(),
-            self.update_news_two(),
-            self.update_news_three(),
-            self.update_news_four(),
+            self.update_eastmoney_news,
+            self.update_news_one,
+            self.update_news_two,
+            self.update_news_three,
+            self.update_news_four,
         ]
 
         for task in tasks:
             try:
-                await task
+                await task()
                 sleep_time = random.uniform(5, 10)
                 await asyncio.sleep(sleep_time)
             except Exception as e:
@@ -330,13 +330,10 @@ class MarketDataAPScheduler:
 
             if not self.running:
                 break
-            if self.is_cn_trading_day():
-                await self.run_cn_daily_tasks()
-                if self._shutdown_after_force_once():
-                    break
+            await self.run_cn_daily_tasks()
 
     async def _scheduler_second_loop_daily_ai_summary(self):
-        daily_times = [time(8, 0)]
+        daily_times = [time(16, 40)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
@@ -352,13 +349,12 @@ class MarketDataAPScheduler:
 
             if not self.running:
                 break
-            if self.is_cn_trading_day():
-                await self.run_second_ai_daily_tasks()
-                if self._shutdown_after_force_once():
-                    break
+            await self.run_second_ai_daily_tasks()
+            if self._shutdown_after_force_once():
+                break
 
     async def _scheduler_first_loop_daily_ai_summary(self):
-        daily_times = [time(7, 40)]
+        daily_times = [time(16, 38)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
@@ -374,10 +370,9 @@ class MarketDataAPScheduler:
 
             if not self.running:
                 break
-            if self.is_cn_trading_day():
-                await self.run_first_ai_daily_tasks()
-                if self._shutdown_after_force_once():
-                    break
+            await self.run_first_ai_daily_tasks()
+            if self._shutdown_after_force_once():
+                break
 
     async def _scheduler_loop_hourly(self):
         daily_times = [time(h, 0) for h in range(10, 19)]
@@ -423,7 +418,7 @@ class MarketDataAPScheduler:
                 break
 
     async def _scheduler_daily_eastmoney_news(self):
-        daily_times = [time(7, 0)]
+        daily_times = [time(8, 0)]
         while self.running:
             now = datetime.now(ZoneInfo("Asia/Shanghai"))
             today = now.date()
@@ -486,5 +481,5 @@ class MarketDataAPScheduler:
 
 
 if __name__ == "__main__":
-    scheduler = MarketDataAPScheduler()
+    scheduler = MarketDataScheduler()
     print("是否在中国交易时间:", scheduler.is_cn_trading_day())

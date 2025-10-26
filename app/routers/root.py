@@ -1,25 +1,23 @@
 import re
+import time
 from datetime import datetime, timedelta
 from math import ceil
 from typing import Optional
 
-from fastapi import Request
-from urllib.parse import urljoin  # 如果还需要 urljoin
-# from flask import url_for, request
 from tortoise.expressions import Q
-from fastapi import APIRouter, Query, HTTPException, Depends, Form, Request
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import APIRouter, Query, HTTPException, Depends, Form, Request, Cookie, status, Response
+import re
+from fastapi.responses import RedirectResponse, JSONResponse, FileResponse, StreamingResponse
 
 from app.deps import optional_auth_cookie, require_auth_cookie
 from app.models import GlobalIndexLatest, ForeignCommodityRealTimeData2, RealTimeForeignCurrencyData, News2, \
     StockMarketActivity, CNMarket, VIXRealTimeData, News4, News3, DifyTemplate, BondYieldHistory, EventData, Article2, \
-    Strategy, Comment2, User
+    Strategy, Comment2, User, Suggestion
 from app.core.templates import templates
 import markdown
 
 from app.utils.markdown_process import process_markdown
 from app.utils.redis_client import cache_get, cache_set
-from app.utils.status_decorator import template_route
 
 CACHE_KEY = "homepage_data"
 CACHE_TTL = 30  # 秒
@@ -1020,3 +1018,205 @@ async def profile(request: Request, current_user=Depends(optional_auth_cookie)):
             "request": request,
             "current_user": current_user
         })
+
+@router.get("/wallet")
+async def wallet(request: Request, current_user=Depends(optional_auth_cookie)):
+    """
+    我的钱包
+    """
+    return templates.TemplateResponse(
+        "public/wallet.html", {
+            "request": request,
+            "current_user": current_user
+        })
+
+@router.get("/vip")
+async def vip(request: Request, current_user=Depends(optional_auth_cookie)):
+    """
+    vip页面
+    """
+    return templates.TemplateResponse(
+        "public/vip.html", {
+            "request": request,
+            "current_user": current_user
+        })
+
+@router.get("/header")
+async def get_header(
+    session_id: Optional[str] = Cookie(None),
+    user_token: Optional[str] = Cookie(None)
+):
+    return {
+        "session_id": session_id,
+        "user_token": user_token
+    }
+
+@router.get("/header2", status_code=status.HTTP_200_OK)
+async def get_header2(
+    request: Request
+):
+    cookie = request.cookies
+    print(cookie)
+    return Response(
+        content="",
+        media_type="text/html"
+    )
+
+@router.get("/local_file", status_code=status.HTTP_200_OK)
+async def get_header2():
+
+    return FileResponse("upload/images/f85c6ca4-da73-4f0e-8eea-e69635fb06f0.png")
+
+def generate_data():
+    for i in range(10):
+        time.sleep(0.5)
+        yield f"数据块 {i}\n".encode('utf-8')
+
+@router.get("/streaming")
+async def get_streaming():
+    return StreamingResponse(
+        generate_data(),
+        media_type="text/event-stream"
+    )
+
+
+@router.get("/request")
+async def get_request(
+    request: Request
+):
+    print(f"Method: {request.method}")
+    print(f"URL: {request.url}")
+    print(f"Headers: {dict(request.headers)}")
+    print(f"Query params: {dict(request.query_params)}")
+    print(f"Cookies: {request.cookies}")
+    return {"msg": "ok"}
+
+@router.post("/form")
+async def get_form(
+    username: str = Form(...),
+    password: str = Form(...)
+):
+    print(username, password)
+    return {"msg": "ok"}
+
+
+# 简单的依赖类
+class UserService:
+    def __init__(self):
+        self.users = [2,3]
+
+    def get_user(self, user_id: int):
+        for user in self.users:
+            if user["id"] == user_id:
+                return user
+        return None
+
+    def create_user(self, user_data: dict):
+        user = {"id": len(self.users) + 1, **user_data}
+        self.users.append(user)
+        return user
+
+
+# 使用类作为依赖项
+@router.get("/users/{user_id}")
+async def get_user(
+        user_id: int,
+        user_service: UserService = Depends(UserService)
+):
+    user = user_service.get_user(user_id)
+    if not user:
+        return {"error": "User not found"}
+    return user
+
+@router.get("/privacy")
+async def privacy_policy(request: Request, current_user=Depends(optional_auth_cookie)):
+    return templates.TemplateResponse(
+        "public/privacy.html",
+        {
+            "request": request,
+            "current_user": current_user
+        }
+    )
+
+@router.get("/contact")
+async def contact(request: Request, current_user=Depends(optional_auth_cookie), success: bool = False, name: str = None):
+    """
+    联系我们页面
+    """
+    return templates.TemplateResponse(
+        "public/contact.html",
+        {
+            "request": request,
+            "current_user": current_user,
+            "success": success,
+            "name": name
+        }
+    )
+
+@router.post("/contact")
+async def contact_submit(
+    request: Request,
+    name: str = Form(...),
+    email: str = Form(...),
+    subject: str = Form(...),
+    message: str = Form(...),
+    current_user=Depends(optional_auth_cookie)
+):
+    """
+    处理联系我们表单提交
+    """
+    # 参数校验
+    errors = []
+    
+    # 姓名校验：不能为空，长度在2-50个字符之间
+    if not name or len(name.strip()) < 2:
+        errors.append("姓名不能为空且至少需要2个字符")
+    elif len(name) > 50:
+        errors.append("姓名不能超过50个字符")
+    
+    # 邮箱校验：不能为空，格式必须正确
+    if not email:
+        errors.append("邮箱不能为空")
+    elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+        errors.append("邮箱格式不正确")
+    
+    # 主题校验：不能为空，长度在5-100个字符之间
+    if not subject or len(subject.strip()) < 5:
+        errors.append("主题不能为空且至少需要5个字符")
+    elif len(subject) > 100:
+        errors.append("主题不能超过100个字符")
+    
+    # 留言内容校验：不能为空，长度在10-2000个字符之间
+    if not message or len(message.strip()) < 10:
+        errors.append("留言内容不能为空且至少需要10个字符")
+    elif len(message) > 2000:
+        errors.append("留言内容不能超过2000个字符")
+    
+    # 如果有错误，返回JSON格式的错误信息
+    if errors:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "success": False,
+                "errors": errors,
+                "form_data": {
+                    "name": name,
+                    "email": email,
+                    "subject": subject,
+                    "message": message
+                }
+            }
+        )
+    
+    # 校验通过，保存数据
+    suggestion = Suggestion(
+        name = name,
+        email = email,
+        theme = subject,
+        content = message
+    )
+
+    await suggestion.save()
+    
+    # 重定向到contact页面，并传递成功消息
+    return RedirectResponse(url=f"/contact?success=true&name={name}", status_code=303)
