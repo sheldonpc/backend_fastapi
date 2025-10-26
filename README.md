@@ -2,7 +2,7 @@
 
 ### 📋 Project Overview
 
-Smart Financial Blog Platform is a modern, AI-powered financial information aggregation and blog management system built with FastAPI. It combines real-time market data monitoring, intelligent financial analysis, and comprehensive content management capabilities.
+Smart Financial Blog Platform is a comprehensive FastAPI-based system that integrates real-time financial data aggregation with intelligent content management. The platform provides AI-driven market analysis, multi-source data integration, and a robust publishing framework for financial content.
 
 ### 🌐 Online Experience
 
@@ -11,7 +11,7 @@ You can experience the platform at: **https://117.72.79.1/**
 ### ✨ Key Features
 
 #### 🚀 Core Capabilities
-- **Real-time Market Data**: Live stock indices, precious metals, and forex data monitoring
+- **Real-time Market Data**: Live stock indices, precious metals, and forex monitoring
 - **AI-Powered Analysis**: Intelligent market sentiment analysis and financial insights
 - **Multi-source Data Integration**: Aggregates data from multiple financial APIs and news sources
 - **Automated Data Pipeline**: Scheduled data collection and processing with Redis caching
@@ -42,17 +42,93 @@ You can experience the platform at: **https://117.72.79.1/**
 │   ├── middlewares/       # Custom middleware (error handling, rate limiting)
 │   ├── routers/           # API route handlers
 │   │   ├── internal/      # Internal services (stock, industry, concept data)
-│   │   ├── admin.py       # Admin management APIs
-│   │   ├── auth.py        # Authentication endpoints
-│   │   ├── articles.py    # Article management
-│   │   ├── board.py       # Financial dashboard APIs
-│   │   └── market.py      # Market data endpoints
+│   │   │   ├── concept_service.py    # Concept data service
+│   │   │   ├── hot_service.py        # Hot stocks service
+│   │   │   ├── hotsearch_service.py   # Hot search service
+│   │   │   ├── hotup_service.py      # Rising stocks service
+│   │   │   ├── industry_service.py   # Industry data service
+│   │   │   ├── lhb_service.py        # Dragon and tiger list service
+│   │   │   ├── stock_service.py      # Stock data service
+│   │   │   └── zt_service.py         # Limit-up stocks service
+│   │   ├── admin.py                  # Admin management APIs
+│   │   ├── admin_messages.py         # Admin message management
+│   │   ├── api_articles.py           # Article management APIs
+│   │   ├── api_config.py             # Configuration management
+│   │   ├── api_fetch_data.py         # Data fetching APIs
+│   │   ├── api_index.py              # Index page APIs
+│   │   ├── api_profile.py            # User profile APIs
+│   │   ├── api_strategy.py           # Strategy management APIs
+│   │   ├── api_users.py              # User management APIs
+│   │   ├── articles.py               # Article page routes
+│   │   ├── auth.py                   # Authentication endpoints
+│   │   ├── board.py                  # Financial dashboard APIs
+│   │   ├── comments.py               # Comment management
+│   │   ├── error.py                  # Error handling
+│   │   ├── financial.py              # Financial data APIs
+│   │   ├── likes.py                  # Like/unlike functionality
+│   │   ├── market.py                 # Market data endpoints
+│   │   ├── messages.py               # Message management
+│   │   ├── messages_page.py          # Message page routes
+│   │   ├── roles.py                  # Role management
+│   │   ├── root.py                   # Root page routes
+│   │   ├── strategy.py               # Strategy page routes
+│   │   ├── strategy_user.py          # User strategy routes
+│   │   ├── upload.py                 # File upload functionality
+│   │   ├── users.py                  # User page routes
+│   │   └── websocket.py              # WebSocket connections
 │   ├── services/          # Business logic services
-│   ├── utils/             # Utility functions and helpers
-│   ├── models.py          # Database models
-│   └── schemas.py         # Pydantic data validation schemas
+│   │   ├── ai_insight_data.py        # AI insight data service
+│   │   ├── logs/                     # Log services
+│   │   ├── market_data_service.py    # Market data service
+│   │   ├── market_service.py         # Market service
+│   │   ├── scheduler.py              # Task scheduler
+│   │   ├── scheduler_market_data.py # Market data scheduler
+│   │   └── specific_stock_data.py    # Specific stock data service
+│   ├── static/             # Static files
+│   │   ├── css/                     # CSS stylesheets
+│   │   ├── images/                  # Image files
+│   │   └── js/                      # JavaScript files
+│   ├── templates/          # HTML templates
+│   │   ├── admin/                   # Admin templates
+│   │   └── public/                  # Public templates
+│   ├── utils/              # Utility functions and helpers
+│   │   ├── ai_market.py             # AI market analysis
+│   │   ├── code.py                  # Code utilities
+│   │   ├── crawl_report.py          # Crawling report utilities
+│   │   ├── email.py                 # Email services
+│   │   ├── eventData.py             # Event data utilities
+│   │   ├── logger.py                # Logging utilities
+│   │   ├── markdown_process.py       # Markdown processing
+│   │   ├── rate_limiter.py          # Rate limiting
+│   │   ├── realtime_market_data.py  # Real-time market data
+│   │   ├── redis_client.py          # Redis client
+│   │   ├── security.py              # Security utilities
+│   │   ├── status_decorator.py      # Status decorators
+│   │   ├── user_utils.py            # User utilities
+│   │   └── warm_up_tasks.py         # Warm-up tasks
+│   ├── database.py         # Database configuration
+│   ├── deps.py             # Dependencies
+│   ├── exceptions.py       # Custom exceptions
+│   ├── main.py             # Application entry point
+│   ├── models.py           # Database models
+│   └── schemas.py          # Pydantic data validation schemas
 ├── migrations/            # Database migrations
-└── requirements.txt       # Python dependencies
+│   └── models/            # Model migrations
+├── upload/                # Upload directory
+│   └── images/            # Uploaded images
+├── uploads/               # Additional uploads
+│   └── avatars/           # User avatars
+├── logs/                  # Application logs
+├── crawlData/             # Crawled data
+├── requirements.txt       # Python dependencies
+├── pyproject.toml         # Project configuration
+├── .env                   # Environment variables
+├── nginx.conf             # Nginx configuration
+├── deploy.sh              # Deployment script
+├── quick_deploy.sh        # Quick deployment script
+├── start_production.sh    # Production startup script
+├── myblog.service         # Service configuration
+└── myblog_production.service # Production service configuration
 ```
 
 ### 🚀 Quick Start
@@ -292,7 +368,7 @@ This project is licensed under the MIT License.
 
 ### 📋 项目概述
 
-智能金融博客平台是一个基于FastAPI构建的现代化、AI驱动的金融信息聚合和博客管理系统。它融合了实时市场数据监控、智能金融分析和全面的内容管理功能。
+智能金融博客平台是基于FastAPI构建的综合性系统，集成了实时金融数据聚合与智能内容管理功能。该平台提供AI驱动的市场分析、多源数据整合以及面向金融内容的强大发布框架。
 
 ### 🌐 在线体验
 
@@ -301,7 +377,7 @@ This project is licensed under the MIT License.
 ### ✨ 核心特性
 
 #### 🚀 核心功能
-- **实时市场数据**: 实时股指、贵金属和外汇数据监控
+- **实时市场数据**: 实时股指、贵金属和外汇监控
 - **AI智能分析**: 智能市场情绪分析和金融洞察
 - **多源数据整合**: 聚合多个金融API和新闻源数据
 - **自动化数据管道**: 定时数据采集和处理，配合Redis缓存
@@ -332,17 +408,93 @@ This project is licensed under the MIT License.
 │   ├── middlewares/       # 自定义中间件（错误处理、限流）
 │   ├── routers/           # API路由处理器
 │   │   ├── internal/      # 内部服务（股票、行业、概念数据）
-│   │   ├── admin.py       # 管理员管理API
-│   │   ├── auth.py        # 认证端点
-│   │   ├── articles.py    # 文章管理
-│   │   ├── board.py       # 金融看板API
-│   │   └── market.py      # 市场数据端点
+│   │   │   ├── concept_service.py    # 概念数据服务
+│   │   │   ├── hot_service.py        # 热门股票服务
+│   │   │   ├── hotsearch_service.py   # 热搜服务
+│   │   │   ├── hotup_service.py      # 上涨股票服务
+│   │   │   ├── industry_service.py   # 行业数据服务
+│   │   │   ├── lhb_service.py        # 龙虎榜服务
+│   │   │   ├── stock_service.py      # 股票数据服务
+│   │   │   └── zt_service.py         # 涨停股票服务
+│   │   ├── admin.py                  # 管理员管理API
+│   │   ├── admin_messages.py         # 管理员消息管理
+│   │   ├── api_articles.py           # 文章管理API
+│   │   ├── api_config.py             # 配置管理
+│   │   ├── api_fetch_data.py         # 数据获取API
+│   │   ├── api_index.py              # 首页API
+│   │   ├── api_profile.py            # 用户资料API
+│   │   ├── api_strategy.py           # 策略管理API
+│   │   ├── api_users.py              # 用户管理API
+│   │   ├── articles.py               # 文章页面路由
+│   │   ├── auth.py                   # 认证端点
+│   │   ├── board.py                  # 金融看板API
+│   │   ├── comments.py               # 评论管理
+│   │   ├── error.py                  # 错误处理
+│   │   ├── financial.py              # 财务数据API
+│   │   ├── likes.py                  # 点赞/取消点赞功能
+│   │   ├── market.py                 # 市场数据端点
+│   │   ├── messages.py               # 消息管理
+│   │   ├── messages_page.py          # 消息页面路由
+│   │   ├── roles.py                  # 角色管理
+│   │   ├── root.py                   # 根页面路由
+│   │   ├── strategy.py               # 策略页面路由
+│   │   ├── strategy_user.py          # 用户策略路由
+│   │   ├── upload.py                 # 文件上传功能
+│   │   ├── users.py                  # 用户页面路由
+│   │   └── websocket.py              # WebSocket连接
 │   ├── services/          # 业务逻辑服务
-│   ├── utils/             # 工具函数和助手
-│   ├── models.py          # 数据库模型
-│   └── schemas.py         # Pydantic数据验证架构
+│   │   ├── ai_insight_data.py        # AI洞察数据服务
+│   │   ├── logs/                     # 日志服务
+│   │   ├── market_data_service.py    # 市场数据服务
+│   │   ├── market_service.py         # 市场服务
+│   │   ├── scheduler.py              # 任务调度器
+│   │   ├── scheduler_market_data.py # 市场数据调度器
+│   │   └── specific_stock_data.py    # 特定股票数据服务
+│   ├── static/             # 静态文件
+│   │   ├── css/                     # CSS样式表
+│   │   ├── images/                  # 图片文件
+│   │   └── js/                      # JavaScript文件
+│   ├── templates/          # HTML模板
+│   │   ├── admin/                   # 管理员模板
+│   │   └── public/                  # 公共模板
+│   ├── utils/              # 工具函数和助手
+│   │   ├── ai_market.py             # AI市场分析
+│   │   ├── code.py                  # 代码工具
+│   │   ├── crawl_report.py          # 爬虫报告工具
+│   │   ├── email.py                 # 邮件服务
+│   │   ├── eventData.py             # 事件数据工具
+│   │   ├── logger.py                # 日志工具
+│   │   ├── markdown_process.py       # Markdown处理
+│   │   ├── rate_limiter.py          # 限流
+│   │   ├── realtime_market_data.py  # 实时市场数据
+│   │   ├── redis_client.py          # Redis客户端
+│   │   ├── security.py              # 安全工具
+│   │   ├── status_decorator.py      # 状态装饰器
+│   │   ├── user_utils.py            # 用户工具
+│   │   └── warm_up_tasks.py         # 预热任务
+│   ├── database.py         # 数据库配置
+│   ├── deps.py             # 依赖项
+│   ├── exceptions.py       # 自定义异常
+│   ├── main.py             # 应用程序入口点
+│   ├── models.py           # 数据库模型
+│   └── schemas.py          # Pydantic数据验证架构
 ├── migrations/            # 数据库迁移
-└── requirements.txt       # Python依赖
+│   └── models/            # 模型迁移
+├── upload/                # 上传目录
+│   └── images/            # 上传的图片
+├── uploads/               # 附加上传
+│   └── avatars/           # 用户头像
+├── logs/                  # 应用程序日志
+├── crawlData/             # 爬取的数据
+├── requirements.txt       # Python依赖
+├── pyproject.toml         # 项目配置
+├── .env                   # 环境变量
+├── nginx.conf             # Nginx配置
+├── deploy.sh              # 部署脚本
+├── quick_deploy.sh        # 快速部署脚本
+├── start_production.sh    # 生产环境启动脚本
+├── myblog.service         # 服务配置
+└── myblog_production.service # 生产环境服务配置
 ```
 
 ### 🚀 快速开始
